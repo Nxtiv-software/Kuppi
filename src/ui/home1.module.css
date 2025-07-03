@@ -69,3 +69,62 @@
   /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); */
 }
 
+.quoteBubble {
+  position: absolute;
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 24px;
+  max-width: 240px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  /* box-shadow: 
+    0 20px 40px rgba(74, 144, 226, 0.3),
+    0 8px 16px rgba(74, 144, 226, 0.2); */
+  z-index: 2;
+}
+
+.leftBubble {
+  top: 10%;
+  left: 5%;
+  animation: slideInFromTopLeft 2s ease-out;
+}
+
+.rightBubble {
+  bottom: 10%;
+  right: 5%;
+  animation: slideInFromTopRight 2s ease-out 0.5s both;
+}
+
+.bubbleContent {
+  position: relative;
+  z-index: 1;
+  text-align: left;
+}
+
+.bubbleArrow {
+  /* position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 16px solid #4A90E2; */
+  display: none;
+}
+
+.bubbleArrowRight {
+  /* position: absolute;
+  top: -12px;
+  right: 50%;
+  transform: translateX(50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 16px solid #4A90E2; */
+  display: none;
+}
