@@ -1,0 +1,242 @@
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(74, 144, 226, 0.15),
+    0 0 0 1px rgba(74, 144, 226, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.navbar:hover {
+  border-color: rgba(74, 144, 226, 0.5);
+  box-shadow: 
+    0 12px 40px rgba(74, 144, 226, 0.25),
+    0 0 0 1px rgba(74, 144, 226, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.navContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2c3e50;
+  cursor: default;
+  user-select: none;
+  letter-spacing: -0.5px;
+}
+
+.lk {
+  color: #4A90E2;
+}
+
+.navLinks {
+  display: flex;
+  padding-left: 160px;
+  align-items: center;
+  gap: 40px;
+}
+
+.navLink {
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  padding: 8px 0;
+}
+
+.navLink:hover {
+  color: #4A90E2;
+  transform: translateY(-1px);
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4A90E2, #357ABD);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.navLink:hover::after {
+  width: 100%;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.langSelect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  color: #2c3e50;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.langSelect:hover {
+  background: rgba(74, 144, 226, 0.1);
+  transform: translateY(-1px);
+}
+
+.globe {
+  font-size: 14px;
+}
+
+.dropdown {
+  font-size: 10px;
+  color: #666;
+  margin-left: 2px;
+}
+
+.loginBtn {
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.loginBtn:hover {
+  color: #4A90E2;
+  background: rgba(74, 144, 226, 0.1);
+  transform: translateY(-1px);
+}
+
+.signupBtn {
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.signupBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.signupBtn:hover::before {
+  left: 100%;
+}
+
+.signupBtn:hover {
+  background: linear-gradient(135deg, #357ABD 0%, #2968A3 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .navbar {
+    top: 15px;
+    left: 15px;
+    right: 15px;
+  }
+  
+  .navContent {
+    padding: 14px 24px;
+  }
+  
+  .navLinks {
+    gap: 30px;
+  }
+  
+  .navRight {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+  }
+  
+  .navContent {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+  
+  .navLinks {
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .navRight {
+    gap: 16px;
+  }
+  
+  .logo {
+    font-size: 24px;
+  }
+  
+  .navLink {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navLinks {
+    gap: 20px;
+  }
+  
+  .signupBtn {
+    padding: 10px 20px;
+    font-size: 15px;
+  }
+  
+  .loginBtn {
+    font-size: 15px;
+  }
+}
