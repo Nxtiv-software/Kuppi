@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Home1 from './ui/home1'
 import Home2 from './ui/home2'
+import Home3 from './ui/home3'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -12,6 +13,7 @@ function App() {
     <>
       <Home1 />
       <Home2 />
+      <Home3 />
     </>
   )
 }
