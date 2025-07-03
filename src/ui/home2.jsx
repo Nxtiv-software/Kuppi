@@ -85,7 +85,7 @@ const Home2 = () => {
     setCustomTopic('');
   };
 
-  return (
+return (
     <div className={styles.container}>
       {/* Hero Section */}
       <section className={styles.heroSection}>
