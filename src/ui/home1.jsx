@@ -6,7 +6,7 @@ import img from "../assets/images/homeimg.png"
 const Home1 = () => {
   return (
     <div className={styles.container}>
-      <Navbar />
+      {/* <Navbar /> */}
       {/* Main Content */}
         <div className={styles.content}>
           <h1 className={styles.title}>
