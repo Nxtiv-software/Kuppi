@@ -5,15 +5,13 @@ import './App.css'
 import Home1 from './ui/home1'
 import Home2 from './ui/home2'
 import Home3 from './ui/home3'
+import HomePage from './ui/HomePage'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <Home1 />
-      <Home2 />
-      <Home3 />
+      <HomePage />
     </>
   )
 }
