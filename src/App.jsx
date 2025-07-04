@@ -6,12 +6,16 @@ import Home1 from './ui/home1'
 import Home2 from './ui/home2'
 import Home3 from './ui/home3'
 import HomePage from './ui/HomePage'
+import AboutPage from './ui/AboutPage'
+import Navbar from './ui/navbar'
 
 function App() {
 
   return (
     <>
-      <HomePage />
+      <Navbar />
+      {/* <HomePage /> */}
+      <AboutPage />
     </>
   )
 }
