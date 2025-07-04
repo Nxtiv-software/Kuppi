@@ -1,10 +1,6 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
-import Home1 from './ui/home1'
-import Home2 from './ui/home2'
-import Home3 from './ui/home3'
 import HomePage from './ui/HomePage'
 import AboutPage from './ui/AboutPage'
 import Navbar from './ui/navbar'
@@ -13,9 +9,21 @@ function App() {
 
   return (
     <>
-      <Navbar />
-      {/* <HomePage /> */}
-      <AboutPage />
+      <Router>
+      <div className="App">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} />
+          {/* <Route path="/popular" element= /> */}
+          <Route path="/about" element={<AboutPage />} />
+          {/* <Route path="/contact" element= />
+          <Route path="/login" element= />
+          <Route path="/signup" element= /> */}
+        </Routes>
+      </div>
+    </Router>
+
     </>
   )
 }
