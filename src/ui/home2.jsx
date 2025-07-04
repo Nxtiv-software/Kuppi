@@ -34,7 +34,7 @@ const Home2 = () => {
     { topic: 'Organic Chemistry Reactions', votes: 38, progress: 76 },
     { topic: 'Data Structures - Trees', votes: 32, progress: 64 },
     { topic: 'Physics Mechanics', votes: 28, progress: 56 },
-    { topic: 'English Poetry Analysis', votes: 25, progress: 50 }
+    { topic: 'limits', votes: 25, progress: 50 }
   ];
 
   const handleVoteNowClick = () => {

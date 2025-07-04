@@ -4,6 +4,7 @@ import './App.css'
 import HomePage from './ui/HomePage'
 import AboutPage from './ui/AboutPage'
 import Navbar from './ui/navbar'
+import ContactUs from './ui/contactus'
 
 function App() {
 
@@ -17,8 +18,8 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           {/* <Route path="/popular" element= /> */}
           <Route path="/about" element={<AboutPage />} />
-          {/* <Route path="/contact" element= />
-          <Route path="/login" element= />
+          <Route path="/contact" element= {<ContactUs/>}/>
+          {/* <Route path="/login" element= />
           <Route path="/signup" element= /> */}
         </Routes>
       </div>
