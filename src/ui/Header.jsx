@@ -19,7 +19,7 @@ const Header = () => {
 
         {/* Navigation Links */}
         <ul className="hidden md:flex space-x-6 text-sm font-medium text-gray-700">
-          <li className="hover:text-blue-500 cursor-pointer">Home</li>
+          <li className="hover:text-blue-500 cursor-pointer">me</li>
           <li className="hover:text-blue-500 cursor-pointer">Popular Sessions</li>
           <li className="hover:text-blue-500 cursor-pointer">About Us</li>
           <li className="hover:text-blue-500 cursor-pointer">Contact Us</li>
