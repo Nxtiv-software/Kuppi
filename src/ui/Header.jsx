@@ -38,4 +38,6 @@ const Header = () => {
   );
 };
 
+//THis is the nav bar
+
 export default Header;
