@@ -85,3 +85,90 @@ const QuickActions = () => {
   );
 };
 
+// Upcoming Sessions Component
+const UpcomingSessions = () => {
+  const sessions = [
+    {
+      id: 1,
+      title: 'Data Structures',
+      subtitle: 'Binary Trees & Tree Traversal',
+      instructor: 'Dr. Amal Perera',
+      date: 'Dec 26, 2024',
+      time: '7:00 PM - 9:00 PM',
+      students: 15,
+      price: 'Rs. 250',
+      status: 'confirmed'
+    },
+    {
+      id: 2,
+      title: 'Database Systems',
+      subtitle: 'SQL Joins & Query Optimization',
+      instructor: 'Prof. Nimal Silva',
+      date: 'Dec 27, 2024',
+      time: '2:00 PM - 4:00 PM',
+      students: 12,
+      price: 'Rs. 300',
+      status: 'confirmed'
+    }
+  ];
+
+  return (
+    <div className={styles.upcomingSessions}>
+      <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
+      <div className={styles.sessionsList}>
+        {sessions.map((session) => (
+          <div key={session.id} className={styles.sessionCard}>
+            <div className={styles.sessionHeader}>
+              <div className={styles.sessionInfo}>
+                <h3 className={styles.sessionTitle}>{session.title}</h3>
+                <p className={styles.sessionSubtitle}>{session.subtitle}</p>
+                <p className={styles.instructor}>by {session.instructor}</p>
+              </div>
+              <div className={styles.statusBadge}>
+                <span className={styles.status}>{session.status}</span>
+              </div>
+            </div>
+            
+            <div className={styles.sessionDetails}>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>📅</span>
+                <span>{session.date}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>⏰</span>
+                <span>{session.time}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>👥</span>
+                <span>{session.students} students</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>💰</span>
+                <span>{session.price}</span>
+              </div>
+            </div>
+            
+            <div className={styles.sessionActions}>
+              <button className={styles.joinButton}>Join Session</button>
+              <button className={styles.calendarButton}>Add to Calendar</button>
+              <button className={styles.contactButton}>Contact Tutor</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Main Overview Component
+const Overview = () => {
+  return (
+    <div className={styles.overview}>
+      <StatsCards />
+      <QuickActions />
+      <UpcomingSessions />
+    </div>
+  );
+};
+
+export default Overview;
