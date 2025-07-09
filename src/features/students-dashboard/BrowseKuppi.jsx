@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from "../students-dashboard/BrowseKuppi.module.css";
+import img from "../../assets/images/img.png"
 
 // Search Filters Component
 const SearchFilters = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
@@ -100,7 +101,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       level: 'intermediate',
       tags: ['React', 'Hooks', 'JavaScript'],
       description: 'Deep dive into React Hooks with practical examples',
-      image: 'https://via.placeholder.com/300x180?text=React+Hooks'
+      image: img
     },
     {
       id: 2,
@@ -118,7 +119,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       level: 'beginner',
       tags: ['SQL', 'ERD', 'Normalization'],
       description: 'Learn database design principles and best practices',
-      image: 'https://via.placeholder.com/300x180?text=Database+Design'
+      image: img
     },
     {
       id: 3,
@@ -136,7 +137,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       level: 'intermediate',
       tags: ['Python', 'ML', 'Data Science'],
       description: 'Introduction to machine learning concepts and algorithms',
-      image: 'https://via.placeholder.com/300x180?text=Machine+Learning'
+      image: img
     },
     {
       id: 4,
@@ -154,7 +155,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       level: 'intermediate',
       tags: ['Algorithms', 'Data Structures', 'Problem Solving'],
       description: 'Comprehensive guide to data structures and algorithms',
-      image: 'https://via.placeholder.com/300x180?text=Data+Structures'
+      image: img
     },
     {
       id: 5,
@@ -172,7 +173,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       level: 'advanced',
       tags: ['React Native', 'Mobile', 'JavaScript'],
       description: 'Build cross-platform mobile apps with React Native',
-      image: 'https://via.placeholder.com/300x180?text=Mobile+Development'
+      image: img
     },
     {
       id: 6,
@@ -190,7 +191,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       level: 'intermediate',
       tags: ['CSS', 'Animations', 'Web Design'],
       description: 'Master advanced CSS techniques and animations',
-      image: 'https://via.placeholder.com/300x180?text=CSS+Animations'
+      image: img
     }
   ];
 

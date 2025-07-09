@@ -6,6 +6,7 @@ import VoteCreate from './VoteCreate';
 import MySessions from './MySessions';
 import Progress from './Progress';
 import BrowseKuppis from './BrowseKuppi';
+import img from "../../assets/images/img.png";
 
 // Header Component
 const Header = () => {
@@ -22,7 +23,7 @@ const Header = () => {
           </div>
           <div className={styles.userProfile}>
             <img 
-              src="https://via.placeholder.com/40x40" 
+              src= {img}
               alt="User Profile" 
               className={styles.profileImage}
             />
