@@ -148,3 +148,139 @@ const SubjectProgress = () => {
   );
 };
 
+// Learning Analytics Component
+const LearningAnalytics = () => {
+  const [timeRange, setTimeRange] = useState('week');
+
+  const weeklyData = [
+    { day: 'Mon', hours: 2.5, sessions: 1 },
+    { day: 'Tue', hours: 1.8, sessions: 1 },
+    { day: 'Wed', hours: 3.2, sessions: 2 },
+    { day: 'Thu', hours: 2.1, sessions: 1 },
+    { day: 'Fri', hours: 4.0, sessions: 2 },
+    { day: 'Sat', hours: 3.5, sessions: 2 },
+    { day: 'Sun', hours: 2.8, sessions: 1 }
+  ];
+
+  const monthlyData = [
+    { week: 'Week 1', hours: 12.5, sessions: 6 },
+    { week: 'Week 2', hours: 15.2, sessions: 8 },
+    { week: 'Week 3', hours: 18.7, sessions: 9 },
+    { week: 'Week 4', hours: 14.3, sessions: 7 }
+  ];
+
+  const data = timeRange === 'week' ? weeklyData : monthlyData;
+  const maxHours = Math.max(...data.map(d => d.hours));
+
+  const achievements = [
+    {
+      title: 'First Session',
+      description: 'Completed your first kuppi session',
+      date: 'Nov 15, 2024',
+      icon: '🎯',
+      earned: true
+    },
+    {
+      title: 'Week Warrior',
+      description: 'Attended sessions for 7 consecutive days',
+      date: 'Dec 10, 2024',
+      icon: '⚡',
+      earned: true
+    },
+    {
+      title: 'Knowledge Seeker',
+      description: 'Completed 10 sessions in different subjects',
+      date: 'Dec 20, 2024',
+      icon: '📚',
+      earned: true
+    },
+    {
+      title: 'Master Learner',
+      description: 'Complete 50 sessions (Progress: 18/50)',
+      date: 'In Progress',
+      icon: '🎓',
+      earned: false
+    }
+  ];
+
+  return (
+    <div className={styles.learningAnalytics}>
+      <div className={styles.analyticsHeader}>
+        <h3 className={styles.sectionTitle}>Learning Analytics</h3>
+        <div className={styles.timeRangeSelector}>
+          <button
+            className={`${styles.timeButton} ${timeRange === 'week' ? styles.active : ''}`}
+            onClick={() => setTimeRange('week')}
+          >
+            This Week
+          </button>
+          <button
+            className={`${styles.timeButton} ${timeRange === 'month' ? styles.active : ''}`}
+            onClick={() => setTimeRange('month')}
+          >
+            This Month
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.chartContainer}>
+        <div className={styles.chart}>
+          {data.map((item, index) => (
+            <div key={index} className={styles.chartBar}>
+              <div 
+                className={styles.barFill}
+                style={{ 
+                  height: `${(item.hours / maxHours) * 100}%`,
+                  backgroundColor: '#2563eb'
+                }}
+              />
+              <div className={styles.barValue}>{item.hours}h</div>
+              <div className={styles.barLabel}>
+                {timeRange === 'week' ? item.day : item.week}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.achievements}>
+        <h4 className={styles.achievementsTitle}>Achievements</h4>
+        <div className={styles.achievementsList}>
+          {achievements.map((achievement, index) => (
+            <div 
+              key={index} 
+              className={`${styles.achievementItem} ${achievement.earned ? styles.earned : styles.locked}`}
+            >
+              <div className={styles.achievementIcon}>
+                {achievement.earned ? achievement.icon : '🔒'}
+              </div>
+              <div className={styles.achievementInfo}>
+                <h5 className={styles.achievementTitle}>{achievement.title}</h5>
+                <p className={styles.achievementDescription}>{achievement.description}</p>
+                <span className={styles.achievementDate}>{achievement.date}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main Progress Component
+const Progress = () => {
+  return (
+    <div className={styles.progress}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Learning Progress</h2>
+        <p className={styles.subtitle}>Track your learning journey and achievements</p>
+      </div>
+      
+      <ProgressStats />
+      <SubjectProgress />
+      <LearningAnalytics />
+    </div>
+  );
+};
+
+export default Progress;
