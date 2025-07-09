@@ -215,4 +215,136 @@ const KuppiGrid = ({ filters, searchTerm }) => {
     return matchesSearch && matchesSubject && matchesLevel && matchesPrice;
   });
 
-  
+  const handleJoinKuppi = (kuppiId) => {
+    console.log('Joining kuppi:', kuppiId);
+    // Handle join kuppi logic here
+  };
+
+  return (
+    <div className={styles.kuppiGrid}>
+      <div className={styles.resultsHeader}>
+        <h3 className={styles.resultsTitle}>
+          Available Kuppis ({filteredKuppis.length})
+        </h3>
+        <div className={styles.sortOptions}>
+          <select className={styles.sortSelect}>
+            <option value="date">Sort by Date</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+            <option value="popularity">Most Popular</option>
+          </select>
+        </div>
+      </div>
+
+      {filteredKuppis.length === 0 ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>🔍</div>
+          <h3 className={styles.emptyTitle}>No kuppis found</h3>
+          <p className={styles.emptyText}>
+            Try adjusting your filters or search terms to find more sessions.
+          </p>
+        </div>
+      ) : (
+        <div className={styles.grid}>
+          {filteredKuppis.map((kuppi) => (
+            <div key={kuppi.id} className={styles.kuppiCard}>
+              <div className={styles.cardImage}>
+                <img src={kuppi.image} alt={kuppi.title} />
+                <div className={styles.levelBadge}>
+                  {kuppi.level}
+                </div>
+              </div>
+
+              <div className={styles.cardContent}>
+                <div className={styles.cardHeader}>
+                  <h4 className={styles.cardTitle}>{kuppi.title}</h4>
+                  <div className={styles.rating}>
+                    <span className={styles.ratingStars}>⭐</span>
+                    <span className={styles.ratingValue}>{kuppi.rating}</span>
+                    <span className={styles.reviewCount}>({kuppi.reviews})</span>
+                  </div>
+                </div>
+
+                <div className={styles.cardMeta}>
+                  <p className={styles.instructor}>by {kuppi.instructor}</p>
+                  <p className={styles.subject}>{kuppi.subject}</p>
+                </div>
+
+                <div className={styles.tags}>
+                  {kuppi.tags.map((tag, index) => (
+                    <span key={index} className={styles.tag}>{tag}</span>
+                  ))}
+                </div>
+
+                <p className={styles.description}>{kuppi.description}</p>
+
+                <div className={styles.sessionInfo}>
+                  <div className={styles.infoItem}>
+                    <span className={styles.icon}>📅</span>
+                    <span>{kuppi.date}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.icon}>⏰</span>
+                    <span>{kuppi.time}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.icon}>👥</span>
+                    <span>{kuppi.enrolled}/{kuppi.maxStudents} enrolled</span>
+                  </div>
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <div className={styles.pricing}>
+                    <span className={styles.currentPrice}>Rs. {kuppi.price}</span>
+                    <span className={styles.originalPrice}>Rs. {kuppi.originalPrice}</span>
+                    <span className={styles.discount}>
+                      {Math.round((1 - kuppi.price / kuppi.originalPrice) * 100)}% off
+                    </span>
+                  </div>
+                  <button 
+                    className={styles.joinButton}
+                    onClick={() => handleJoinKuppi(kuppi.id)}
+                  >
+                    Join Kuppi
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Main Browse Kuppis Component
+const BrowseKuppis = () => {
+  const [filters, setFilters] = useState({
+    subject: 'all',
+    level: 'all',
+    priceRange: 'all',
+    date: 'all'
+  });
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  return (
+    <div className={styles.browseKuppis}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Browse Kuppis</h2>
+        <p className={styles.subtitle}>Find and join available study sessions</p>
+      </div>
+      
+      <SearchFilters 
+        filters={filters} 
+        setFilters={setFilters}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
+      <KuppiGrid filters={filters} searchTerm={searchTerm} />
+    </div>
+  );
+};
+
+export default BrowseKuppis;
