@@ -112,4 +112,148 @@ const SessionsList = ({ filter }) => {
     }
   };
 
- 
+ const renderSessionActions = (session) => {
+    switch (session.status) {
+      case 'upcoming':
+        return (
+          <div className={styles.sessionActions}>
+            <button className={styles.joinButton}>Join Session</button>
+            {session.meetingLink && (
+              <a 
+                href={session.meetingLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.linkButton}
+              >
+                Meeting Link
+              </a>
+            )}
+            <button className={styles.contactButton}>Contact Instructor</button>
+          </div>
+        );
+      case 'completed':
+        return (
+          <div className={styles.sessionActions}>
+            <button className={styles.downloadButton}>Download Materials</button>
+            <button className={styles.reviewButton}>Leave Review</button>
+            <button className={styles.certificateButton}>Get Certificate</button>
+          </div>
+        );
+      case 'cancelled':
+        return (
+          <div className={styles.sessionActions}>
+            <button className={styles.refundButton}>Request Refund</button>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={styles.sessionsList}>
+      {filteredSessions.length === 0 ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>📚</div>
+          <h3 className={styles.emptyTitle}>No sessions found</h3>
+          <p className={styles.emptyText}>
+            {filter === 'all' 
+              ? 'You haven\'t enrolled in any sessions yet.' 
+              : `No ${filter} sessions found.`}
+          </p>
+        </div>
+      ) : (
+        filteredSessions.map((session) => (
+          <div key={session.id} className={styles.sessionCard}>
+            <div className={styles.sessionHeader}>
+              <div className={styles.sessionInfo}>
+                <h3 className={styles.sessionTitle}>{session.title}</h3>
+                <p className={styles.sessionSubject}>{session.subject}</p>
+                <p className={styles.sessionInstructor}>by {session.instructor}</p>
+              </div>
+              <div 
+                className={styles.statusBadge}
+                style={{ backgroundColor: getStatusColor(session.status) }}
+              >
+                {session.status}
+              </div>
+            </div>
+
+            <div className={styles.sessionDetails}>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>📅</span>
+                <span>{session.date}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>⏰</span>
+                <span>{session.time}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>👥</span>
+                <span>{session.students} students</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.icon}>💰</span>
+                <span>{session.price}</span>
+              </div>
+              {session.rating && (
+                <div className={styles.detailItem}>
+                  <span className={styles.icon}>⭐</span>
+                  <span>{session.rating}/5.0</span>
+                </div>
+              )}
+            </div>
+
+            {session.materials && session.materials.length > 0 && (
+              <div className={styles.materialsSection}>
+                <h4 className={styles.materialsTitle}>Materials:</h4>
+                <div className={styles.materialsList}>
+                  {session.materials.map((material, index) => (
+                    <span key={index} className={styles.material}>
+                      📎 {material}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {session.notes && (
+              <div className={styles.notesSection}>
+                <h4 className={styles.notesTitle}>Notes:</h4>
+                <p className={styles.notesText}>{session.notes}</p>
+              </div>
+            )}
+
+            {session.reason && (
+              <div className={styles.reasonSection}>
+                <h4 className={styles.reasonTitle}>Cancellation Reason:</h4>
+                <p className={styles.reasonText}>{session.reason}</p>
+              </div>
+            )}
+
+            {renderSessionActions(session)}
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
+
+// Main My Sessions Component
+const MySessions = () => {
+  const [filter, setFilter] = useState('all');
+
+  return (
+    <div className={styles.mySessions}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>My Sessions</h2>
+        <p className={styles.subtitle}>Manage your enrolled and completed sessions</p>
+      </div>
+      
+      <SessionFilters filter={filter} setFilter={setFilter} />
+      <SessionsList filter={filter} />
+    </div>
+  );
+};
+
+export default MySessions;
