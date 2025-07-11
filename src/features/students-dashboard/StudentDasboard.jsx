@@ -6,7 +6,8 @@ import VoteCreate from './VoteCreate';
 import MySessions from './MySessions';
 import Progress from './Progress';
 import BrowseKuppis from './BrowseKuppi';
-import img from "../../assets/images/img.png";
+// import img from "../../assets/images/img.png";
+import { UserButton } from "@clerk/clerk-react"; 
 
 // Header Component
 const Header = () => {
@@ -22,12 +23,22 @@ const Header = () => {
             <span className={styles.notificationBadge}>3</span>
           </div>
           <div className={styles.userProfile}>
-            <img 
+            {/* <img 
               src= {img}
               alt="User Profile" 
               className={styles.profileImage}
             />
-            <span className={styles.userName}>John Doe</span>
+            <span className={styles.userName}>John Doe</span> */}
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: {
+                    width: "3rem",
+                    height: "3rem",
+                  },
+                },
+              }}
+            />
           </div>
         </div>
       </div>

@@ -3,9 +3,11 @@ import { Button } from '../components/Button';
 import { Menu, X } from 'lucide-react';
 import React from 'react';
 import { Link } from "react-router-dom";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 
 const Header = () => {
+  const dashboardPath = '/dashboard';
+
   return (
     <header className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[95%] max-w-7xl">
       <nav
@@ -35,16 +37,21 @@ const Header = () => {
             Sign Up
           </button> */}
           <SignedIn>
-            <UserButton 
+            <UserButton
               appearance={{
                 elements: {
                   userButtonAvatarBox: {
                     width: "3rem",
                     height: "3rem",
-                  }
-                }
+                  },
+                },
               }}
             />
+            <Link to={dashboardPath}>
+              <button className="px-4 py-1.5 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
+                Dashboard
+              </button>
+            </Link>
           </SignedIn>
           <SignedOut>
             <div className={`flex`}>
