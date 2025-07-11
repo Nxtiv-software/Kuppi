@@ -10,24 +10,21 @@ import MySessions from "./features/students-dashboard/MySessions"
 import Overview from "./features/students-dashboard/Overview"
 import Dashboard from "./features/students-dashboard/StudentDasboard"
 import StudentDashboard from "./features/students-dashboard/StudentDasboard"
-import { HomePage } from "./ui/HomePage"
-import { Login } from "./ui/login"
-import { Signup } from "./ui/signup"
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
 
 function App() {
 
 
   return (
     <>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage/>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/signup" element={<Signup/>} />
-          <Route path="/dashboard" element={<StudentDashboard/>} />
-        </Routes>
-      </Router>
+      {/* <Header/>
+      <Hero/>
+      <Features/>
+      <HowItWorks/>
+      <Testimonials/>
+      <Footer/> */}
+
+      <StudentDashboard />
     </>
   )
 }
