@@ -7,7 +7,7 @@
 // import StudentOverview from "./features/student-dashboard/StudentOverview"
 
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard"
-
+import StudentDashboard from "./features/students-dashboard/StudentDasboard"
 function App() {
 
 
@@ -20,8 +20,8 @@ function App() {
       <Testimonials/>
       <Footer/> 
          <StudentDashboard />*/}
-   <TutorDashboard/>
-   
+  
+   <StudentDashboard/>
     </>
   )
 }
