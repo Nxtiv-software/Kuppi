@@ -5,7 +5,7 @@
 // import Testimonials from "./ui/Testimonials"
 // import Footer from "./ui/Footer"
 // import StudentOverview from "./features/student-dashboard/StudentOverview"
-
+import StudentDashboard from "./features/students-dashboard/StudentDasboard"
 
 function App() {
 
