@@ -6,22 +6,21 @@
 // import Footer from "./ui/Footer"
 // import StudentOverview from "./features/student-dashboard/StudentOverview"
 
-import TutorDashboard from "./features/tutor-dashboard/TutorDashboard"
-import StudentDashboard from "./features/students-dashboard/StudentDasboard"
+
 function App() {
 
 
   return (
     <>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage/>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/signup" element={<Signup/>} />
-          <Route path="/dashboard" element={<StudentDashboard/>} />
-        </Routes>
-      </Router>
-    </> 
+      {/* <Header/>
+      <Hero/>
+      <Features/>
+      <HowItWorks/>
+      <Testimonials/>
+      <Footer/> */}
+
+      <StudentDashboard />
+    </>
   )
 }
 
