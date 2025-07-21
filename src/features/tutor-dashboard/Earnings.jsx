@@ -2,14 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  Calendar,
-  Download,
-  Eye,
-  CreditCard
-} from 'lucide-react';
 
 const earningsData = {
   thisMonth: 45000,
@@ -27,8 +19,7 @@ const recentTransactions = [
     date: '2024-06-25',
     students: 15,
     amount: 4500,
-    status: 'paid',
-    type: 'session'
+    status: 'paid'
   },
   {
     id: 2,
@@ -36,8 +27,7 @@ const recentTransactions = [
     date: '2024-06-23',
     students: 12,
     amount: 3600,
-    status: 'paid',
-    type: 'session'
+    status: 'paid'
   },
   {
     id: 3,
@@ -45,26 +35,7 @@ const recentTransactions = [
     date: '2024-06-20',
     students: 18,
     amount: 5400,
-    status: 'pending',
-    type: 'session'
-  },
-  {
-    id: 4,
-    sessionTitle: 'Web Development',
-    date: '2024-06-18',
-    students: 22,
-    amount: 5500,
-    status: 'paid',
-    type: 'session'
-  },
-  {
-    id: 5,
-    sessionTitle: 'Object Oriented Programming',
-    date: '2024-06-15',
-    students: 8,
-    amount: 2400,
-    status: 'paid',
-    type: 'session'
+    status: 'pending'
   }
 ];
 
@@ -89,27 +60,31 @@ const Earnings = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
+            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
             Export Report
           </Button>
           <Button>
-            <CreditCard className="h-4 w-4 mr-2" />
+            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
             Payout Settings
           </Button>
         </div>
       </div>
 
-      {/* Earnings Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Month</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Rs. {earningsData.thisMonth.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
               +{growthPercentage}% from last month
             </p>
           </CardContent>
@@ -118,7 +93,9 @@ const Earnings = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Year</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Rs. {(earningsData.thisYear / 1000).toFixed(0)}K</div>
@@ -131,7 +108,9 @@ const Earnings = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Payout</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Rs. {earningsData.pendingPayouts.toLocaleString()}</div>
@@ -144,7 +123,9 @@ const Earnings = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">Rs. {(earningsData.totalEarnings / 1000).toFixed(0)}K</div>
@@ -155,23 +136,6 @@ const Earnings = () => {
         </Card>
       </div>
 
-      {/* Monthly Breakdown Chart Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Monthly Earnings Trend</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <TrendingUp className="h-12 w-12 mx-auto mb-2" />
-              <p>Earnings chart visualization</p>
-              <p className="text-sm">Would be implemented with recharts</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Transactions */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
@@ -204,7 +168,10 @@ const Earnings = () => {
                   </div>
                   
                   <Button variant="outline" size="sm">
-                    <Eye className="h-4 w-4 mr-2" />
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                     Details
                   </Button>
                 </div>
@@ -218,7 +185,6 @@ const Earnings = () => {
         </CardContent>
       </Card>
 
-      {/* Payout Information */}
       <Card>
         <CardHeader>
           <CardTitle>Payout Information</CardTitle>

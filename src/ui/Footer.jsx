@@ -40,11 +40,11 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">hello@kuppi.lk</span>
+                <span className="text-gray-300">smarttutor@gmail.com</span>
               </div>
               <div className="flex items-center">
                 <Phone className="h-5 w-5 text-blue-400 mr-3" />
-                <span className="text-gray-300">+94 77 123 4567</span>
+                <span className="text-gray-300">+94 71 768 4195</span>
               </div>
               <div className="flex items-start">
                 <MapPin className="h-5 w-5 text-blue-400 mr-3 mt-1" />
@@ -56,7 +56,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center">
           <p className="text-gray-400">
-            © 2025 Nxtiv Software. All rights reserved. Made with ❤️ for students.
+            © 2025 Nxtiv Software. All rights reserved.
           </p>
         </div>
       </div>

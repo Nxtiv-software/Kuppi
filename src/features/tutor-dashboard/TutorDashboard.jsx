@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/tabs';
-import { Button } from '../../components/Button';
-import {
-  BookOpen,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  User,
-  Clock,
-  MessageSquare
-} from 'lucide-react';
 import TutorOverview from '../tutor-dashboard/TutorOverview';
 import MySchedule from '../tutor-dashboard/MySchedule';
 import SessionRequests from '../tutor-dashboard/SessionRequests';

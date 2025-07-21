@@ -2,15 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
-import {
-  Calendar,
-  Clock,
-  Users,
-  Video,
-  MapPin,
-  Edit,
-  Plus
-} from 'lucide-react';
 
 const upcomingSessions = [
   {
@@ -48,18 +39,6 @@ const upcomingSessions = [
     type: 'hybrid',
     status: 'pending',
     earnings: 2400
-  },
-  {
-    id: 4,
-    title: 'Machine Learning Basics',
-    topic: 'Introduction to Neural Networks',
-    date: '2024-07-01',
-    time: '10:00',
-    duration: '3 hours',
-    students: 22,
-    type: 'online',
-    status: 'confirmed',
-    earnings: 7700
   }
 ];
 
@@ -69,15 +48,6 @@ const getStatusColor = (status) => {
     case 'pending': return 'bg-yellow-100 text-yellow-800';
     case 'cancelled': return 'bg-red-100 text-red-800';
     default: return 'bg-gray-100 text-gray-800';
-  }
-};
-
-const getTypeIcon = (type) => {
-  switch (type) {
-    case 'online': return Video;
-    case 'offline': return MapPin;
-    case 'hybrid': return MapPin;
-    default: return Video;
   }
 };
 
@@ -91,17 +61,20 @@ const MySchedule = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <Calendar className="h-4 w-4 mr-2" />
+            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
             Set Availability
           </Button>
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
+            <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
             Block Time
           </Button>
         </div>
       </div>
 
-      {/* Weekly Overview */}
       <Card>
         <CardHeader>
           <CardTitle>This Week Overview</CardTitle>
@@ -113,135 +86,120 @@ const MySchedule = () => {
               <div className="text-sm text-gray-600">Sessions Scheduled</div>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">57</div>
+              <div className="text-2xl font-bold text-green-600">35</div>
               <div className="text-sm text-gray-600">Total Students</div>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">8.5h</div>
+              <div className="text-2xl font-bold text-purple-600">7.5h</div>
               <div className="text-sm text-gray-600">Teaching Hours</div>
             </div>
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">Rs. 18.2K</div>
+              <div className="text-2xl font-bold text-orange-600">Rs. 10.5K</div>
               <div className="text-sm text-gray-600">Expected Earnings</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Upcoming Sessions */}
       <div className="grid gap-6">
-        {upcomingSessions.map((session) => {
-          const TypeIcon = getTypeIcon(session.type);
-
-          return (
-            <Card key={session.id} className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl text-gray-900 mb-1">
-                      {session.title}
-                    </CardTitle>
-                    <p className="text-gray-600 mb-3">{session.topic}</p>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Badge className={getStatusColor(session.status)}>
-                        {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
-                      </Badge>
-                      <Badge variant="outline">
-                        <TypeIcon className="h-3 w-3 mr-1" />
-                        {session.type}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-green-600 mb-1">
-                      Rs. {session.earnings.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Rs. {Math.round(session.earnings / session.students)}/student
-                    </div>
+        {upcomingSessions.map((session) => (
+          <Card key={session.id} className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-xl text-gray-900 mb-1">
+                    {session.title}
+                  </CardTitle>
+                  <p className="text-gray-600 mb-3">{session.topic}</p>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className={getStatusColor(session.status)}>
+                      {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                    </Badge>
+                    <Badge variant="outline">
+                      <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      {session.type}
+                    </Badge>
                   </div>
                 </div>
-              </CardHeader>
-
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Session Details */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                      <span>{new Date(session.date).toLocaleDateString()}</span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="h-4 w-4 mr-2 text-orange-500" />
-                      <span>{session.time} ({session.duration})</span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Users className="h-4 w-4 mr-2 text-green-500" />
-                      <span>{session.students} students</span>
-                    </div>
-
-                    <div className="flex items-center text-sm text-gray-600">
-                      <TypeIcon className="h-4 w-4 mr-2 text-purple-500" />
-                      <span className="capitalize">{session.type}</span>
-                    </div>
+                
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-green-600 mb-1">
+                    Rs. {session.earnings.toLocaleString()}
                   </div>
-
-                  {/* Progress Bar for Time Until Session */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Time until session</span>
-                      <span className="text-blue-600">
-                        {new Date(session.date) > new Date()
-                          ? `${Math.ceil((new Date(session.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days`
-                          : 'Today'}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{
-                          width: new Date(session.date) > new Date()
-                            ? `${100 - (Math.ceil((new Date(session.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) * 10)}%`
-                            : '100%'
-                        }}
-                      ></div>
-                    </div>
+                  <div className="text-sm text-gray-500">
+                    Rs. {Math.round(session.earnings / session.students)}/student
                   </div>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <svg className="h-4 w-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{new Date(session.date).toLocaleDateString()}</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-gray-600">
+                    <svg className="h-4 w-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{session.time} ({session.duration})</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-gray-600">
+                    <svg className="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    <span>{session.students} students</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-gray-600">
+                    <svg className="h-4 w-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span className="capitalize">{session.type}</span>
+                  </div>
+                </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2">
-                    {session.status === 'confirmed' && (
-                      <>
-                        <Button variant="outline" className="flex-1">
-                          <Video className="h-4 w-4 mr-2" />
-                          Join Session
-                        </Button>
-                        <Button variant="outline" className="flex-1">
-                          View Students
-                        </Button>
-                      </>
-                    )}
-
-                    {session.status === 'pending' && (
-                      <Button className="flex-1">
-                        Confirm Session
+                <div className="flex gap-2 pt-2">
+                  {session.status === 'confirmed' && (
+                    <>
+                      <Button variant="outline" className="flex-1">
+                        <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Join Session
                       </Button>
-                    )}
-
-                    <Button variant="outline" className="px-4">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
+                      <Button variant="outline" className="flex-1">
+                        View Students
+                      </Button>
+                    </>
+                  )}
+                  
+                  {session.status === 'pending' && (
+                    <Button className="flex-1">
+                      Confirm Session
                     </Button>
-                  </div>
+                  )}
+                  
+                  <Button variant="outline" className="px-4">
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
