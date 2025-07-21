@@ -13,12 +13,12 @@ function App() {
 
   return (
     <>
-      {/* <Header/>
+      <Header/>
       <Hero/>
       <Features/>
       <HowItWorks/>
       <Testimonials/>
-      <Footer/> */}
+      <Footer/> 
 
       {/* <StudentDashboard /> */}
       <TutorDashboard />
