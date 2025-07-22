@@ -1,30 +1,41 @@
-import Header from "./ui/Header"
-import Hero from "./ui/Hero"
-import Features from "./ui/Features"
-import HowItWorks from "./ui/HowItWorks"
-import Testimonials from "./ui/Testimonials"
-import Footer from "./ui/Footer"
-import StudentDashboard from "./features/students-dashboard/StudentDasboard"
-import TutorDashboard from "./features/tutor-dashboard/TutorDashboard"
+import Header from "./ui/Header";
+import Hero from "./ui/Hero";
+import Features from "./ui/Features";
+import HowItWorks from "./ui/HowItWorks";
+import Testimonials from "./ui/Testimonials";
+import Footer from "./ui/Footer";
+import StudentDashboard from "./features/students-dashboard/StudentDasboard";
+import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { SignUp } from "./ui/signup";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+    },
+  },
+});
 
 function App() {
-
-
   return (
-    <>
-      <Header/>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools initialIsOpen={false}/>
+      {/* <Header/>
       <Hero/>
       <Features/>
       <HowItWorks/>
       <Testimonials/>
-      <Footer/> 
+      <Footer/>  */}
 
       {/* <StudentDashboard /> */}
-      <TutorDashboard />
-      
-    </>
-  )
+      {/* <TutorDashboard /> */}
+      <SignUp/>
+     
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
