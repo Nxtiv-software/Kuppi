@@ -14,3 +14,17 @@ export async function addUser(userData) {
     console.error("Signup failed:", errorMessage);
   }
 }
+
+export async function loginUser(userData) {
+  try {
+    const response = await axios.post("http://localhost:8000/login", userData);
+
+    const { user, token } = response.data;
+    console.log(user);
+    localStorage.setItem("token", token);
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.error || error.message || "Something went wrong";
+    console.log("Login failed" + errorMessage);
+  }
+}

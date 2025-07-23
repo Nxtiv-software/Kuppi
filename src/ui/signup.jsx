@@ -4,9 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import { addUser } from "../services/apiUser";
 import Button from "./Button";
 
-
-
-
 export const SignUp = () => {
   const { register, handleSubmit, reset } = useForm();
 
@@ -16,9 +13,8 @@ export const SignUp = () => {
       console.log("success");
       reset();
     },
-    onError: (err) => console.log("Error while adding user"),
+    onError: (err) => console.log("Error while adding user" + err),
   });
-
 
   function onSubmit(data) {
     mutate(data);
@@ -35,8 +31,8 @@ export const SignUp = () => {
             <Label>Password</Label>
             <Input type="password" id="password" {...register("password")} />
             <Button disabled={isAdding} variation="primary" size="medium">
-          Add user
-        </Button>
+              Add user
+            </Button>
           </Form>
         </div>
         <div className="bg-black h-full">s</div>
