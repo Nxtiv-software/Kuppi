@@ -10,6 +10,8 @@ import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { SignUp } from "./ui/signup";
+import Login from "./ui/login";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +34,8 @@ function App() {
 
       {/* <StudentDashboard /> */}
       {/* <TutorDashboard /> */}
-      <SignUp/>
+      {/* <SignUp/> */}
+       <Login/> 
      
     </QueryClientProvider>
   );
