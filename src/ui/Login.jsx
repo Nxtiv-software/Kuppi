@@ -77,11 +77,7 @@ function Login() {
             <div className={styles.rightPanel}>
                 <div className={styles.imageContainer}>
                     <img src={img2} alt="" className={styles.backgroundImage} />
-                    <div className={styles.dots}>
-                        <span className={styles.dot + ' ' + styles.activeDot}></span>
-                        <span className={styles.dot}></span>
-                        <span className={styles.dot}></span>
-                    </div>
+                
                 </div>
             </div>
         </div>
