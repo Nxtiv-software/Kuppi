@@ -1,9 +1,4 @@
-import Header from "./ui/Header";
-import Hero from "./ui/Hero";
-import Features from "./ui/Features";
-import HowItWorks from "./ui/HowItWorks";
-import Testimonials from "./ui/Testimonials";
-import Footer from "./ui/Footer";
+
 import StudentDashboard from "./features/students-dashboard/StudentDasboard";
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 
@@ -11,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { SignUp } from "./ui/signup";
 import Login from "./ui/login";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomeLayout from "./ui/HomeLayout";
+
 
 
 const queryClient = new QueryClient({
@@ -25,16 +23,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false}/>
-      {/* <Header/>
-      <Hero/>
-      <Features/>
-      <HowItWorks/>
-      <Testimonials/>
-      <Footer/>  */}
+      <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomeLayout/>}/>
+        <Route path="signup" element={<SignUp/>}/>
+        <Route path="login" element={<Login/>}/>
+      </Routes>
+      </BrowserRouter>
 
       {/* <StudentDashboard /> */}
       {/* <TutorDashboard /> */}
-      <SignUp/>
+      {/* <SignUp/> */}
        <Login/> 
      
     </QueryClientProvider>
