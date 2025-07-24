@@ -5,7 +5,7 @@ import { addUser } from "../services/apiUser";
 import Button from "./Button";
 import styles from "../ui/signup.module.css";  
 import img2 from "../assets/images/img2.png"; 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const SignUp = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -38,7 +38,7 @@ export const SignUp = () => {
           <div className={styles.header}>
             <h1 className={styles.title}>Create an account</h1>
             <p className={styles.subtitle}>
-              Already have an account? <span className={styles.loginLink}>Log in</span>
+              Already have an account? <Link to={"/login"} className={styles.loginLink}>Log in</Link>
             </p>
           </div>
 
