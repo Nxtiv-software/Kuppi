@@ -1,4 +1,3 @@
-
 import StudentDashboard from "./features/students-dashboard/StudentDasboard";
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 
@@ -8,8 +7,7 @@ import { SignUp } from "./ui/signup";
 import Login from "./ui/login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomeLayout from "./ui/HomeLayout";
-
-
+import {Toaster } from "react-hot-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,14 +20,34 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false}/>
+      <ReactQueryDevtools initialIsOpen={false} />
       <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomeLayout/>}/>
-        <Route path="signup" element={<SignUp/>}/>
-        <Route path="login" element={<Login/>}/>
-      </Routes>
-      </BrowserRouter> 
+        <Routes>
+          <Route path="/" element={<HomeLayout />} />
+          <Route path="signup" element={<SignUp />} />
+          <Route path="login" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
+      <Toaster
+        position="top-center"
+        gutter={12}
+        containerStyle={{ margin: "8px" }}
+        toastOptions={{
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+          style: {
+            fontSize: "16px",
+            maxWidth: "500px",
+            padding: "16px 24px",
+            backgroundColor: "var(--color-grey-0)",
+            color: "var(--color-grey-700)",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

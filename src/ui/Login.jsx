@@ -6,19 +6,20 @@ import { loginUser } from "../services/apiUser";
 import styles from "../ui/login.module.css";
 import img2 from "../assets/images/img2.png";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Login() {
   const { register, handleSubmit, reset } = useForm();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
   const { mutate, isLoading: isLogin } = useMutation({
     mutationFn: (user) => loginUser(user),
     onSuccess: () => {
-      console.log("login success");
+      toast.success("login successfull");
       reset();
-      navigate("/");
+        navigate("/");
     },
-    onError: (err) => console.log(err),
+    onError: (err) => toast.error(err.message),
   });
 
   function onSubmit(data) {

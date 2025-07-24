@@ -12,6 +12,7 @@ export async function addUser(userData) {
     const errorMessage =
       error.response?.data?.error || error.message || "Something went wrong";
     console.error("Signup failed:", errorMessage);
+    throw new Error(errorMessage);
   }
 }
 
@@ -26,5 +27,6 @@ export async function loginUser(userData) {
     const errorMessage =
       error.response?.data?.error || error.message || "Something went wrong";
     console.log("Login failed" + errorMessage);
+    throw new Error(errorMessage);
   }
 }

@@ -3,9 +3,10 @@ import { Form, Input, Label } from "./Form";
 import { useMutation } from "@tanstack/react-query";
 import { addUser } from "../services/apiUser";
 import Button from "./Button";
-import styles from "../ui/signup.module.css";  
-import img2 from "../assets/images/img2.png"; 
+import styles from "../ui/signup.module.css";
+import img2 from "../assets/images/img2.png";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export const SignUp = () => {
   const { register, handleSubmit, reset } = useForm();
@@ -18,7 +19,10 @@ export const SignUp = () => {
       reset();
       navigate("/");
     },
-    onError: (err) => console.log("Error while adding user" + err),
+    onError: (err) => {
+      console.log("Error while adding user" + err);
+      toast(err.message);
+    },
   });
 
   function onSubmit(data) {
@@ -32,80 +36,79 @@ export const SignUp = () => {
           <img src={img2} alt="" className={styles.backgroundImage} />
         </div>
       </div>
-      
+
       <div className={styles.rightPanel}>
         <div className={styles.formContainer}>
           <div className={styles.header}>
             <h1 className={styles.title}>Create an account</h1>
             <p className={styles.subtitle}>
-              Already have an account? <Link to={"/login"} className={styles.loginLink}>Log in</Link>
+              Already have an account?{" "}
+              <Link to={"/login"} className={styles.loginLink}>
+                Log in
+              </Link>
             </p>
           </div>
 
           <Form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
             <div className={styles.inputRow}>
               <div className={styles.inputGroup}>
-                <Input 
-                  type="text" 
-                  id="name" 
+                <Input
+                  type="text"
+                  id="name"
                   placeholder="First Name"
                   className={styles.input}
-                  {...register("name")} 
+                  {...register("name")}
                 />
               </div>
               <div className={styles.inputGroup}>
-                <Input 
-                  type="text" 
-                  id="lastName" 
+                <Input
+                  type="text"
+                  id="lastName"
                   placeholder="Last Name"
                   className={styles.input}
-                  {...register("lastName")} 
+                  {...register("lastName")}
                 />
               </div>
             </div>
 
             <div className={styles.inputGroup}>
-              <Input 
-                type="email" 
-                id="email" 
+              <Input
+                type="email"
+                id="email"
                 placeholder="Email"
                 className={styles.input}
-                {...register("email")} 
+                {...register("email")}
               />
             </div>
 
             <div className={styles.inputGroup}>
               <div className={styles.passwordContainer}>
-                <Input 
-                  type="password" 
-                  id="password" 
+                <Input
+                  type="password"
+                  id="password"
                   placeholder="Enter your password"
                   className={styles.input}
-                  {...register("password")} 
+                  {...register("password")}
                 />
                 <span className={styles.eyeIcon}>👁️</span>
               </div>
             </div>
 
             <div className={styles.checkboxContainer}>
-              <input 
-                type="checkbox" 
-                id="terms" 
-                className={styles.checkbox}
-              />
+              <input type="checkbox" id="terms" className={styles.checkbox} />
               <label htmlFor="terms" className={styles.checkboxLabel}>
-                I agree to the <span className={styles.termsLink}>terms & conditions</span>
+                I agree to the{" "}
+                <span className={styles.termsLink}>terms & conditions</span>
               </label>
             </div>
 
-            <Button 
-              disabled={isAdding} 
+            <Button
+              disabled={isAdding}
               className={styles.createButton}
               type="submit"
             >
               Create account
             </Button>
-
           </Form>
         </div>
       </div>
