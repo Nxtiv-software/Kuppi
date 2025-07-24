@@ -2,7 +2,26 @@
 import { Menu, X } from 'lucide-react';
 import React from 'react';
 import { Link } from "react-router-dom";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+
+import styled from 'styled-components';
+
+const LoginButton = styled.button`
+  background-color: #2563EB;
+  color: white;
+  padding: 0.85rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+`;
+
+
+const SignUpButton = styled.button`
+border: 1px solid;
+  border-color: #2563EB;
+  color: #000000;
+  padding: 0.85rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+`;
 
 const Header = () => {
   const dashboardPath = '/dashboard';
@@ -35,33 +54,24 @@ const Header = () => {
           <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-md font-medium">
             Sign Up
           </button> */}
-          <SignedIn>
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: {
-                    width: "3rem",
-                    height: "3rem",
-                  },
-                },
-              }}
-            />
-            <Link to={dashboardPath}>
+          
+            {/* <Link to={dashboardPath}>
               <button className="px-4 py-1.5 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
                 Dashboard
               </button>
-            </Link>
-          </SignedIn>
-          <SignedOut>
-            <div className={`flex`}>
-              <button>
+            </Link> */}
+          
+          
+            <div className={`flex gap-5`}>
+              <LoginButton>
                 <Link to={"/login"}>Login</Link>
-              </button>
-              <button>
+              </LoginButton>
+              
+              <SignUpButton>
                 <Link to={"/signup"}>Sign up</Link>
-              </button>
+              </SignUpButton>
             </div>
-          </SignedOut>
+          
         </div>
       </nav>
     </header>

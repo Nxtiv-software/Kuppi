@@ -5,15 +5,18 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "../services/apiUser";
 import styles from "../ui/login.module.css";
 import img2 from "../assets/images/img2.png"; 
+import { useNavigate } from "react-router-dom";
 
 function Login() {
     const {register, handleSubmit, reset} = useForm();
+    const navigate = useNavigate();
 
     const {mutate, isLoading: isLogin} = useMutation({
         mutationFn: (user) => loginUser(user),
         onSuccess: () => {
             console.log("login success");
             reset();
+            navigate("/");
         },
         onError: (err) => console.log(err)
     })

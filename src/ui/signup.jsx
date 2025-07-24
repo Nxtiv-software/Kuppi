@@ -5,15 +5,18 @@ import { addUser } from "../services/apiUser";
 import Button from "./Button";
 import styles from "../ui/signup.module.css";  
 import img2 from "../assets/images/img2.png"; 
+import { useNavigate } from "react-router-dom";
 
 export const SignUp = () => {
   const { register, handleSubmit, reset } = useForm();
+  const navigate = useNavigate();
 
   const { mutate, isLoading: isAdding } = useMutation({
     mutationFn: (newUser) => addUser(newUser),
     onSuccess: () => {
       console.log("success");
       reset();
+      navigate("/");
     },
     onError: (err) => console.log("Error while adding user" + err),
   });
