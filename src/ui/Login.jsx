@@ -3,6 +3,8 @@ import Button from "./Button"
 import { Form, Input, Label } from "./Form"
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "../services/apiUser";
+import styles from "../ui/login.module.css";
+import img2 from "../assets/images/img2.png"; 
 
 function Login() {
     const {register, handleSubmit, reset} = useForm();
@@ -21,17 +23,67 @@ function Login() {
     }
 
     return (
-        <div className="h-screen grid grid-cols-2">
-            <div className="h-full">
-                <Form onSubmit={handleSubmit(onSubmit)}>
-                    <Label>Email</Label>
-                    <Input type="email" id="email" {...register("email")}/>
-                    <Label>Password</Label>
-                    <Input type="password" id="password" {...register("password")}/>
-                    <Button disabled={isLogin} variation="primary" size="medium">LogIn</Button>
-                </Form>
+        <div className={styles.container}>
+            <div className={styles.leftPanel}>
+                <div className={styles.formContainer}>
+                    <div className={styles.header}>
+                        <h1 className={styles.title}>Login</h1>
+                        <p className={styles.subtitle}>
+                            Don't have an account? <span className={styles.signupLink}>Register</span>
+                        </p>
+                    </div>
+
+                    <div className={styles.glassForm}>
+                        <Form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+                            <div className={styles.inputGroup}>
+                                <Input 
+                                    type="email" 
+                                    id="email" 
+                                    placeholder="Enter your email"
+                                    className={styles.input}
+                                    {...register("email")}
+                                />
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                                <div className={styles.passwordContainer}>
+                                    <Input 
+                                        type="password" 
+                                        id="password" 
+                                        placeholder="Enter your password"
+                                        className={styles.input}
+                                        {...register("password")}
+                                    />
+                                    <span className={styles.eyeIcon}>👁️</span>
+                                </div>
+                            </div>
+
+                            <div className={styles.forgotPassword}>
+                                <span className={styles.forgotLink}>Forgot password?</span>
+                            </div>
+
+                            <Button 
+                                disabled={isLogin} 
+                                className={styles.loginButton}
+                                type="submit"
+                            >
+                                Log In
+                            </Button>
+                        </Form>
+                    </div>
+                </div>
             </div>
-            <div className="bg-black h-full"></div>
+
+            <div className={styles.rightPanel}>
+                <div className={styles.imageContainer}>
+                    <img src={img2} alt="" className={styles.backgroundImage} />
+                    <div className={styles.dots}>
+                        <span className={styles.dot + ' ' + styles.activeDot}></span>
+                        <span className={styles.dot}></span>
+                        <span className={styles.dot}></span>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

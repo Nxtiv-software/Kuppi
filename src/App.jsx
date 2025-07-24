@@ -35,7 +35,7 @@ function App() {
       {/* <StudentDashboard /> */}
       {/* <TutorDashboard /> */}
       <SignUp/>
-       {/* <Login/>  */}
+       <Login/> 
      
     </QueryClientProvider>
   );
