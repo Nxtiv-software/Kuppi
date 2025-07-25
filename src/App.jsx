@@ -8,6 +8,9 @@ import Login from "./ui/login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomeLayout from "./ui/HomeLayout";
 import {Toaster } from "react-hot-toast";
+import AboutPage from "./ui/AboutPage";
+import ContactUs from "./ui/ContactUs/Contact";
+import ContactUsPage from "./ui/ContactUsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +29,9 @@ function App() {
           <Route path="/" element={<HomeLayout />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="login" element={<Login />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactUsPage />} />
+          {/* <Route path="contact-us" element={<ContactPage />} /> */}
         </Routes>
       </BrowserRouter>
       <Toaster
@@ -49,6 +55,9 @@ function App() {
         }}
       />
     </QueryClientProvider>
+    
+    
+    // <AboutPage />
   );
 }
 

@@ -1,0 +1,159 @@
+/* Main container for the entire section */
+.container {
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 110px 0 0 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Content wrapper - vertical stack, centered */
+.content {
+  max-width: 1000px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  text-align: center;
+}
+
+/* Text section styling */
+.textSection {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.description {
+  font-size: 1.25rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 400;
+  text-align: center;
+  max-width: 1000px;
+}
+
+/* Image section styling */
+.imageSection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imageContainer {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.customImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .container {
+    padding: 50px 30px;
+  }
+  
+  .content {
+    gap: 50px;
+  }
+  
+  .title {
+    font-size: 3rem;
+  }
+  
+  .description {
+    font-size: 1.125rem;
+  }
+  
+  .imageContainer {
+    max-width: 500px;
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 40px 20px;
+  }
+  
+  .content {
+    gap: 40px;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+  }
+  
+  .description {
+    font-size: 1.125rem;
+  }
+  
+  .imageContainer {
+    max-width: 400px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 30px 16px;
+  }
+  
+  .content {
+    gap: 30px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .description {
+    font-size: 1rem;
+  }
+  
+  .imageContainer {
+    max-width: 320px;
+    height: 250px;
+  }
+}
