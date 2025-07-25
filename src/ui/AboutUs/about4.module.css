@@ -1,0 +1,159 @@
+/* Container for the entire section */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Header Section */
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+/* Services Tag with arrows */
+.servicesTag {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.leftArrow {
+  margin-right: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.rightArrow {
+  margin-left: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tagText {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Cards Container */
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* Individual Card */
+.card {
+  background: linear-gradient(135deg, #74b9ff, #0984e3, #6c5ce7);
+  border-radius: 25px;
+  padding: 35px 50px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(116, 185, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 45px rgba(116, 185, 255, 0.4);
+}
+
+/* Card Title */
+.cardTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Description */
+.cardDescription {
+  font-size: 17px;
+  color: #ffffff;
+  line-height: 1.6;
+  margin: 0 0 15px 0;
+  font-weight: 500;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cardDescription:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 60px 15px;
+  }
+  
+  .cardsContainer {
+    gap: 30px;
+  }
+  
+  .card {
+    padding: 30px 35px;
+  }
+  
+  .cardTitle {
+    font-size: 2rem;
+  }
+  
+  .cardDescription {
+    font-size: 16px;
+  }
+  
+  .servicesTag {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  .leftArrow,
+  .rightArrow {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 40px 10px;
+  }
+  
+  .card {
+    padding: 25px 25px;
+  }
+  
+  .cardTitle {
+    font-size: 1.8rem;
+  }
+  
+  .cardDescription {
+    font-size: 15px;
+  }
+  
+  .cardsContainer {
+    gap: 25px;
+  }
+}
