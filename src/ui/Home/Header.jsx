@@ -6,18 +6,18 @@ import { Link } from "react-router-dom";
 import styled from 'styled-components';
 
 const LoginButton = styled.button`
-  background-color: #2563EB;
-  color: white;
+ border: 1px solid;
+  border-color: #2563EB;
+  color: #000000;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 1rem; 
 `;
 
 
 const SignUpButton = styled.button`
-border: 1px solid;
-  border-color: #2563EB;
-  color: #000000;
+background-color: #2563EB;
+  color: white;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
   font-size: 1rem;
@@ -27,7 +27,7 @@ const Header = () => {
   return (
     <header className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[95%] max-w-7xl">
       <nav
-        className="flex items-center justify-between px-8 py-2.5 backdrop-blur-md rounded-xl border border-white/30"
+        className="flex items-center justify-between px-8 py-3 backdrop-blur-md rounded-xl border border-white/30"
         style={{
           boxShadow: '0 0 20px rgba(64, 139, 219, 0.4)',
         }}
@@ -60,7 +60,7 @@ const Header = () => {
             </Link> */}
           
           
-            <div className={`flex gap-5`}>
+            <div className={`flex gap-2`}>
               <LoginButton>
                 <Link to={"/login"}>Login</Link>
               </LoginButton>
