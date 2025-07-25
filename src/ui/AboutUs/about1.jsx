@@ -1,11 +1,10 @@
 import React from 'react';
 import styles from "../AboutUs/about1.module.css"; 
-import img from "../../assets/images/img.png"; 
+import img from "../../assets/images/abt.jpg"; 
 
 const About1 = () => {
   return (
     <div className={styles.container}>
-        {/* <Navbar /> */}
       <div className={styles.content}>
         <div className={styles.textSection}>
           <h1 className={styles.title}>
