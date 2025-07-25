@@ -8,7 +8,7 @@
 /* Hero Section */
 .heroSection {
   background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
-  margin: 20px;
+  margin-left: 160px;
   border-radius: 20px;
   padding: 40px 0;
   padding-top: 25px;
@@ -16,10 +16,12 @@
   overflow: hidden;
   text-align: center;
   margin-top: 100px;
-  height: 180px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 1200px; 
+  /* margin: auto; */
 }
 
 .heroContent {
