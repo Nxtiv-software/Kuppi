@@ -24,7 +24,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <BrowserRouter>
+
         <Routes>
           <Route path="/" element={<HomeLayout />} />
           <Route path="signup" element={<SignUp />} />
@@ -33,7 +33,7 @@ function App() {
           <Route path="contact" element={<ContactUsPage />} />
           {/* <Route path="contact-us" element={<ContactPage />} /> */}
         </Routes>
-      </BrowserRouter>
+
       <Toaster
         position="top-center"
         gutter={12}
