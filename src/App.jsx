@@ -1,4 +1,4 @@
-import StudentDashboard from "./features/students-dashboard/StudentDasboard";
+
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import {Toaster } from "react-hot-toast";
 import AboutPage from "./ui/AboutPage";
 import ContactUs from "./ui/ContactUs/Contact";
 import ContactUsPage from "./ui/ContactUsPage";
+import StudentDashboard from "./features/students-dashboard/StudentDasboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,16 +25,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <BrowserRouter>
+      {/* <BrowserRouter> */}
         <Routes>
           <Route path="/" element={<HomeLayout />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="login" element={<Login />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactUsPage />} />
-          {/* <Route path="contact-us" element={<ContactPage />} /> */}
+          <Route path="session" element={<StudentDashboard />} />
+          
         </Routes>
-      </BrowserRouter>
+      {/* </BrowserRouter> */}
       <Toaster
         position="top-center"
         gutter={12}
@@ -56,7 +58,7 @@ function App() {
       />
     </QueryClientProvider>
     
-    
+    // <StudentDashboard />
     // <AboutPage />
   );
 }
