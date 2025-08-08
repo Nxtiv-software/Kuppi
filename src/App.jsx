@@ -25,7 +25,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      {/* <BrowserRouter> */}
+
         <Routes>
           <Route path="/" element={<HomeLayout />} />
           <Route path="signup" element={<SignUp />} />
@@ -35,7 +35,7 @@ function App() {
           <Route path="session" element={<StudentDashboard />} />
           
         </Routes>
-      {/* </BrowserRouter> */}
+
       <Toaster
         position="top-center"
         gutter={12}

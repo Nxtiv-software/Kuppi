@@ -1,0 +1,29 @@
+{
+  "brand": "Kuppi.LK",
+  "nav": {
+    "home": "Home",
+    "popular": "Popular Sessions",
+    "about": "About Us",
+    "contact": "Contact Us"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up"
+  },
+  "language": "EN 🌐",
+
+  "hero": {
+    "title": "Get the help you need, Right when you need it!",
+    "description": "We’re not here to teach the ordinary syllabus. We’re here to help you with what you're struggling to learn. Vote on what you need help with, We’ll organize a session with expert tutors, just for that.",
+    "vote": "Vote now",
+    "explore": "Explore Sessions",
+
+      "stat1": "100+ Active Tutors",
+      "stat2": "50+ Subjects"
+    },
+    "card": {
+      "title": "Join a Study Group",
+      "description": "Connect with peers and tutors instantly"
+    }
+  }
+
