@@ -1,4 +1,4 @@
-import StudentDashboard from "./features/students-dashboard/StudentDasboard";
+
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,6 +11,9 @@ import {Toaster } from "react-hot-toast";
 import AboutPage from "./ui/AboutPage";
 import ContactUs from "./ui/ContactUs/Contact";
 import ContactUsPage from "./ui/ContactUsPage";
+import StudentDashboard from "./features/students-dashboard/StudentDasboard";
+import SignUpClerk from "./ui/SignUpClerk";
+import LoginClerk from "./ui/LoginClerk";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,11 +30,13 @@ function App() {
 
         <Routes>
           <Route path="/" element={<HomeLayout />} />
-          <Route path="signup" element={<SignUp />} />
-          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<SignUpClerk />} />
+          <Route path="login" element={<LoginClerk />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactUsPage />} />
-          {/* <Route path="contact-us" element={<ContactPage />} /> */}
+          <Route path="student-dashboard" element={<StudentDashboard />} />
+          <Route path="tutor-dashboard" element={<TutorDashboard/>} />
+          
         </Routes>
 
       <Toaster
@@ -56,7 +61,7 @@ function App() {
       />
     </QueryClientProvider>
     
-    
+    // <StudentDashboard />
     // <AboutPage />
   );
 }

@@ -133,7 +133,7 @@
 }
 
 .submitButton {
-  background: #1e293b;
+  background: #2563eb;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -144,7 +144,7 @@
 }
 
 .submitButton:hover {
-  background: #334155;
+  background: #1d4ed8;
 }
 
 /* Filter Polls Styles */
@@ -155,47 +155,24 @@
   border: 1px solid #e5e7eb;
 }
 
-.filterTitle {
-  font-size: 1.25rem;
+.filterHeader {
+  font-size: 1.2rem;
   font-weight: 600;
   color: #1f2937;
   margin-bottom: 1rem;
 }
 
-.filtersRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.filterForm {
+  display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.filterSelect {
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  background: white;
-  transition: border-color 0.2s;
-}
-
-.filterSelect:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-/* Trending Polls Styles */
-.trendingPolls {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-}
-
-.sectionTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .pollsGrid {
@@ -314,6 +291,22 @@
   transition: background 0.2s;
 }
 
+.removeVoteButton {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.removeVoteButton:hover {
+  background: #dc2626;
+}
+
 .voteButton:hover {
   background: #1d4ed8;
 }
@@ -328,6 +321,10 @@
   }
   
   .formActions {
+    flex-direction: column;
+  }
+  
+  .filterForm {
     flex-direction: column;
   }
 }
