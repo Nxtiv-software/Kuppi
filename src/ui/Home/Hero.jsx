@@ -5,6 +5,7 @@ import { ArrowRight, Users, BookOpen } from 'lucide-react';
 
 const Hero = () => {
   const { t } = useTranslation('global');
+  const isSinhala = (text) => /[\u0D80-\u0DFF]/.test(text);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-orange-50 py-20 h-screen flex items-center">
@@ -13,11 +14,15 @@ const Hero = () => {
 
           {/* Left Section */}
           <div className="text-center lg:text-left animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              <Trans i18nKey="hero.title">
-                Get the help you need, <span className="text-blue-600">Right when you need it!</span>
-              </Trans>
-            </h1>
+            <h1
+  className={`font-bold text-gray-900 mb-6 leading-tight ${
+    isSinhala(t('hero.title')) ? 'text-3xl md:text-5xl' : 'text-4xl md:text-6xl'
+  }`}
+>
+  <Trans i18nKey="hero.title">
+    Get the help you need, <span className="text-blue-600">Right when you need it!</span>
+  </Trans>
+</h1>
 
             <p className="text-xl text-gray-600 mb-8 max-w-2xl">
               {t("hero.description")}
