@@ -8,8 +8,13 @@ import {
   SignedOut,
   UserButton,
   SignInButton,
+  useUser,
 } from "@clerk/clerk-react";
 import LoginClerk from "../LoginClerk";
+import StudentDashboard from "../../features/students-dashboard/StudentDasboard";
+import StudentDashBoardButton from "../../features/students-dashboard/StudentDashBoardButton";
+import TuttorDashBoardButton from "../../features/tutor-dashboard/TuttorDashBoardButton";
+import AdminDashBoardButton from "../../features/admin-dashboard/AdminDashBoardButton";
 
 const LoginButton = styled.button`
   border: 1px solid;
@@ -32,6 +37,7 @@ const Header = () => {
   const { t, i18n } = useTranslation("global");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { isLoaded, user } = useUser();
 
   const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
 
@@ -56,6 +62,10 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
+
+  if (!isLoaded) return <div>Loading...</div>;
+  const role = user?.publicMetadata?.role;
+  console.log(role);
 
   return (
     <header className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[95%] max-w-7xl">
@@ -145,12 +155,31 @@ const Header = () => {
 
             <SignedOut>
               <div className={`flex gap-2`}>
-                <Link className="bg-blue-600 px-4 py-3 text-white rounded-md" to={"/login"}>Login</Link>
-                <Link className="px-4 py-3 border-2 border-blue-500 rounded-md" to={"/signup"}>Sign up</Link>
+                <Link
+                  className="bg-blue-600 px-4 py-3 text-white rounded-md"
+                  to={"/login"}
+                >
+                  Login
+                </Link>
+                <Link
+                  className="px-4 py-3 border-2 border-blue-500 rounded-md"
+                  to={"/signup"}
+                >
+                  Sign up
+                </Link>
               </div>
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <div className="flex items-center gap-3">
+                {role === "student" ? (
+                  <StudentDashBoardButton />
+                ) : role === "tutor" ? (
+                  <TuttorDashBoardButton />
+                ) : (
+                  <AdminDashBoardButton />
+                )}
+                <UserButton />
+              </div>
             </SignedIn>
           </div>
         </div>

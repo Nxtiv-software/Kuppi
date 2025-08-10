@@ -34,7 +34,8 @@ function App() {
           <Route path="login" element={<LoginClerk />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactUsPage />} />
-          <Route path="session" element={<StudentDashboard />} />
+          <Route path="student-dashboard" element={<StudentDashboard />} />
+          <Route path="tutor-dashboard" element={<TutorDashboard/>} />
           
         </Routes>
 
