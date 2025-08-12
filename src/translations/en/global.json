@@ -11,19 +11,65 @@
     "signup": "Sign Up"
   },
   "language": "EN 🌐",
-
   "hero": {
     "title": "Get the help you need, Right when you need it!",
     "description": "We’re not here to teach the ordinary syllabus. We’re here to help you with what you're struggling to learn. Vote on what you need help with, We’ll organize a session with expert tutors, just for that.",
     "vote": "Vote now",
     "explore": "Explore Sessions",
-
-      "stat1": "100+ Active Tutors",
-      "stat2": "50+ Subjects"
-    },
-    "card": {
-      "title": "Join a Study Group",
-      "description": "Connect with peers and tutors instantly"
-    }
-  }
-
+    "stat1": "100+ Active Tutors",
+    "stat2": "50+ Subjects"
+  },
+  "card": {
+    "title": "Join a Study Group",
+    "description": "Connect with peers and tutors instantly"
+  },
+  "features": {
+    "heading": "Study Smarter with Kuppi.LK",
+    "subheading": "Experience personalized learning with our innovative approach to education",
+    "items": [
+      {
+        "title": "Focused Learning",
+        "description": "Learn only what you are struggling with. No time wasted."
+      },
+      {
+        "title": "Expert Tutors",
+        "description": "We carefully match each session with the right tutor who knows best."
+      },
+      {
+        "title": "Flexible Timing",
+        "description": "We schedule each session at a time that works for you."
+      },
+      {
+        "title": "Affordable",
+        "description": "Quality learning at a fair and affordable price."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How it works?",
+    "description": "Get personalized help in just four simple steps",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Vote",
+        "description": "Choose what topic you need help with."
+      },
+      {
+        "number": "2",
+        "title": "Get matched",
+        "description": "We find others like you and organize a session."
+      },
+      {
+        "number": "3",
+        "title": "Join the Session",
+        "description": "Learn with an expert tutor, right when you need it."
+      },
+      {
+        "number": "4",
+        "title": "Catch Up, Together",
+        "description": "Review, ask questions, and get back on track."
+      }
+    ]
+}
+}
+  
