@@ -1,13 +1,14 @@
 // src/components/students-dashboard/VoteCreate.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './VoteCreate.module.css';
 import { createPoll, getTrendingPolls, getPolls, voteOnPoll, removeVote } from '../../services/api';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../context/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 const CreatePoll = ({ onBack }) => {
-  const { user } = useAuth();
+  const queryClient = QueryClient()
+  const {user} = useUser();
   const [pollData, setPollData] = useState({
     title: '',
     subject: '',
@@ -148,7 +149,7 @@ const CreatePoll = ({ onBack }) => {
 };
 
 const FilterPolls = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const queryClient = useQueryClient();
   const { data: polls, isLoading, error } = useQuery({
     queryKey: ['polls'],
@@ -261,7 +262,7 @@ const FilterPolls = () => {
 };
 
 const TrendingPolls = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const queryClient = useQueryClient();
   const { data: trendingPolls, isLoading, error } = useQuery({
     queryKey: ['trendingPolls'],

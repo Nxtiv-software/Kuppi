@@ -36,7 +36,7 @@ function App() {
           <Route path="contact" element={<ContactUsPage />} />
           <Route path="student-dashboard" element={<StudentDashboard />} />
           <Route path="tutor-dashboard" element={<TutorDashboard/>} />
-          
+
         </Routes>
 
       <Toaster
