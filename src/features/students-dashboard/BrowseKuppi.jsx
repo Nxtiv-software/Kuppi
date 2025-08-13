@@ -26,11 +26,9 @@ const SearchFilters = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
             className={styles.select}
           >
             <option value="all">All Subjects</option>
-            <option value="web-development">Web Development</option>
-            <option value="data-structures">Data Structures</option>
-            <option value="database">Database Systems</option>
-            <option value="machine-learning">Machine Learning</option>
-            <option value="mobile-development">Mobile Development</option>
+            <option value="combined-mathematics">Combined Mathematics</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
           </select>
         </div>
 
@@ -87,62 +85,62 @@ const KuppiGrid = ({ filters, searchTerm }) => {
   const allKuppis = [
     {
       id: 1,
-      title: 'React Hooks Masterclass',
-      subject: 'Web Development',
+      title: 'Vectors',
+      subject: 'Combined Mathematics',
       instructor: 'John Smith',
       rating: 4.8,
       reviews: 124,
       price: 350,
       originalPrice: 500,
-      date: 'Dec 28, 2024',
+      date: 'Dec 28, 2025',
       time: '2:00 PM - 4:00 PM',
       enrolled: 15,
       maxStudents: 25,
       level: 'intermediate',
-      tags: ['React', 'Hooks', 'JavaScript'],
-      description: 'Deep dive into React Hooks with practical examples',
+      tags: ['Vectors', 'Mathematics'],
+      description: 'Deep dive into Vectors with practical examples',
       image: img
     },
     {
       id: 2,
-      title: 'Database Design Fundamentals',
-      subject: 'Database Systems',
+      title: 'Thermal Physics',
+      subject: 'Physics',
       instructor: 'Dr. Sarah Wilson',
       rating: 4.9,
       reviews: 89,
       price: 400,
       originalPrice: 600,
-      date: 'Dec 29, 2024',
+      date: 'Dec 29, 2025',
       time: '10:00 AM - 12:00 PM',
       enrolled: 20,
       maxStudents: 30,
       level: 'beginner',
-      tags: ['SQL', 'ERD', 'Normalization'],
-      description: 'Learn database design principles and best practices',
+      tags: ['Thermal', 'Physics'],
+      description: 'Learn about thermal physics concepts and applications',
       image: img
     },
     {
       id: 3,
-      title: 'Machine Learning Basics',
-      subject: 'Machine Learning',
+      title: 'Chemical calculations',
+      subject: 'Chemistry',
       instructor: 'Prof. Mike Chen',
       rating: 4.7,
       reviews: 156,
       price: 600,
       originalPrice: 800,
-      date: 'Dec 30, 2024',
+      date: 'Dec 30, 2025',
       time: '7:00 PM - 9:00 PM',
       enrolled: 12,
       maxStudents: 20,
       level: 'intermediate',
-      tags: ['Python', 'ML', 'Data Science'],
-      description: 'Introduction to machine learning concepts and algorithms',
+      tags: ['Chemical', 'Calculations'],
+      description: 'Introduction to chemical calculations and their applications',
       image: img
     },
     {
       id: 4,
-      title: 'Data Structures & Algorithms',
-      subject: 'Data Structures',
+      title: 'Mechanical Properties of Matter',
+      subject: 'Physics',
       instructor: 'Alex Rodriguez',
       rating: 4.6,
       reviews: 203,
@@ -153,14 +151,14 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       enrolled: 25,
       maxStudents: 35,
       level: 'intermediate',
-      tags: ['Algorithms', 'Data Structures', 'Problem Solving'],
-      description: 'Comprehensive guide to data structures and algorithms',
+      tags: ['Mechanical', 'Properties', 'Matter'],
+      description: 'Comprehensive guide to mechanical properties of matter',
       image: img
     },
     {
       id: 5,
-      title: 'Mobile App Development with React Native',
-      subject: 'Mobile Development',
+      title: 'Derivatives',
+      subject: 'Combined Mathematics',
       instructor: 'Emma Johnson',
       rating: 4.5,
       reviews: 78,
@@ -171,14 +169,14 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       enrolled: 8,
       maxStudents: 15,
       level: 'advanced',
-      tags: ['React Native', 'Mobile', 'JavaScript'],
-      description: 'Build cross-platform mobile apps with React Native',
+      tags: ['Derivatives', 'Calculus'],
+      description: 'Introduction to derivatives and their applications',
       image: img
     },
     {
       id: 6,
-      title: 'Advanced CSS & Animations',
-      subject: 'Web Development',
+      title: 'Electro chemistry',
+      subject: 'Chemistry',
       instructor: 'David Kim',
       rating: 4.7,
       reviews: 145,
@@ -189,8 +187,8 @@ const KuppiGrid = ({ filters, searchTerm }) => {
       enrolled: 18,
       maxStudents: 25,
       level: 'intermediate',
-      tags: ['CSS', 'Animations', 'Web Design'],
-      description: 'Master advanced CSS techniques and animations',
+      tags: ['Electro', 'Chemistry'],
+      description: 'Master advanced electrochemistry concepts and applications',
       image: img
     }
   ];

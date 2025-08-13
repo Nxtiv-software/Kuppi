@@ -38,11 +38,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <I18nextProvider i18n={i18next}>
-        <AuthProvider>
+        {/* <AuthProvider> */}
           <BrowserRouter>
             <App />
           </BrowserRouter>
-        </AuthProvider>
+        {/* </AuthProvider> */}
       </I18nextProvider>
     </ClerkProvider>
   </React.StrictMode>
