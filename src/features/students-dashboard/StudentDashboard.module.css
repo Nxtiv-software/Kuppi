@@ -4,10 +4,12 @@
   background-color: #f8f9fa;
 }
 
+/* Push dashboard content below header */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  margin-top: 80px; /* Adjust based on your Header height */
 }
 
 .headerSection {
@@ -114,6 +116,9 @@
   background: white;
   border-radius: 8px;
   overflow: hidden;
+  position: sticky;
+  top: 80px; /* Keeps nav under header */
+  z-index: 10;
 }
 
 .tabList {
@@ -149,13 +154,13 @@
   .tabList {
     flex-direction: column;
   }
-  
+
   .tab {
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
     border-right: none;
   }
-  
+
   .tab.active {
     border-bottom-color: #e5e7eb;
     border-left: 3px solid #2563eb;

@@ -8,43 +8,45 @@ import Progress from './Progress';
 import BrowseKuppis from './BrowseKuppi';
 // import img from "../../assets/images/img.png";
 import { UserButton } from "@clerk/clerk-react"; 
+import Header from '../../ui/Home/Header'
 
 // Header Component
-const Header = () => {
-  return (
-    <header className={styles.header}>
-      <div className={styles.headerContainer}>
-        <div className={styles.logo}>
-          <span className={styles.logoText}>Kuppi.lk</span>
-        </div>
-        <div className={styles.userSection}>
-          <div className={styles.notifications}>
-            <span className={styles.notificationIcon}>🔔</span>
-            <span className={styles.notificationBadge}>3</span>
-          </div>
-          <div className={styles.userProfile}>
-            {/* <img 
-              src= {img}
-              alt="User Profile" 
-              className={styles.profileImage}
-            />
-            <span className={styles.userName}>John Doe</span> */}
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: {
-                    width: "3rem",
-                    height: "3rem",
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
+// const Header = () => {
+//   return (
+//     <header className={styles.header}>
+//       <div className={styles.headerContainer}>
+//         <div className={styles.logo}>
+//           <span className={styles.logoText}>Kuppi.lk</span>
+//         </div>
+//         <div className={styles.userSection}>
+//           <div className={styles.notifications}>
+//             <span className={styles.notificationIcon}>🔔</span>
+//             <span className={styles.notificationBadge}>3</span>
+//           </div>
+//           <div className={styles.userProfile}>
+//             {/* <img 
+//               src= {img}
+//               alt="User Profile" 
+//               className={styles.profileImage}
+//             />
+//             <span className={styles.userName}>John Doe</span> */}
+//             <UserButton
+//               appearance={{
+//                 elements: {
+//                   userButtonAvatarBox: {
+//                     width: "3rem",
+//                     height: "3rem",
+//                   },
+//                 },
+//               }}
+//             />
+//           </div>
+//         </div>
+//       </div>
+//     </header>
+//   );
+// };
+
 
 // Navigation Component
 const Navigation = ({ activeTab, setActiveTab }) => {
@@ -90,7 +92,7 @@ const StudentDashboard = () => {
       case 'browse-kuppis':
         return <BrowseKuppis />;
       default:
-        return <Overview />; // Default to Overview if no tab is selected
+        return <Overview />;
     }
   };
 
@@ -100,7 +102,9 @@ const StudentDashboard = () => {
       <div className={styles.container}>
         <div className={styles.headerSection}>
           <h1 className={styles.title}>My Learning Dashboard</h1>
-          <p className={styles.subtitle}>Track your kuppi sessions and learning progress</p>
+          {/* <p className={styles.subtitle}>
+            Track your kuppi sessions and learning progress
+          </p> */}
         </div>
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
         <main className={styles.content}>
