@@ -46,8 +46,8 @@
     ]
   },
   "howItWorks": {
-    "title": "How it works?",
-    "description": "Get personalized help in just four simple steps",
+    "heading": "How it works?",
+    "subheading": "Get personalized help in just four simple steps",
     "steps": [
       {
         "number": "1",
