@@ -10,13 +10,38 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to dynamically add token
+// Function to get Clerk session token
+const getClerkToken = async () => {
+  try {
+    // AUTHENTICATION: Get token from Clerk session
+    // Uncomment when deploying with authentication
+    /*
+    const { session } = window.Clerk || {};
+    if (session) {
+      return await session.getToken();
+    }
+    */
+    return null;
+  } catch (error) {
+    console.error('Error getting Clerk token:', error);
+    return null;
+  }
+};
+
+// Add request interceptor to add Clerk token
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
+  async (config) => {
+    // AUTHENTICATION: Add Clerk token to requests
+    // Uncomment when deploying with authentication
+    /*
+    const token = await getClerkToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    */
+    
+    // FOR LOCALHOST TESTING: Skip authentication
+    console.log('Making request to:', config.url);
     return config;
   },
   (error) => {
@@ -24,7 +49,7 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor to handle token refresh
+// Add response interceptor to handle authentication errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -33,29 +58,31 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      // AUTHENTICATION: Handle token refresh
+      // Uncomment when deploying with authentication
+      /*
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await axios.post(`${API_URL}/auth/refresh-token`, {
-            refreshToken: refreshToken
-          });
-
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-
+        // Try to get a fresh token from Clerk
+        const newToken = await getClerkToken();
+        
+        if (newToken) {
           // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
+        } else {
+          // If no token available, redirect to login
+          window.location.href = '/sign-in';
+          return Promise.reject(error);
         }
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        // If token refresh fails, redirect to login
+        window.location.href = '/sign-in';
         return Promise.reject(refreshError);
       }
+      */
+      
+      // FOR LOCALHOST TESTING: Just log the error
+      console.error('Authentication error (commented out for testing):', error.response?.data);
     }
 
     return Promise.reject(error);
@@ -65,9 +92,19 @@ api.interceptors.response.use(
 // Create a new poll
 export const createPoll = async (pollData) => {
   try {
+    console.log('API: Sending poll data:', JSON.stringify(pollData, null, 2));
     const response = await api.post('/polls', pollData);
     return response.data;
   } catch (error) {
+    console.error('API Error Details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.response?.data?.message,
+      errors: error.response?.data?.errors,
+      validationErrors: error.response?.data?.validationErrors
+    });
+    console.error('Full error response:', JSON.stringify(error.response?.data, null, 2));
     throw new Error(error.response?.data?.message || 'Failed to create poll');
   }
 };
@@ -119,6 +156,26 @@ export const getPollDetails = async (pollId) => {
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch poll details');
+  }
+};
+
+// Delete a poll
+export const deletePoll = async (pollId) => {
+  try {
+    const response = await api.delete(`/polls/${pollId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete poll');
+  }
+};
+
+// Get poll statistics
+export const getPollStats = async () => {
+  try {
+    const response = await api.get('/polls/stats');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch poll statistics');
   }
 };
 

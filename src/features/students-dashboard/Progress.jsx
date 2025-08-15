@@ -62,44 +62,28 @@ const ProgressStats = () => {
 const SubjectProgress = () => {
   const subjects = [
     {
-      name: 'Web Development',
+      name: 'Combined Mathematics',
       progress: 85,
       sessions: 8,
       totalSessions: 10,
-      color: '#2563eb',
-      nextTopic: 'React State Management'
+      color: '#2bc2ecff',
+      nextTopic: 'Intergration'
     },
     {
-      name: 'Data Structures',
+      name: 'Physics',
       progress: 70,
       sessions: 7,
       totalSessions: 10,
-      color: '#10b981',
-      nextTopic: 'Graph Algorithms'
+      color: '#b9b010ff',
+      nextTopic: 'Mechanical Properties of Matter'
     },
     {
-      name: 'Database Systems',
-      progress: 60,
-      sessions: 6,
-      totalSessions: 10,
-      color: '#f59e0b',
-      nextTopic: 'Query Optimization'
-    },
-    {
-      name: 'Machine Learning',
+      name: 'Chemistry',
       progress: 40,
       sessions: 4,
       totalSessions: 10,
       color: '#8b5cf6',
-      nextTopic: 'Neural Networks'
-    },
-    {
-      name: 'Mobile Development',
-      progress: 25,
-      sessions: 2,
-      totalSessions: 8,
-      color: '#ef4444',
-      nextTopic: 'React Native Basics'
+      nextTopic: 'Oxygen containing organic compounds'
     }
   ];
 

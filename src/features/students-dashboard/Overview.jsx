@@ -90,10 +90,10 @@ const UpcomingSessions = () => {
   const sessions = [
     {
       id: 1,
-      title: 'Data Structures',
-      subtitle: 'Binary Trees & Tree Traversal',
+      title: 'Trigonometrics Indentities',
+      subtitle: 'Sine rule and cosine rule',
       instructor: 'Dr. Amal Perera',
-      date: 'Dec 26, 2024',
+      date: 'Dec 26, 2025',
       time: '7:00 PM - 9:00 PM',
       students: 15,
       price: 'Rs. 250',
@@ -101,10 +101,10 @@ const UpcomingSessions = () => {
     },
     {
       id: 2,
-      title: 'Database Systems',
-      subtitle: 'SQL Joins & Query Optimization',
+      title: 'Electronics',
+      subtitle: 'Characteristic curves of a diode',
       instructor: 'Prof. Nimal Silva',
-      date: 'Dec 27, 2024',
+      date: 'Dec 27, 2025',
       time: '2:00 PM - 4:00 PM',
       students: 12,
       price: 'Rs. 300',
