@@ -465,14 +465,26 @@ const FilterPolls = () => {
                   </>
                 )}
                 
-                {/* Allow creator to delete poll if no votes and not scheduled */}
-                {user && poll.creator && poll.creator._id === user.id && 
-                 poll.voteCount === 0 && poll.status === 'active' && (
+                {/* Allow creator to delete poll if vote count <= 3 and poll is active */}
+                {user && poll.createdBy === user.id && 
+                 poll.voteCount <= 3 && poll.status === 'active' && (
                   <button 
                     className={styles.deleteButton} 
                     onClick={() => handleDeletePoll(poll._id)}
                   >
                     Delete
+                  </button>
+                )}
+                
+                {/* Show info for polls that can't be deleted */}
+                {user && poll.createdBy === user.id && 
+                 poll.voteCount > 3 && poll.status === 'active' && (
+                  <button 
+                    className={styles.deleteButton}
+                    style={{opacity: 0.5, cursor: 'not-allowed'}}
+                    onClick={() => toast.info(`Cannot delete: Poll has ${poll.voteCount} votes. Can only delete polls with 3 or fewer votes.`)}
+                  >
+                    Delete (Disabled)
                   </button>
                 )}
               </div>
