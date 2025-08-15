@@ -1,14 +1,21 @@
 // src/components/students-dashboard/VoteCreate.jsx
 import React, { useState } from 'react';
 import styles from './VoteCreate.module.css';
-import { createPoll, getTrendingPolls, getPolls, voteOnPoll, removeVote } from '../../services/api';
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createPoll, getTrendingPolls, getPolls, voteOnPoll, removeVote, deletePoll } from '../../services/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { useUser } from '@clerk/clerk-react';
+// import { useUser } from '@clerk/clerk-react';
 
 const CreatePoll = ({ onBack }) => {
-  const queryClient = QueryClient()
-  const {user} = useUser();
+  const queryClient = useQueryClient();
+  // AUTHENTICATION: Uncomment when deploying with Clerk
+  // const { user, isSignedIn } = useUser();
+  
+  // FOR LOCALHOST TESTING: Mock user data
+  const mockUser = { id: 'test-user-123', name: 'Test User' };
+  const isSignedIn = true; // Set to true for testing
+  const user = mockUser;
+
   const [pollData, setPollData] = useState({
     title: '',
     subject: '',
@@ -17,50 +24,131 @@ const CreatePoll = ({ onBack }) => {
     preferredDate: '',
     timeSlot: '',
     maxStudents: '',
-    advancePayment: ''
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // AUTHENTICATION: Uncomment when deploying
+    /*
+    if (!isSignedIn || !user) {
+      toast.error('Please sign in to create a poll');
+      return;
+    }
+    */
 
-    if (!user) {
-      toast.error('Please log in to create a poll');
+    // Validation
+    if (!pollData.title || !pollData.subject || !pollData.chapter || !pollData.description || 
+        !pollData.preferredDate || !pollData.timeSlot || !pollData.maxStudents) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
+    // Title validation (server requires 5-200 characters)
+    if (pollData.title.length < 5) {
+      toast.error('Title must be at least 5 characters long');
+      return;
+    }
+
+    if (pollData.title.length > 200) {
+      toast.error('Title must be less than 200 characters');
+      return;
+    }
+
+    // Description validation (server requires 10-1000 characters)
+    if (pollData.description.length < 10) {
+      toast.error('Description must be at least 10 characters long');
+      return;
+    }
+
+    if (pollData.description.length > 1000) {
+      toast.error('Description must be less than 1000 characters');
+      return;
+    }
+
+    // Chapter validation
+    if (pollData.chapter.length < 3) {
+      toast.error('Chapter/Topic must be at least 3 characters long');
+      return;
+    }
+
+    if (parseInt(pollData.maxStudents) < 5 || parseInt(pollData.maxStudents) > 50) {
+      toast.error('Max students must be between 5 and 50');
+      return;
+    }
+
+    const selectedDate = new Date(pollData.preferredDate);
+    if (selectedDate <= new Date()) {
+      toast.error('Preferred date must be in the future');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      await createPoll(pollData);
+      // Debug: Log the data being sent
+      console.log('Sending poll data:', JSON.stringify(pollData, null, 2));
+      
+      // Add user information to the poll data
+      const pollDataWithUser = {
+        ...pollData,
+        maxStudents: parseInt(pollData.maxStudents), // Convert to number
+        createdBy: user.id,
+        creatorName: user.name || 'Test User'
+      };
+      
+      console.log('Complete poll data with user:', JSON.stringify(pollDataWithUser, null, 2));
+      
+      await createPoll(pollDataWithUser);
       toast.success('Poll created successfully!');
       onBack();
-      queryClient.refetchQueries(['polls']);
+      queryClient.invalidateQueries(['polls']);
+      queryClient.invalidateQueries(['trendingPolls']);
+      
+      // Reset form
+      setPollData({
+        title: '',
+        subject: '',
+        chapter: '',
+        description: '',
+        preferredDate: '',
+        timeSlot: '',
+        maxStudents: '',
+      });
     } catch (error) {
       toast.error(error.message);
+      console.error('Error creating poll:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className={styles.createPoll}>
       <div className={styles.formHeader}>
-        <button onClick={onBack} className={styles.backButton}>← Back</button>
+        <button onClick={onBack} className={styles.backButton} type="button">← Back</button>
         <h2 className={styles.formTitle}>Create New Poll</h2>
       </div>
       
       <form onSubmit={handleSubmit} className={styles.pollForm}>
         <div className={styles.formGrid}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Poll Title</label>
+            <label className={styles.label}>Poll Title * (5-200 characters)</label>
             <input
               type="text"
               value={pollData.title}
               onChange={(e) => setPollData({ ...pollData, title: e.target.value })}
               className={styles.input}
-              placeholder="e.g., Data Structures Revision Session"
+              placeholder="e.g., combined mathematics revision session (minimum 2 characters)"
+              minLength="2"
+              maxLength="200"
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Subject</label>
+            <label className={styles.label}>Subject *</label>
             <select
               value={pollData.subject}
               onChange={(e) => setPollData({ ...pollData, subject: e.target.value })}
@@ -68,39 +156,40 @@ const CreatePoll = ({ onBack }) => {
               required
             >
               <option value="">Select Subject</option>
-              <option value="data-structures">Data Structures</option>
-              <option value="algorithms">Algorithms</option>
-              <option value="database">Database Systems</option>
-              <option value="web-dev">Web Development</option>
-              <option value="mobile-dev">Mobile Development</option>
+              <option value="combined-maths">Combined Mathematics</option>
+              <option value="physics">Physics</option>
+              <option value="chemistry">Chemistry</option>
             </select>
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Chapter/Topic</label>
+            <label className={styles.label}>Chapter/Topic * (minimum 3 characters)</label>
             <input
               type="text"
               value={pollData.chapter}
               onChange={(e) => setPollData({ ...pollData, chapter: e.target.value })}
               className={styles.input}
-              placeholder="e.g., Binary Trees and Traversal"
+              placeholder="e.g., introduction to integration (minimum 3 characters)"
+              minLength="3"
+              maxLength="200"
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Preferred Date</label>
+            <label className={styles.label}>Preferred Date *</label>
             <input
               type="date"
               value={pollData.preferredDate}
               onChange={(e) => setPollData({ ...pollData, preferredDate: e.target.value })}
               className={styles.input}
+              min={new Date().toISOString().split('T')[0]}
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Time Slot</label>
+            <label className={styles.label}>Time Slot *</label>
             <select
               value={pollData.timeSlot}
               onChange={(e) => setPollData({ ...pollData, timeSlot: e.target.value })}
@@ -115,7 +204,7 @@ const CreatePoll = ({ onBack }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Max Students</label>
+            <label className={styles.label}>Max Students *</label>
             <input
               type="number"
               value={pollData.maxStudents}
@@ -123,25 +212,37 @@ const CreatePoll = ({ onBack }) => {
               className={styles.input}
               min="5"
               max="50"
+              placeholder="e.g., 20"
               required
             />
           </div>
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Description</label>
+          <label className={styles.label}>Description * (10-1000 characters)</label>
           <textarea
             value={pollData.description}
             onChange={(e) => setPollData({ ...pollData, description: e.target.value })}
             className={styles.textarea}
-            placeholder="e.g., Need help with binary tree traversal concepts"
+            placeholder="Describe what topics will be covered and any special requirements... (minimum 10 characters)"
+            minLength="10"
+            maxLength="1000"
+            rows="4"
             required
           />
         </div>
 
         <div className={styles.formActions}>
-          <button type="button" className={styles.cancelButton} onClick={onBack}>Cancel</button>
-          <button type="submit" className={styles.submitButton}>Create Poll</button>
+          <button type="button" className={styles.cancelButton} onClick={onBack}>
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            className={styles.submitButton}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating Poll...' : 'Create Poll'}
+          </button>
         </div>
       </form>
     </div>
@@ -149,42 +250,118 @@ const CreatePoll = ({ onBack }) => {
 };
 
 const FilterPolls = () => {
-  const { user } = useUser();
+  // AUTHENTICATION: Uncomment when deploying with Clerk
+  // const { user, isSignedIn } = useUser();
+  
+  // FOR LOCALHOST TESTING: Mock user data
+  const mockUser = { id: 'test-user-123', name: 'Test User' };
+  const isSignedIn = true;
+  const user = mockUser;
+
   const queryClient = useQueryClient();
+  const [filters, setFilters] = useState({
+    subject: 'all',
+    status: 'all',
+    date: 'all',
+    page: 1,
+    limit: 10
+  });
+
   const { data: polls, isLoading, error } = useQuery({
-    queryKey: ['polls'],
-    queryFn: () => getPolls({ page: 1, limit: 10 }),
+    queryKey: ['polls', filters],
+    queryFn: () => getPolls(filters),
+    // enabled: isSignedIn, // Uncomment when deploying with authentication
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: false,
   });
 
   const handleVote = async (pollId) => {
-    if (!user) {
-      toast.error('Please log in to vote');
+    // AUTHENTICATION: Uncomment when deploying
+    /*
+    if (!isSignedIn || !user) {
+      toast.error('Please sign in to vote');
       return;
     }
+    */
+
     try {
       await voteOnPoll(pollId);
       toast.success('Vote recorded successfully!');
-      queryClient.refetchQueries(['polls']);
-      queryClient.refetchQueries(['trendingPolls']);
+      queryClient.invalidateQueries(['polls']);
+      queryClient.invalidateQueries(['trendingPolls']);
     } catch (error) {
       toast.error(error.message);
+      console.error('Error voting on poll:', error);
     }
   };
 
   const handleRemoveVote = async (pollId) => {
-    if (!user) {
-      toast.error('Please log in to remove vote');
+    // AUTHENTICATION: Uncomment when deploying
+    /*
+    if (!isSignedIn || !user) {
+      toast.error('Please sign in to remove vote');
       return;
     }
+    */
+
     try {
       await removeVote(pollId);
       toast.success('Vote removed successfully!');
-      queryClient.refetchQueries(['polls']);
-      queryClient.refetchQueries(['trendingPolls']);
+      queryClient.invalidateQueries(['polls']);
+      queryClient.invalidateQueries(['trendingPolls']);
     } catch (error) {
       toast.error(error.message);
+      console.error('Error removing vote:', error);
     }
   };
+
+  const handleDeletePoll = async (pollId) => {
+    if (!window.confirm('Are you sure you want to delete this poll?')) {
+      return;
+    }
+
+    try {
+      await deletePoll(pollId);
+      toast.success('Poll deleted successfully!');
+      queryClient.invalidateQueries(['polls']);
+      queryClient.invalidateQueries(['trendingPolls']);
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Error deleting poll:', error);
+    }
+  };
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value,
+      page: 1 // Reset to first page when filters change
+    }));
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getSubjectDisplayName = (subject) => {
+    const subjectMap = {
+      'combined-maths': 'Combined Mathematics',
+      'physics': 'Physics',
+      'chemistry': 'Chemistry',
+    };
+    return subjectMap[subject] || subject;
+  };
+
+  // FOR LOCALHOST TESTING: Comment out authentication check
+  /*
+  if (!isSignedIn) {
+    return (
+      <div className={styles.signInPrompt}>
+        <h3>Please sign in to view and vote on polls</h3>
+      </div>
+    );
+  }
+  */
 
   return (
     <div className={styles.filterPolls}>
@@ -192,18 +369,24 @@ const FilterPolls = () => {
       <div className={styles.filterForm}>
         <div className={styles.filterGroup}>
           <label className={styles.label}>Subject</label>
-          <select className={styles.select}>
+          <select 
+            className={styles.select}
+            value={filters.subject}
+            onChange={(e) => handleFilterChange('subject', e.target.value)}
+          >
             <option value="all">All Subjects</option>
-            <option value="data-structures">Data Structures</option>
-            <option value="algorithms">Algorithms</option>
-            <option value="database">Database Systems</option>
-            <option value="web-dev">Web Development</option>
-            <option value="mobile-dev">Mobile Development</option>
+            <option value="combined-maths">Combined Mathematics</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
           </select>
         </div>
         <div className={styles.filterGroup}>
           <label className={styles.label}>Status</label>
-          <select className={styles.select}>
+          <select 
+            className={styles.select}
+            value={filters.status}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+          >
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="completed">Completed</option>
@@ -212,7 +395,11 @@ const FilterPolls = () => {
         </div>
         <div className={styles.filterGroup}>
           <label className={styles.label}>Date</label>
-          <select className={styles.select}>
+          <select 
+            className={styles.select}
+            value={filters.date}
+            onChange={(e) => handleFilterChange('date', e.target.value)}
+          >
             <option value="all">All Dates</option>
             <option value="today">Today</option>
             <option value="week">Last Week</option>
@@ -220,25 +407,36 @@ const FilterPolls = () => {
           </select>
         </div>
       </div>
+      
       <div className={styles.pollsGrid}>
-        {isLoading && <p>Loading polls...</p>}
-        {error && <p>Error loading polls: {error.message}</p>}
+        {isLoading && <div className={styles.loading}>Loading polls...</div>}
+        {error && <div className={styles.error}>Error loading polls: {error.message}</div>}
+        {polls && polls.data && polls.data.polls.length === 0 && (
+          <div className={styles.noPollsMessage}>No polls found with current filters.</div>
+        )}
         {polls && polls.data && polls.data.polls.map((poll) => (
           <div key={poll._id} className={styles.pollCard}>
             <div className={styles.pollHeader}>
               <h4 className={styles.pollTitle}>{poll.title}</h4>
-              <span className={styles.pollStatus}>{poll.status}</span>
+              <span className={`${styles.pollStatus} ${styles[poll.status]}`}>
+                {poll.status}
+              </span>
             </div>
             <div className={styles.pollInfo}>
-              <p className={styles.pollSubject}>{poll.subject}</p>
+              <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
               <p className={styles.pollChapter}>{poll.chapter}</p>
-              <p className={styles.pollCreator}>Created by {poll.creator.name}</p>
+              <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
+              <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
+              <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
+            </div>
+            <div className={styles.pollDescription}>
+              <p>{poll.description}</p>
             </div>
             <div className={styles.pollProgress}>
               <div className={styles.progressBar}>
                 <div 
                   className={styles.progressFill}
-                  style={{ width: `${(poll.voteCount / poll.maxStudents) * 100}%` }}
+                  style={{ width: `${Math.min((poll.voteCount / poll.maxStudents) * 100, 100)}%` }}
                 />
               </div>
               <div className={styles.progressText}>
@@ -246,79 +444,186 @@ const FilterPolls = () => {
               </div>
             </div>
             <div className={styles.pollFooter}>
-              <span className={styles.timeLeft}>⏰ Time Left: {poll.timeLeft || 'N/A'}</span>
-              {!poll.hasVoted && (
-                <button className={styles.voteButton} onClick={() => handleVote(poll._id)}>Vote Now</button>
-              )}
-              {poll.hasVoted && user && poll.creator._id === user._id && (
-                <button className={styles.removeVoteButton} onClick={() => handleRemoveVote(poll._id)}>Remove Vote</button>
-              )}
+              <div className={styles.pollActions}>
+                {poll.status === 'active' && (
+                  <>
+                    {!poll.hasVoted ? (
+                      <button 
+                        className={styles.voteButton} 
+                        onClick={() => handleVote(poll._id)}
+                      >
+                        Vote Now
+                      </button>
+                    ) : (
+                      <button 
+                        className={styles.removeVoteButton} 
+                        onClick={() => handleRemoveVote(poll._id)}
+                      >
+                        Remove Vote
+                      </button>
+                    )}
+                  </>
+                )}
+                
+                {/* Allow creator to delete poll if no votes and not scheduled */}
+                {user && poll.creator && poll.creator._id === user.id && 
+                 poll.voteCount === 0 && poll.status === 'active' && (
+                  <button 
+                    className={styles.deleteButton} 
+                    onClick={() => handleDeletePoll(poll._id)}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Pagination */}
+      {polls && polls.data && polls.data.pagination && polls.data.pagination.pages > 1 && (
+        <div className={styles.pagination}>
+          <button 
+            className={styles.paginationButton}
+            onClick={() => handleFilterChange('page', Math.max(1, filters.page - 1))}
+            disabled={filters.page <= 1}
+          >
+            Previous
+          </button>
+          <span className={styles.paginationInfo}>
+            Page {polls.data.pagination.current} of {polls.data.pagination.pages}
+          </span>
+          <button 
+            className={styles.paginationButton}
+            onClick={() => handleFilterChange('page', Math.min(polls.data.pagination.pages, filters.page + 1))}
+            disabled={filters.page >= polls.data.pagination.pages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 const TrendingPolls = () => {
-  const { user } = useUser();
+  // AUTHENTICATION: Uncomment when deploying with Clerk
+  // const { user, isSignedIn } = useUser();
+  
+  // FOR LOCALHOST TESTING: Mock user data
+  const mockUser = { id: 'test-user-123', name: 'Test User' };
+  const isSignedIn = true;
+  const user = mockUser;
+
   const queryClient = useQueryClient();
   const { data: trendingPolls, isLoading, error } = useQuery({
     queryKey: ['trendingPolls'],
     queryFn: getTrendingPolls,
+    // enabled: isSignedIn, // Uncomment when deploying with authentication
+    staleTime: 60 * 1000, // 1 minute
+    refetchOnWindowFocus: false,
   });
 
   const handleVote = async (pollId) => {
-    if (!user) {
-      toast.error('Please log in to vote');
+    // AUTHENTICATION: Uncomment when deploying
+    /*
+    if (!isSignedIn || !user) {
+      toast.error('Please sign in to vote');
       return;
     }
+    */
+
     try {
       await voteOnPoll(pollId);
       toast.success('Vote recorded successfully!');
-      queryClient.refetchQueries(['trendingPolls']);
+      queryClient.invalidateQueries(['trendingPolls']);
+      queryClient.invalidateQueries(['polls']);
     } catch (error) {
       toast.error(error.message);
+      console.error('Error voting on poll:', error);
     }
   };
 
   const handleRemoveVote = async (pollId) => {
-    if (!user) {
-      toast.error('Please log in to remove vote');
+    // AUTHENTICATION: Uncomment when deploying
+    /*
+    if (!isSignedIn || !user) {
+      toast.error('Please sign in to remove vote');
       return;
     }
+    */
+
     try {
       await removeVote(pollId);
       toast.success('Vote removed successfully!');
-      queryClient.refetchQueries(['trendingPolls']);
+      queryClient.invalidateQueries(['trendingPolls']);
+      queryClient.invalidateQueries(['polls']);
     } catch (error) {
       toast.error(error.message);
+      console.error('Error removing vote:', error);
     }
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getSubjectDisplayName = (subject) => {
+    const subjectMap = {
+      'combined-maths': 'Combined Mathematics',
+      'physics': 'Physics',
+      'chemistry': 'Chemistry'
+    };
+    return subjectMap[subject] || subject;
+  };
+
+  // FOR LOCALHOST TESTING: Comment out authentication check
+  /*
+  if (!isSignedIn) {
+    return (
+      <div className={styles.signInPrompt}>
+        <h3>Please sign in to view trending polls</h3>
+      </div>
+    );
+  }
+  */
+
   return (
     <div className={styles.trendingPolls}>
-      <h3 className={styles.sectionTitle}>Trending Polls</h3>
+      <h3 className={styles.sectionTitle}>🔥 Trending Polls (7+ votes)</h3>
       <div className={styles.pollsGrid}>
-        {isLoading && <p>Loading trending polls...</p>}
-        {error && <p>Error loading trending polls: {error.message}</p>}
+        {isLoading && <div className={styles.loading}>Loading trending polls...</div>}
+        {error && <div className={styles.error}>Error loading trending polls: {error.message}</div>}
+        {trendingPolls && trendingPolls.data && trendingPolls.data.length === 0 && (
+          <div className={styles.noTrendingMessage}>No trending polls yet. Vote on polls to make them trend!</div>
+        )}
         {trendingPolls && trendingPolls.data && trendingPolls.data.map((poll) => (
-          <div key={poll._id} className={styles.pollCard}>
+          <div key={poll._id} className={`${styles.pollCard} ${styles.trendingCard}`}>
             <div className={styles.pollHeader}>
               <h4 className={styles.pollTitle}>{poll.title}</h4>
-              <span className={styles.pollStatus}>{poll.status}</span>
+              <div className={styles.badgeContainer}>
+                <span className={`${styles.pollStatus} ${styles[poll.status]}`}>
+                  {poll.status}
+                </span>
+                <span className={styles.trendingBadge}>🔥 Trending</span>
+              </div>
             </div>
             <div className={styles.pollInfo}>
-              <p className={styles.pollSubject}>{poll.subject}</p>
+              <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
               <p className={styles.pollChapter}>{poll.chapter}</p>
-              <p className={styles.pollCreator}>Created by {poll.creator.name}</p>
+              <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
+              <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
+              <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
+            </div>
+            <div className={styles.pollDescription}>
+              <p>{poll.description}</p>
             </div>
             <div className={styles.pollProgress}>
               <div className={styles.progressBar}>
                 <div 
                   className={styles.progressFill}
-                  style={{ width: `${(poll.voteCount / poll.maxStudents) * 100}%` }}
+                  style={{ width: `${Math.min((poll.voteCount / poll.maxStudents) * 100, 100)}%` }}
                 />
               </div>
               <div className={styles.progressText}>
@@ -326,13 +631,27 @@ const TrendingPolls = () => {
               </div>
             </div>
             <div className={styles.pollFooter}>
-              <span className={styles.timeLeft}>⏰ Time Left: {poll.timeLeft || 'N/A'}</span>
-              {!poll.hasVoted && (
-                <button className={styles.voteButton} onClick={() => handleVote(poll._id)}>Vote Now</button>
-              )}
-              {poll.hasVoted && user && poll.creator._id === user._id && (
-                <button className={styles.removeVoteButton} onClick={() => handleRemoveVote(poll._id)}>Remove Vote</button>
-              )}
+              <div className={styles.pollActions}>
+                {poll.status === 'active' && (
+                  <>
+                    {!poll.hasVoted ? (
+                      <button 
+                        className={styles.voteButton} 
+                        onClick={() => handleVote(poll._id)}
+                      >
+                        Vote Now
+                      </button>
+                    ) : (
+                      <button 
+                        className={styles.removeVoteButton} 
+                        onClick={() => handleRemoveVote(poll._id)}
+                      >
+                        Remove Vote
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         ))}
@@ -343,6 +662,25 @@ const TrendingPolls = () => {
 
 const VoteCreate = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  // AUTHENTICATION: Uncomment when deploying with Clerk
+  // const { isSignedIn } = useUser();
+  
+  // FOR LOCALHOST TESTING: Mock authentication
+  const isSignedIn = true;
+
+  // FOR LOCALHOST TESTING: Comment out authentication check
+  /*
+  if (!isSignedIn) {
+    return (
+      <div className={styles.voteCreate}>
+        <div className={styles.signInPrompt}>
+          <h2>Please sign in to access the voting system</h2>
+          <p>You need to be signed in to create polls and vote.</p>
+        </div>
+      </div>
+    );
+  }
+  */
 
   return (
     <div className={styles.voteCreate}>
