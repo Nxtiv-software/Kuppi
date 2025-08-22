@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getMyScheduledSessions } from '../../services/api';
 import styles from "../students-dashboard/MySessions.module.css";
 
 // Session Filters Component
-const SessionFilters = ({ filter, setFilter }) => {
+const SessionFilters = ({ filter, setFilter, sessionsData }) => {
+  const sessions = sessionsData?.data || [];
+  
+  const getCount = (status) => {
+    if (status === 'all') return sessions.length;
+    return sessions.filter(session => session.status === status).length;
+  };
+
   const filters = [
-    { id: 'all', label: 'All Sessions', count: 24 },
-    { id: 'upcoming', label: 'Upcoming', count: 3 },
-    { id: 'completed', label: 'Completed', count: 18 },
-    { id: 'cancelled', label: 'Cancelled', count: 3 }
+    { id: 'all', label: 'All Sessions', count: getCount('all') },
+    { id: 'upcoming', label: 'Upcoming', count: getCount('upcoming') },
+    { id: 'completed', label: 'Completed', count: getCount('completed') },
+    { id: 'cancelled', label: 'Cancelled', count: getCount('cancelled') }
   ];
 
   return (
@@ -29,229 +38,226 @@ const SessionFilters = ({ filter, setFilter }) => {
 };
 
 // Sessions List Component
-const SessionsList = ({ filter }) => {
-  const allSessions = [
-    {
-      id: 1,
-      title: 'Trigonometrics Indentities',
-      subject: 'Combined Mathematics',
-      instructor: 'John Smith',
-      date: 'Dec 28, 2025',
-      time: '2:00 PM - 4:00 PM',
-      students: 15,
-      price: 'Rs. 400',
-      status: 'upcoming',
-      meetingLink: 'https://meet.google.com/abc-def-ghi',
-      materials: ['Trigonometrics Basics.pdf', 'Trigonometrics Notes.pdf'],
-    },
-    {
-      id: 2,
-      title: 'Permutations and Combinations',
-      subject: 'Combined Mathematics',
-      instructor: 'Dr. Sarah Wilson',
-      date: 'Dec 25, 2025',
-      time: '10:00 AM - 12:00 PM',
-      students: 20,
-      price: 'Rs. 350',
-      status: 'completed',
-      rating: 4.8,
-      materials: ['Permutations Basics.pdf', 'Permutations and Combinations.pdf'],
-      notes: 'Great session! The instructor explained the concepts clearly and provided useful examples.'
-    },
-    {
-      id: 3,
-      title: 'Electronics',
-      subject: 'Physics',
-      instructor: 'Prof. Mike Chen',
-      date: 'Dec 30, 2025',
-      time: '7:00 PM - 9:00 PM',
-      students: 12,
-      price: 'Rs. 500',
-      status: 'upcoming',
-      meetingLink: 'https://zoom.us/j/123456789',
-      materials: ['Electronics Basics.pdf']
-    },
-    {
-      id: 4,
-      title: 'Magnetic Field',
-      subject: 'Physics',
-      instructor: 'Anna Rodriguez',
-      date: 'Dec 20, 2025',
-      time: '6:00 PM - 8:00 PM',
-      students: 18,
-      price: 'Rs. 300',
-      status: 'completed',
-      rating: 4.5,
-      materials: ['Magnetic Field Basics.pdf', 'Magnetic Field Applications.pdf'],
-      notes: 'Great overview of magnetic field concepts and applications.'
-    },
-    {
-      id: 5,
-      title: 'Basic concepts of organic chemistry',
-      subject: 'Chemistry',
-      instructor: 'Dr. Robert Kim',
-      date: 'Dec 15, 2025',
-      time: '3:00 PM - 5:00 PM',
-      students: 25,
-      price: 'Rs. 450',
-      status: 'cancelled',
-      reason: 'Instructor unavailable due to emergency'
-    }
-  ];
+const SessionsList = ({ filter, sessionsData }) => {
+  if (!sessionsData) return null;
 
+  const allSessions = sessionsData.data || [];
+
+  // Filter sessions based on selected filter
   const filteredSessions = filter === 'all' 
     ? allSessions 
     : allSessions.filter(session => session.status === filter);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'upcoming': return '#2563eb';
-      case 'completed': return '#10b981';
-      case 'cancelled': return '#ef4444';
-      default: return '#6b7280';
-    }
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
- const renderSessionActions = (session) => {
-    switch (session.status) {
-      case 'upcoming':
-        return (
-          <div className={styles.sessionActions}>
-            <button className={styles.joinButton}>Join Session</button>
-            {session.meetingLink && (
-              <a 
-                href={session.meetingLink} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={styles.linkButton}
-              >
-                Meeting Link
-              </a>
-            )}
-            <button className={styles.contactButton}>Contact Instructor</button>
-          </div>
-        );
-      case 'completed':
-        return (
-          <div className={styles.sessionActions}>
-            <button className={styles.downloadButton}>Download Materials</button>
-            <button className={styles.reviewButton}>Leave Review</button>
-            <button className={styles.certificateButton}>Get Certificate</button>
-          </div>
-        );
-      case 'cancelled':
-        return (
-          <div className={styles.sessionActions}>
-            <button className={styles.refundButton}>Request Refund</button>
-          </div>
-        );
-      default:
-        return null;
-    }
+  const formatTime = (timeString) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
   };
+
+  if (filteredSessions.length === 0) {
+    return (
+      <div className={styles.sessionsList}>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>📚</div>
+          <h3>No {filter === 'all' ? '' : filter} sessions found</h3>
+          <p>
+            {filter === 'all' 
+              ? "You haven't joined any sessions yet. Vote on polls to get sessions scheduled!"
+              : `No ${filter} sessions at the moment.`
+            }
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.sessionsList}>
-      {filteredSessions.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>📚</div>
-          <h3 className={styles.emptyTitle}>No sessions found</h3>
-          <p className={styles.emptyText}>
-            {filter === 'all' 
-              ? 'You haven\'t enrolled in any sessions yet.' 
-              : `No ${filter} sessions found.`}
-          </p>
-        </div>
-      ) : (
-        filteredSessions.map((session) => (
-          <div key={session.id} className={styles.sessionCard}>
-            <div className={styles.sessionHeader}>
-              <div className={styles.sessionInfo}>
-                <h3 className={styles.sessionTitle}>{session.title}</h3>
-                <p className={styles.sessionSubject}>{session.subject}</p>
-                <p className={styles.sessionInstructor}>by {session.instructor}</p>
-              </div>
-              <div 
-                className={styles.statusBadge}
-                style={{ backgroundColor: getStatusColor(session.status) }}
-              >
+      {filteredSessions.map((session) => (
+        <div key={session._id} className={`${styles.sessionCard} ${styles[session.status]}`}>
+          <div className={styles.sessionHeader}>
+            <div className={styles.sessionInfo}>
+              <h3 className={styles.sessionTitle}>{session.title}</h3>
+              <p className={styles.sessionSubject}>
+                {session.subject} - {session.topic}
+              </p>
+              <p className={styles.sessionInstructor}>
+                👨‍🏫 Instructor: {session.tutor?.name || session.tutorName || 'TBA'}
+              </p>
+            </div>
+            <div className={styles.sessionStatus}>
+              <span className={`${styles.statusBadge} ${styles[session.status]}`}>
                 {session.status}
-              </div>
+              </span>
             </div>
-
-            <div className={styles.sessionDetails}>
-              <div className={styles.detailItem}>
-                <span className={styles.icon}>📅</span>
-                <span>{session.date}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.icon}>⏰</span>
-                <span>{session.time}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.icon}>👥</span>
-                <span>{session.students} students</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.icon}>💰</span>
-                <span>{session.price}</span>
-              </div>
-              {session.rating && (
-                <div className={styles.detailItem}>
-                  <span className={styles.icon}>⭐</span>
-                  <span>{session.rating}/5.0</span>
-                </div>
-              )}
-            </div>
-
-            {session.materials && session.materials.length > 0 && (
-              <div className={styles.materialsSection}>
-                <h4 className={styles.materialsTitle}>Materials:</h4>
-                <div className={styles.materialsList}>
-                  {session.materials.map((material, index) => (
-                    <span key={index} className={styles.material}>
-                      📎 {material}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {session.notes && (
-              <div className={styles.notesSection}>
-                <h4 className={styles.notesTitle}>Notes:</h4>
-                <p className={styles.notesText}>{session.notes}</p>
-              </div>
-            )}
-
-            {session.reason && (
-              <div className={styles.reasonSection}>
-                <h4 className={styles.reasonTitle}>Cancellation Reason:</h4>
-                <p className={styles.reasonText}>{session.reason}</p>
-              </div>
-            )}
-
-            {renderSessionActions(session)}
           </div>
-        ))
-      )}
+
+          <div className={styles.sessionDetails}>
+            <div className={styles.sessionMeta}>
+              <div className={styles.metaItem}>
+                <span className={styles.metaIcon}>📅</span>
+                <span className={styles.metaLabel}>Date:</span>
+                <span className={styles.metaValue}>{formatDate(session.date)}</span>
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaIcon}>⏰</span>
+                <span className={styles.metaLabel}>Time:</span>
+                <span className={styles.metaValue}>
+                  {formatTime(session.time)} ({session.duration || '2'} hrs)
+                </span>
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaIcon}>👥</span>
+                <span className={styles.metaLabel}>Students:</span>
+                <span className={styles.metaValue}>{session.enrolledStudents || session.maxStudents || 'TBA'}</span>
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaIcon}>💰</span>
+                <span className={styles.metaLabel}>Fee:</span>
+                <span className={styles.metaValue}>Rs. {session.feePerStudent || 'TBA'}</span>
+              </div>
+            </div>
+
+            {session.description && (
+              <div className={styles.sessionDescription}>
+                <h4>Description</h4>
+                <p>{session.description}</p>
+              </div>
+            )}
+
+            {session.status === 'upcoming' && (
+              <div className={styles.sessionActions}>
+                {session.meetingLink ? (
+                  <a 
+                    href={session.meetingLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.joinButton}
+                  >
+                    🔗 Join Session
+                  </a>
+                ) : (
+                  <button className={styles.joinButtonDisabled} disabled>
+                    Meeting link will be shared soon
+                  </button>
+                )}
+                {session.materials && session.materials.length > 0 && (
+                  <div className={styles.materials}>
+                    <h4>Materials:</h4>
+                    <ul>
+                      {session.materials.map((material, index) => (
+                        <li key={index}>📄 {material}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {session.status === 'completed' && (
+              <div className={styles.completedSession}>
+                {session.rating && (
+                  <div className={styles.sessionRating}>
+                    <span>Rating: {'⭐'.repeat(Math.floor(session.rating))} ({session.rating})</span>
+                  </div>
+                )}
+                {session.notes && (
+                  <div className={styles.sessionNotes}>
+                    <h4>Your Notes:</h4>
+                    <p>{session.notes}</p>
+                  </div>
+                )}
+                {session.materials && session.materials.length > 0 && (
+                  <div className={styles.materials}>
+                    <h4>Materials:</h4>
+                    <ul>
+                      {session.materials.map((material, index) => (
+                        <li key={index}>📄 {material}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {session.status === 'cancelled' && session.reason && (
+              <div className={styles.cancelReason}>
+                <h4>Cancellation Reason:</h4>
+                <p>{session.reason}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
 
-// Main My Sessions Component
+// Main MySessions Component
 const MySessions = () => {
   const [filter, setFilter] = useState('all');
 
+  // Fetch scheduled sessions for the current user
+  const { data: sessionsData, isLoading, error } = useQuery({
+    queryKey: ['myScheduledSessions'],
+    queryFn: getMyScheduledSessions,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className={styles.mySessions}>
+        <div className={styles.sessionHeader}>
+          <h2 className={styles.pageTitle}>My Sessions</h2>
+          <p className={styles.pageDescription}>Loading your scheduled sessions...</p>
+        </div>
+        <div className={styles.loadingSpinner}>
+          <div className={styles.spinner}></div>
+          <p>Loading sessions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.mySessions}>
+        <div className={styles.sessionHeader}>
+          <h2 className={styles.pageTitle}>My Sessions</h2>
+          <p className={styles.pageDescription}>Error loading your sessions</p>
+        </div>
+        <div className={styles.errorState}>
+          <div className={styles.errorIcon}>❌</div>
+          <h3>Error Loading Sessions</h3>
+          <p>{error.message}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.mySessions}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>My Sessions</h2>
-        <p className={styles.subtitle}>Manage your enrolled and completed sessions</p>
+      <div className={styles.sessionHeader}>
+        <h2 className={styles.pageTitle}>My Sessions</h2>
+        <p className={styles.pageDescription}>
+          View and manage your scheduled learning sessions
+        </p>
       </div>
       
-      <SessionFilters filter={filter} setFilter={setFilter} />
-      <SessionsList filter={filter} />
+      <SessionFilters filter={filter} setFilter={setFilter} sessionsData={sessionsData} />
+      <SessionsList filter={filter} sessionsData={sessionsData} />
     </div>
   );
 };
