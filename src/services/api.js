@@ -179,4 +179,54 @@ export const getPollStats = async () => {
   }
 };
 
+// Get session requests for tutors (polls with >50% votes)
+export const getSessionRequests = async () => {
+  try {
+    const response = await api.get('/sessions/requests');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch session requests');
+  }
+};
+
+// Accept a session request
+export const acceptSessionRequest = async (pollId) => {
+  try {
+    const response = await api.post(`/sessions/requests/${pollId}/accept`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to accept session request');
+  }
+};
+
+// Decline a session request
+export const declineSessionRequest = async (pollId) => {
+  try {
+    const response = await api.post(`/sessions/requests/${pollId}/decline`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to decline session request');
+  }
+};
+
+// Schedule a session with tutor details
+export const scheduleSession = async (pollId, sessionData) => {
+  try {
+    const response = await api.post(`/sessions/${pollId}/schedule`, sessionData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to schedule session');
+  }
+};
+
+// Get scheduled sessions for students (only for sessions they voted on)
+export const getMyScheduledSessions = async () => {
+  try {
+    const response = await api.get('/sessions/my-sessions');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch scheduled sessions');
+  }
+};
+
 export { api };

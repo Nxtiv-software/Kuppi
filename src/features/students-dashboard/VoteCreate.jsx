@@ -74,8 +74,8 @@ const CreatePoll = ({ onBack }) => {
       return;
     }
 
-    if (parseInt(pollData.maxStudents) < 5 || parseInt(pollData.maxStudents) > 50) {
-      toast.error('Max students must be between 5 and 50');
+    if (parseInt(pollData.maxStudents) < 1 || parseInt(pollData.maxStudents) > 50) {
+      toast.error('Max students must be between 1 and 50');
       return;
     }
 
@@ -210,9 +210,9 @@ const CreatePoll = ({ onBack }) => {
               value={pollData.maxStudents}
               onChange={(e) => setPollData({ ...pollData, maxStudents: e.target.value })}
               className={styles.input}
-              min="5"
+              min="1"
               max="50"
-              placeholder="e.g., 20"
+              placeholder="e.g., 2"
               required
             />
           </div>
