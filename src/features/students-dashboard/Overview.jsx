@@ -50,25 +50,28 @@ const StatsCards = () => {
 };
 
 // Quick Actions Component
-const QuickActions = () => {
+const QuickActions = ({ setActiveTab }) => {
   const actions = [
     {
       title: 'Create Poll',
       description: 'Start a new poll for a kuppi session',
       icon: '📝',
-      color: 'primary'
+      color: 'primary',
+      onClick: () => setActiveTab('vote-create')
     },
     {
       title: 'View Schedule',
       description: 'Check your upcoming sessions',
       icon: '📅',
-      color: 'secondary'
+      color: 'secondary',
+      onClick: () => setActiveTab('my-sessions')
     },
     {
       title: 'Find Study Group',
       description: 'Join or create a study group',
       icon: '👥',
-      color: 'tertiary'
+      color: 'tertiary',
+      onClick: () => {} // Placeholder for future implementation
     }
   ];
 
@@ -77,7 +80,12 @@ const QuickActions = () => {
       <h2 className={styles.sectionTitle}>Quick Actions</h2>
       <div className={styles.actionsGrid}>
         {actions.map((action, index) => (
-          <div key={index} className={`${styles.actionCard} ${styles[action.color]}`}>
+          <div 
+            key={index} 
+            className={`${styles.actionCard} ${styles[action.color]}`}
+            onClick={action.onClick}
+            style={{ cursor: action.onClick ? 'pointer' : 'default' }}
+          >
             <div className={styles.actionIcon}>{action.icon}</div>
             <h3 className={styles.actionTitle}>{action.title}</h3>
             <p className={styles.actionDescription}>{action.description}</p>
@@ -89,7 +97,7 @@ const QuickActions = () => {
 };
 
 // Upcoming Sessions Component
-const UpcomingSessions = () => {
+const UpcomingSessions = ({ setActiveTab }) => {
   const { user, isSignedIn } = useUser();
 
   // Fetch scheduled sessions for the current user
@@ -240,10 +248,7 @@ const UpcomingSessions = () => {
         <div className={styles.viewAllSessions}>
           <button 
             className={styles.viewAllButton}
-            onClick={() => {
-              // Navigate to My Sessions tab - you may need to implement this navigation
-              console.log('Navigate to My Sessions tab');
-            }}
+            onClick={() => setActiveTab('my-sessions')}
           >
             View All Sessions ({upcomingSessions.length})
           </button>
@@ -254,12 +259,12 @@ const UpcomingSessions = () => {
 };
 
 // Main Overview Component
-const Overview = () => {
+const Overview = ({ setActiveTab }) => {
   return (
     <div className={styles.overview}>
       <StatsCards />
-      <QuickActions />
-      <UpcomingSessions />
+      <QuickActions setActiveTab={setActiveTab} />
+      <UpcomingSessions setActiveTab={setActiveTab} />
     </div>
   );
 };
