@@ -14,13 +14,10 @@ const api = axios.create({
 const getClerkToken = async () => {
   try {
     // AUTHENTICATION: Get token from Clerk session
-    // Uncomment when deploying with authentication
-    /*
     const { session } = window.Clerk || {};
     if (session) {
       return await session.getToken();
     }
-    */
     return null;
   } catch (error) {
     console.error('Error getting Clerk token:', error);
@@ -32,16 +29,12 @@ const getClerkToken = async () => {
 api.interceptors.request.use(
   async (config) => {
     // AUTHENTICATION: Add Clerk token to requests
-    // Uncomment when deploying with authentication
-    /*
+    // Add authentication token for requests
     const token = await getClerkToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    */
     
-    // FOR LOCALHOST TESTING: Skip authentication
-    console.log('Making request to:', config.url);
     return config;
   },
   (error) => {
@@ -81,8 +74,7 @@ api.interceptors.response.use(
       }
       */
       
-      // FOR LOCALHOST TESTING: Just log the error
-      console.error('Authentication error (commented out for testing):', error.response?.data);
+      console.error('Authentication error:', error.response?.data);
     }
 
     return Promise.reject(error);
@@ -92,7 +84,7 @@ api.interceptors.response.use(
 // Create a new poll
 export const createPoll = async (pollData) => {
   try {
-    console.log('API: Sending poll data:', JSON.stringify(pollData, null, 2));
+    // console.log('API: Sending poll data:', JSON.stringify(pollData, null, 2));
     const response = await api.post('/polls', pollData);
     return response.data;
   } catch (error) {

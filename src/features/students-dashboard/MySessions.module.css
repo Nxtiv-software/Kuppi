@@ -29,10 +29,43 @@
   border: 1px solid #e5e7eb;
 }
 
+.filtersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .filterTabs {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  flex: 1;
+}
+
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortSelect {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-width: 140px;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .filterTab {
@@ -348,5 +381,267 @@
   
   .filterTabs {
     flex-direction: column;
+  }
+}
+
+/* Poll Context Styles */
+.pollContext {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.pollContext h4 {
+  margin: 0 0 0.5rem 0;
+  color: #0369a1;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pollInfo {
+  color: #1e40af;
+}
+
+.pollInfo strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.pollInfo p {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.pollInfo small {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* Tutor Email Link */
+.tutorEmail {
+  color: #2563eb;
+  text-decoration: none;
+  margin-left: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.tutorEmail:hover {
+  text-decoration: underline;
+}
+
+/* Enhanced Materials and Notes */
+.materials {
+  margin-top: 1rem;
+}
+
+.materials h4 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.materials ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: #6b7280;
+}
+
+.materials li {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.sessionNotes {
+  margin-top: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fed7aa;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.sessionNotes h4 {
+  margin: 0 0 0.5rem 0;
+  color: #92400e;
+  font-size: 0.9rem;
+}
+
+.sessionNotes p {
+  margin: 0;
+  color: #a16207;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Retry Button */
+.retryButton {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.retryButton:hover {
+  background: #2563eb;
+}
+
+/* Session Countdown */
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.countdownIcon {
+  font-size: 0.7rem;
+}
+
+.countdownText {
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* Loading Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeletonTitle {
+  height: 1.5rem;
+  width: 70%;
+  margin-bottom: 0.5rem;
+}
+
+.skeletonSubject {
+  height: 1rem;
+  width: 50%;
+  margin-bottom: 0.25rem;
+}
+
+.skeletonInstructor {
+  height: 1rem;
+  width: 60%;
+}
+
+.skeletonBadge {
+  height: 1.5rem;
+  width: 4rem;
+  border-radius: 12px;
+}
+
+.skeletonMeta {
+  height: 0.875rem;
+  width: 100%;
+}
+
+.skeletonTab {
+  height: 2.5rem;
+  width: 8rem;
+  border-radius: 8px;
+}
+
+.skeletonSort {
+  height: 2.25rem;
+  width: 9rem;
+  border-radius: 6px;
+}
+
+/* Enhanced Empty State */
+.emptyActions {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+}
+
+.emptyHint {
+  margin: 0;
+  color: #1e40af;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.emptyHint strong {
+  color: #1d4ed8;
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 768px) {
+  .sessionCard {
+    padding: 1rem;
+  }
+  
+  .sessionDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .sessionActions {
+    flex-direction: column;
+  }
+  
+  .filterTabs {
+    flex-direction: column;
+  }
+  
+  .filtersHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .sortControls {
+    justify-content: stretch;
+  }
+  
+  .sortSelect {
+    width: 100%;
+  }
+  
+  .sessionMeta {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .metaItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .sessionStatus {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+  
+  .countdown {
+    margin-top: 0;
   }
 }
