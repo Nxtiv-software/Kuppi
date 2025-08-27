@@ -268,9 +268,9 @@ const SessionRequests = () => {
             const votePercentage = (request.voteCount / request.maxStudents) * 100;
             
             // Debug: Log poll reaching threshold
-            if (votePercentage >= 50) {
-              console.log(`🎉 Poll "${request.title}" reached ${Math.round(votePercentage)}% votes (${request.voteCount}/${request.maxStudents}) - Available for scheduling!`);
-            }
+            // if (votePercentage >= 50) {
+            //   console.log(`🎉 Poll "${request.title}" reached ${Math.round(votePercentage)}% votes (${request.voteCount}/${request.maxStudents}) - Available for scheduling!`);
+            // }
             
             return (
               <Card key={request._id} className="hover:shadow-lg transition-shadow duration-300">
