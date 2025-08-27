@@ -215,7 +215,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
   });
 
   const handleJoinKuppi = (kuppiId) => {
-    console.log('Joining kuppi:', kuppiId);
+    // console.log('Joining kuppi:', kuppiId);
     // Handle join kuppi logic here
   };
 
