@@ -12,8 +12,8 @@ import ContactUsPage from "./ui/ContactUsPage";
 import StudentDashboard from "./features/students-dashboard/StudentDasboard";
 import SignUpClerk from "./ui/SignUpClerk";
 import LoginClerk from "./ui/LoginClerk";
-// AUTHENTICATION: Import Clerk components when deploying
-// import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+// AUTHENTICATION: Import Clerk components
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +28,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// AUTHENTICATION: Protected Route Component (uncomment when deploying)
-/*
+// AUTHENTICATION: Protected Route Component
 const ProtectedRoute = ({ children }) => {
   return (
     <SignedIn>
@@ -45,7 +44,6 @@ const PublicRoute = ({ children }) => {
     </SignedOut>
   );
 };
-*/
 
 function App() {
   return (
@@ -55,8 +53,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeLayout />} />
         
-        {/* AUTHENTICATION: Uncomment when deploying with Clerk authentication */}
-        {/*
+        {/* AUTHENTICATION: Protected auth routes */}
         <Route 
           path="signup" 
           element={
@@ -73,17 +70,11 @@ function App() {
             </PublicRoute>
           } 
         />
-        */}
-        
-        {/* FOR LOCALHOST TESTING: Direct routes without authentication */}
-        <Route path="signup" element={<SignUpClerk />} />
-        <Route path="login" element={<LoginClerk />} />
         
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactUsPage />} />
         
-        {/* AUTHENTICATION: Uncomment when deploying with Clerk authentication */}
-        {/*
+        {/* AUTHENTICATION: Protected dashboard routes */}
         <Route 
           path="student-dashboard" 
           element={
@@ -100,14 +91,8 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        */}
         
-        {/* FOR LOCALHOST TESTING: Direct routes without authentication */}
-        <Route path="student-dashboard" element={<StudentDashboard />} />
-        <Route path="tutor-dashboard" element={<TutorDashboard />} />
-        
-        {/* AUTHENTICATION: Uncomment when deploying with Clerk authentication */}
-        {/*
+        {/* AUTHENTICATION: Redirect to sign-in for protected routes */}
         <Route 
           path="*" 
           element={
@@ -116,7 +101,6 @@ function App() {
             </SignedOut>
           } 
         />
-        */}
       </Routes>
 
       <Toaster

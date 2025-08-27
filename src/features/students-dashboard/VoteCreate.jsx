@@ -4,17 +4,12 @@ import styles from './VoteCreate.module.css';
 import { createPoll, getTrendingPolls, getPolls, voteOnPoll, removeVote, deletePoll } from '../../services/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-// import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
 
 const CreatePoll = ({ onBack }) => {
   const queryClient = useQueryClient();
-  // AUTHENTICATION: Uncomment when deploying with Clerk
-  // const { user, isSignedIn } = useUser();
-  
-  // FOR LOCALHOST TESTING: Mock user data
-  const mockUser = { id: 'test-user-123', name: 'Test User' };
-  const isSignedIn = true; // Set to true for testing
-  const user = mockUser;
+  // AUTHENTICATION: Use real authentication
+  const { user, isSignedIn } = useUser();
 
   const [pollData, setPollData] = useState({
     title: '',
@@ -31,13 +26,11 @@ const CreatePoll = ({ onBack }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // AUTHENTICATION: Uncomment when deploying
-    /*
+    // AUTHENTICATION: Check if user is signed in
     if (!isSignedIn || !user) {
       toast.error('Please sign in to create a poll');
       return;
     }
-    */
 
     // Validation
     if (!pollData.title || !pollData.subject || !pollData.chapter || !pollData.description || 
@@ -88,17 +81,17 @@ const CreatePoll = ({ onBack }) => {
     setIsSubmitting(true);
     try {
       // Debug: Log the data being sent
-      console.log('Sending poll data:', JSON.stringify(pollData, null, 2));
+      // console.log('Sending poll data:', JSON.stringify(pollData, null, 2));
       
       // Add user information to the poll data
       const pollDataWithUser = {
         ...pollData,
         maxStudents: parseInt(pollData.maxStudents), // Convert to number
         createdBy: user.id,
-        creatorName: user.name || 'Test User'
+        creatorName: user.name || user.firstName || 'Anonymous'
       };
       
-      console.log('Complete poll data with user:', JSON.stringify(pollDataWithUser, null, 2));
+      // console.log('Complete poll data with user:', JSON.stringify(pollDataWithUser, null, 2));
       
       await createPoll(pollDataWithUser);
       toast.success('Poll created successfully!');
@@ -253,10 +246,8 @@ const FilterPolls = () => {
   // AUTHENTICATION: Uncomment when deploying with Clerk
   // const { user, isSignedIn } = useUser();
   
-  // FOR LOCALHOST TESTING: Mock user data
-  const mockUser = { id: 'test-user-123', name: 'Test User' };
-  const isSignedIn = true;
-  const user = mockUser;
+  // AUTHENTICATION: Use real authentication
+  const { user, isSignedIn } = useUser();
 
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
@@ -270,7 +261,7 @@ const FilterPolls = () => {
   const { data: polls, isLoading, error } = useQuery({
     queryKey: ['polls', filters],
     queryFn: () => getPolls(filters),
-    // enabled: isSignedIn, // Uncomment when deploying with authentication
+    enabled: isSignedIn, // Only fetch when user is signed in
     staleTime: 30 * 1000, // 30 seconds
     refetchOnWindowFocus: false,
   });
@@ -352,8 +343,7 @@ const FilterPolls = () => {
     return subjectMap[subject] || subject;
   };
 
-  // FOR LOCALHOST TESTING: Comment out authentication check
-  /*
+  // Show sign-in prompt if not authenticated
   if (!isSignedIn) {
     return (
       <div className={styles.signInPrompt}>
@@ -361,7 +351,6 @@ const FilterPolls = () => {
       </div>
     );
   }
-  */
 
   return (
     <div className={styles.filterPolls}>
@@ -523,28 +512,24 @@ const TrendingPolls = () => {
   // AUTHENTICATION: Uncomment when deploying with Clerk
   // const { user, isSignedIn } = useUser();
   
-  // FOR LOCALHOST TESTING: Mock user data
-  const mockUser = { id: 'test-user-123', name: 'Test User' };
-  const isSignedIn = true;
-  const user = mockUser;
+  // AUTHENTICATION: Use real authentication
+  const { user, isSignedIn } = useUser();
 
   const queryClient = useQueryClient();
   const { data: trendingPolls, isLoading, error } = useQuery({
     queryKey: ['trendingPolls'],
     queryFn: getTrendingPolls,
-    // enabled: isSignedIn, // Uncomment when deploying with authentication
+    enabled: isSignedIn, // Only fetch when user is signed in
     staleTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: false,
   });
 
   const handleVote = async (pollId) => {
-    // AUTHENTICATION: Uncomment when deploying
-    /*
+    // AUTHENTICATION: Check if user is signed in
     if (!isSignedIn || !user) {
       toast.error('Please sign in to vote');
       return;
     }
-    */
 
     try {
       await voteOnPoll(pollId);
