@@ -50,8 +50,8 @@ const HowItWorks = () => {
 
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <div className="w-8 h-0.5 bg-gray-300"></div>
-                    <div className="absolute -right-1 -top-1 w-3 h-3 border-r-2 border-b-2 border-gray-300 transform rotate-45"></div>
+                    {/* <div className="w-8 h-0.5 bg-gray-300"></div>
+                    <div className="absolute -right-1 -top-1 w-3 h-3 border-r-2 border-b-2 border-gray-300 transform rotate-45"></div> */}
                   </div>
                 )}
               </div>
