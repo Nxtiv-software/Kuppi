@@ -16,8 +16,11 @@ const getClerkToken = async () => {
     // AUTHENTICATION: Get token from Clerk session
     const { session } = window.Clerk || {};
     if (session) {
-      return await session.getToken();
+      const token = await session.getToken();
+      console.log('Clerk token retrieved:', token ? 'Token present' : 'No token');
+      return token;
     }
+    console.log('No Clerk session found');
     return null;
   } catch (error) {
     console.error('Error getting Clerk token:', error);
@@ -33,11 +36,15 @@ api.interceptors.request.use(
     const token = await getClerkToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url} - Token added`);
+    } else {
+      console.log(`API Request: ${config.method?.toUpperCase()} ${config.url} - No token available`);
     }
     
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -124,9 +131,18 @@ export const getTrendingPolls = async () => {
 // Vote on a poll
 export const voteOnPoll = async (pollId) => {
   try {
+    console.log('API: Attempting to vote on poll:', pollId);
     const response = await api.post(`/polls/${pollId}/vote`);
+    console.log('API: Vote successful:', response.data);
     return response.data;
   } catch (error) {
+    console.error('API: Vote failed:', {
+      pollId,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
     throw new Error(error.response?.data?.message || 'Failed to vote on poll');
   }
 };
@@ -134,9 +150,18 @@ export const voteOnPoll = async (pollId) => {
 // Remove vote from a poll
 export const removeVote = async (pollId) => {
   try {
+    console.log('API: Attempting to remove vote from poll:', pollId);
     const response = await api.delete(`/polls/${pollId}/vote`);
+    console.log('API: Remove vote successful:', response.data);
     return response.data;
   } catch (error) {
+    console.error('API: Remove vote failed:', {
+      pollId,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
     throw new Error(error.response?.data?.message || 'Failed to remove vote');
   }
 };

@@ -269,13 +269,25 @@ const FilterPolls = () => {
     }
 
     try {
+      console.log('Voting attempt:', { 
+        pollId, 
+        userId: user.id, 
+        userName: user.fullName || user.firstName || 'Unknown',
+        isSignedIn 
+      });
+      
       await voteOnPoll(pollId);
       toast.success('Vote recorded successfully!');
       queryClient.invalidateQueries(['polls']);
       queryClient.invalidateQueries(['trendingPolls']);
     } catch (error) {
-      toast.error(error.message);
       console.error('Error voting on poll:', error);
+      console.error('Full error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error(error.message || 'Failed to vote on poll');
     }
   };
 
@@ -287,13 +299,25 @@ const FilterPolls = () => {
     }
 
     try {
+      console.log('Remove vote attempt:', { 
+        pollId, 
+        userId: user.id, 
+        userName: user.fullName || user.firstName || 'Unknown',
+        isSignedIn 
+      });
+      
       await removeVote(pollId);
       toast.success('Vote removed successfully!');
       queryClient.invalidateQueries(['polls']);
       queryClient.invalidateQueries(['trendingPolls']);
     } catch (error) {
-      toast.error(error.message);
       console.error('Error removing vote:', error);
+      console.error('Full error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error(error.message || 'Failed to remove vote');
     }
   };
 
@@ -396,6 +420,18 @@ const FilterPolls = () => {
         )}
         {polls && polls.data && polls.data.polls.map((poll) => {
           const hasVoted = poll.hasVoted;
+          
+          // Debug: Log poll data and user info
+          console.log('Poll data for voting:', {
+            pollId: poll._id,
+            pollTitle: poll.title,
+            hasVoted,
+            currentUserId: user?.id,
+            pollCreator: poll.createdBy,
+            voteCount: poll.voteCount,
+            pollStatus: poll.status
+          });
+          
           return (
             <div key={poll._id} className={styles.pollCard}>
               <div className={styles.pollHeader}>
@@ -530,13 +566,25 @@ const TrendingPolls = () => {
     }
 
     try {
+      console.log('Trending poll voting attempt:', { 
+        pollId, 
+        userId: user.id, 
+        userName: user.fullName || user.firstName || 'Unknown',
+        isSignedIn 
+      });
+      
       await voteOnPoll(pollId);
       toast.success('Vote recorded successfully!');
       queryClient.invalidateQueries(['trendingPolls']);
       queryClient.invalidateQueries(['polls']);
     } catch (error) {
-      toast.error(error.message);
-      console.error('Error voting on poll:', error);
+      console.error('Error voting on trending poll:', error);
+      console.error('Full error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error(error.message || 'Failed to vote on poll');
     }
   };
 
@@ -548,13 +596,25 @@ const TrendingPolls = () => {
     }
 
     try {
+      console.log('Trending poll remove vote attempt:', { 
+        pollId, 
+        userId: user.id, 
+        userName: user.fullName || user.firstName || 'Unknown',
+        isSignedIn 
+      });
+      
       await removeVote(pollId);
       toast.success('Vote removed successfully!');
       queryClient.invalidateQueries(['trendingPolls']);
       queryClient.invalidateQueries(['polls']);
     } catch (error) {
-      toast.error(error.message);
-      console.error('Error removing vote:', error);
+      console.error('Error removing vote from trending poll:', error);
+      console.error('Full error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error(error.message || 'Failed to remove vote');
     }
   };
 
@@ -582,6 +642,18 @@ const TrendingPolls = () => {
         )}
         {trendingPolls && trendingPolls.data && trendingPolls.data.map((poll) => {
           const hasVoted = poll.hasVoted;
+          
+          // Debug: Log trending poll data and user info
+          console.log('Trending poll data for voting:', {
+            pollId: poll._id,
+            pollTitle: poll.title,
+            hasVoted,
+            currentUserId: user?.id,
+            pollCreator: poll.createdBy,
+            voteCount: poll.voteCount,
+            pollStatus: poll.status
+          });
+          
           return (
             <div key={poll._id} className={`${styles.pollCard} ${styles.trendingCard}`}>
               <div className={styles.pollHeader}>
