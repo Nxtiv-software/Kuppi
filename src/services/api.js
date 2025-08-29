@@ -191,9 +191,21 @@ export const getPollStats = async () => {
 // Get session requests for tutors (polls with >50% votes)
 export const getSessionRequests = async () => {
   try {
+    console.log('📡 API: Fetching session requests...');
     const response = await api.get('/sessions/requests');
+    console.log('📡 API: Session requests received:', {
+      count: response.data.data?.length || 0,
+      requests: response.data.data?.map(req => ({
+        id: req._id,
+        title: req.title,
+        status: req.status,
+        acceptedBy: req.acceptedBy,
+        declinedBy: req.declinedBy
+      })) || []
+    });
     return response.data;
   } catch (error) {
+    console.error('❌ API: Failed to fetch session requests:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to fetch session requests');
   }
 };
@@ -201,9 +213,16 @@ export const getSessionRequests = async () => {
 // Accept a session request
 export const acceptSessionRequest = async (pollId) => {
   try {
+    console.log('✅ API: Accepting session request:', pollId);
     const response = await api.post(`/sessions/requests/${pollId}/accept`);
+    console.log('✅ API: Session request accepted successfully:', response.data);
     return response.data;
   } catch (error) {
+    console.error('❌ API: Failed to accept session request:', {
+      pollId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
     throw new Error(error.response?.data?.message || 'Failed to accept session request');
   }
 };
@@ -211,9 +230,16 @@ export const acceptSessionRequest = async (pollId) => {
 // Decline a session request
 export const declineSessionRequest = async (pollId) => {
   try {
+    console.log('❌ API: Declining session request:', pollId);
     const response = await api.post(`/sessions/requests/${pollId}/decline`);
+    console.log('❌ API: Session request declined successfully:', response.data);
     return response.data;
   } catch (error) {
+    console.error('❌ API: Failed to decline session request:', {
+      pollId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
     throw new Error(error.response?.data?.message || 'Failed to decline session request');
   }
 };
@@ -221,9 +247,26 @@ export const declineSessionRequest = async (pollId) => {
 // Schedule a session with tutor details
 export const scheduleSession = async (pollId, sessionData) => {
   try {
+    console.log('📅 API: Scheduling session for poll:', pollId);
+    console.log('📋 Session data being sent:', sessionData);
+    
+    // Validate required fields
+    const requiredFields = ['date', 'time', 'duration', 'feePerStudent', 'maxStudents'];
+    const missingFields = requiredFields.filter(field => !sessionData[field]);
+    
+    if (missingFields.length > 0) {
+      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    }
+    
     const response = await api.post(`/sessions/${pollId}/schedule`, sessionData);
+    console.log('✅ Session scheduled successfully:', response.data);
     return response.data;
   } catch (error) {
+    console.error('❌ API Error scheduling session:', {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+      data: error.response?.data
+    });
     throw new Error(error.response?.data?.message || 'Failed to schedule session');
   }
 };
@@ -251,9 +294,20 @@ export const getTutorScheduledSessions = async () => {
 // Get accepted sessions awaiting scheduling (new function)
 export const getAcceptedSessions = async () => {
   try {
+    console.log('📡 API: Fetching accepted sessions...');
     const response = await api.get('/sessions/accepted');
+    console.log('📡 API: Accepted sessions received:', {
+      count: response.data.data?.length || 0,
+      sessions: response.data.data?.map(session => ({
+        id: session._id,
+        title: session.title,
+        status: session.status,
+        acceptedBy: session.acceptedBy
+      })) || []
+    });
     return response.data;
   } catch (error) {
+    console.error('❌ API: Failed to fetch accepted sessions:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to fetch accepted sessions');
   }
 };

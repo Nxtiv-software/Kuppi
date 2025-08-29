@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUser } from '@clerk/clerk-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
@@ -154,8 +155,11 @@ const getTimeSlotDisplay = (timeSlot) => {
 };
 
 const SessionRequests = () => {
+  const { user, isSignedIn } = useUser();
   const queryClient = useQueryClient();
   const [scheduleModal, setScheduleModal] = useState({ isOpen: false, pollData: null });
+
+  const currentUserId = user?.id;
 
   // Fetch session requests (polls with >50% votes that haven't been accepted or declined by this tutor)
   const { data: sessionRequests, isLoading, error } = useQuery({
@@ -256,6 +260,53 @@ const SessionRequests = () => {
   const requests = sessionRequests?.data || [];
   const accepted = acceptedSessions?.data || [];
 
+  // Debug: Log current data state
+  console.log('🔍 Debug - Current session data:', {
+    pendingRequests: requests.map(req => ({
+      id: req._id,
+      title: req.title,
+      status: req.status,
+      acceptedBy: req.acceptedBy,
+      declinedBy: req.declinedBy
+    })),
+    acceptedSessions: accepted.map(sess => ({
+      id: sess._id,
+      title: sess.title,
+      status: sess.status,
+      acceptedBy: sess.acceptedBy
+    }))
+  });
+
+  // Client-side filtering to ensure proper behavior (matching backend logic)
+  const filteredRequests = requests.filter(request => {
+    // Backend should already filter out "accepted" and "scheduled" status polls
+    // But add client-side safety checks for consistency
+    
+    // Don't show if status is "accepted" or "scheduled"
+    if (request.status === 'accepted' || request.status === 'scheduled') {
+      console.log(`🚫 Filtering out ${request.status} session: ${request.title}`);
+      return false;
+    }
+    
+    // Don't show if already accepted by someone (backup check)
+    if (request.acceptedBy && request.acceptedBy.length > 0) {
+      console.log(`🚫 Filtering out accepted session: ${request.title} (accepted by: ${request.acceptedBy})`);
+      return false;
+    }
+    
+    // Don't show if declined by current user
+    if (request.declinedBy && Array.isArray(request.declinedBy) && currentUserId) {
+      if (request.declinedBy.includes(currentUserId)) {
+        console.log(`🚫 Filtering out declined session for current user: ${request.title}`);
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
+  console.log(`📊 Filtering results: ${requests.length} total → ${filteredRequests.length} filtered (Current user: ${currentUserId})`);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -264,11 +315,11 @@ const SessionRequests = () => {
           <p className="text-gray-600">Review and respond to student requests for group sessions (polls with &gt;50% votes)</p>
         </div>
         <Badge variant="outline" className="text-sm">
-          {requests.length} Available Requests
+          {filteredRequests.length} Available Requests
         </Badge>
       </div>
 
-      {requests.length === 0 ? (
+      {filteredRequests.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
             <div className="text-gray-500">
@@ -282,7 +333,7 @@ const SessionRequests = () => {
         </Card>
       ) : (
         <div className="grid gap-6">
-          {requests.map((request) => {
+          {filteredRequests.map((request) => {
             const votePercentage = (request.voteCount / request.maxStudents) * 100;
             
             // Debug: Log poll reaching threshold
