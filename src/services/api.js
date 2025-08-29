@@ -131,17 +131,13 @@ export const getTrendingPolls = async () => {
 // Vote on a poll
 export const voteOnPoll = async (pollId) => {
   try {
-    console.log('API: Attempting to vote on poll:', pollId);
     const response = await api.post(`/polls/${pollId}/vote`);
-    console.log('API: Vote successful:', response.data);
     return response.data;
   } catch (error) {
     console.error('API: Vote failed:', {
       pollId,
       status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message
+      message: error.response?.data?.message || error.message
     });
     throw new Error(error.response?.data?.message || 'Failed to vote on poll');
   }
@@ -150,17 +146,13 @@ export const voteOnPoll = async (pollId) => {
 // Remove vote from a poll
 export const removeVote = async (pollId) => {
   try {
-    console.log('API: Attempting to remove vote from poll:', pollId);
     const response = await api.delete(`/polls/${pollId}/vote`);
-    console.log('API: Remove vote successful:', response.data);
     return response.data;
   } catch (error) {
     console.error('API: Remove vote failed:', {
       pollId,
       status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message
+      message: error.response?.data?.message || error.message
     });
     throw new Error(error.response?.data?.message || 'Failed to remove vote');
   }
@@ -253,6 +245,16 @@ export const getTutorScheduledSessions = async () => {
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch tutor schedule');
+  }
+};
+
+// Get accepted sessions awaiting scheduling (new function)
+export const getAcceptedSessions = async () => {
+  try {
+    const response = await api.get('/sessions/accepted');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch accepted sessions');
   }
 };
 

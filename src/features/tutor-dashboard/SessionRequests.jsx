@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
-import { getSessionRequests, acceptSessionRequest, declineSessionRequest, scheduleSession } from '../../services/api';
+import { getSessionRequests, acceptSessionRequest, declineSessionRequest, scheduleSession, getAcceptedSessions } from '../../services/api';
 import toast from 'react-hot-toast';
 
 // Schedule Session Modal Component
@@ -157,7 +157,7 @@ const SessionRequests = () => {
   const queryClient = useQueryClient();
   const [scheduleModal, setScheduleModal] = useState({ isOpen: false, pollData: null });
 
-  // Fetch session requests (polls with >50% votes)
+  // Fetch session requests (polls with >50% votes that haven't been accepted or declined by this tutor)
   const { data: sessionRequests, isLoading, error } = useQuery({
     queryKey: ['sessionRequests'],
     queryFn: getSessionRequests,
@@ -166,6 +166,17 @@ const SessionRequests = () => {
     refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnReconnect: false, // Don't refetch on reconnect
     refetchInterval: false, // No automatic polling
+  });
+
+  // Fetch accepted sessions awaiting scheduling
+  const { data: acceptedSessions, isLoading: acceptedLoading, error: acceptedError } = useQuery({
+    queryKey: ['acceptedSessions'],
+    queryFn: getAcceptedSessions,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
   });
 
   const handleAcceptRequest = async (pollId) => {
@@ -177,8 +188,9 @@ const SessionRequests = () => {
       const pollData = sessionRequests.data.find(req => req._id === pollId);
       setScheduleModal({ isOpen: true, pollData });
       
-      // Refresh the session requests
+      // Refresh both session requests and accepted sessions
       queryClient.invalidateQueries(['sessionRequests']);
+      queryClient.invalidateQueries(['acceptedSessions']);
     } catch (error) {
       toast.error(error.message);
       console.error('Error accepting session request:', error);
@@ -206,6 +218,8 @@ const SessionRequests = () => {
       toast.success('Session scheduled successfully! Students who voted will see it in their dashboard.');
       setScheduleModal({ isOpen: false, pollData: null });
       queryClient.invalidateQueries(['sessionRequests']);
+      queryClient.invalidateQueries(['acceptedSessions']);
+      queryClient.invalidateQueries(['tutorSchedule']); // Also invalidate tutor schedule
     } catch (error) {
       toast.error(error.message);
       console.error('Error scheduling session:', error);
@@ -240,6 +254,7 @@ const SessionRequests = () => {
   }
 
   const requests = sessionRequests?.data || [];
+  const accepted = acceptedSessions?.data || [];
 
   return (
     <div className="space-y-6">
@@ -386,6 +401,112 @@ const SessionRequests = () => {
           })}
         </div>
       )}
+
+      {/* Accepted Sessions Awaiting Scheduling Section */}
+      <div className="space-y-6 border-t pt-8">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Accepted Sessions</h2>
+            <p className="text-gray-600">Sessions you've accepted that are awaiting scheduling</p>
+          </div>
+          <Badge variant="outline" className="text-sm bg-green-50 text-green-700">
+            {accepted.length} Awaiting Schedule
+          </Badge>
+        </div>
+
+        {acceptedLoading ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <div className="text-gray-500">Loading accepted sessions...</div>
+            </CardContent>
+          </Card>
+        ) : acceptedError ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <div className="text-red-600">Error loading accepted sessions: {acceptedError.message}</div>
+            </CardContent>
+          </Card>
+        ) : accepted.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <div className="text-gray-500">
+                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Accepted Sessions</h3>
+                <p className="text-gray-600">You haven't accepted any session requests yet.</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6">
+            {accepted.map((session) => {
+              const votePercentage = (session.voteCount / session.maxStudents) * 100;
+              
+              return (
+                <Card key={session._id} className="border-green-200 bg-green-50 hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl text-gray-900 mb-2">
+                          {session.title}
+                        </CardTitle>
+                        <h3 className="text-lg font-medium text-gray-700 mb-3">
+                          Topic: {session.chapter}
+                        </h3>
+                        <div className="flex flex-wrap gap-3 mb-4">
+                          <Badge className="bg-green-100 text-green-800">
+                            Accepted
+                          </Badge>
+                          <Badge className={getDifficultyColor(session.difficulty)}>
+                            {getSubjectDisplayName(session.subject)}
+                          </Badge>
+                          <Badge variant="outline">
+                            {getTimeSlotDisplay(session.timeSlot)}
+                          </Badge>
+                          <Badge variant="outline">
+                            {new Date(session.preferredDate).toLocaleDateString()}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-600 mb-4">{session.description}</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <svg className="h-4 w-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>Created by {session.creator?.name || 'Unknown'}</span>
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-gray-600">
+                        <svg className="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Students: {session.voteCount}/{session.maxStudents}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700 flex-1"
+                        onClick={() => setScheduleModal({ isOpen: true, pollData: session })}
+                      >
+                        <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Schedule Now
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Schedule Session Modal */}
       <ScheduleSessionModal

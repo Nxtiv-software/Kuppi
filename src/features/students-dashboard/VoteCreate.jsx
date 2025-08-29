@@ -269,24 +269,12 @@ const FilterPolls = () => {
     }
 
     try {
-      console.log('Voting attempt:', { 
-        pollId, 
-        userId: user.id, 
-        userName: user.fullName || user.firstName || 'Unknown',
-        isSignedIn 
-      });
-      
       await voteOnPoll(pollId);
       toast.success('Vote recorded successfully!');
       queryClient.invalidateQueries(['polls']);
       queryClient.invalidateQueries(['trendingPolls']);
     } catch (error) {
       console.error('Error voting on poll:', error);
-      console.error('Full error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
       toast.error(error.message || 'Failed to vote on poll');
     }
   };
