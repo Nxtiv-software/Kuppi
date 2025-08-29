@@ -221,4 +221,14 @@ export const getMyScheduledSessions = async () => {
   }
 };
 
+// Get scheduled sessions for tutors (sessions they are teaching)
+export const getTutorScheduledSessions = async () => {
+  try {
+    const response = await api.get('/sessions/tutor-schedule');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch tutor schedule');
+  }
+};
+
 export { api };

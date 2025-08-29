@@ -1,50 +1,15 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useUser } from '@clerk/clerk-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
-
-const upcomingSessions = [
-  {
-    id: 1,
-    title: 'Data Structures & Algorithms',
-    topic: 'Binary Trees and Tree Traversal',
-    date: '2024-06-27',
-    time: '15:00',
-    duration: '2 hours',
-    students: 15,
-    type: 'online',
-    status: 'confirmed',
-    earnings: 4500
-  },
-  {
-    id: 2,
-    title: 'Database Systems',
-    topic: 'SQL Joins and Subqueries',
-    date: '2024-06-28',
-    time: '14:00',
-    duration: '1.5 hours',
-    students: 12,
-    type: 'online',
-    status: 'confirmed',
-    earnings: 3600
-  },
-  {
-    id: 3,
-    title: 'Object Oriented Programming',
-    topic: 'Inheritance and Polymorphism',
-    date: '2024-06-29',
-    time: '16:00',
-    duration: '2 hours',
-    students: 8,
-    type: 'hybrid',
-    status: 'pending',
-    earnings: 2400
-  }
-];
+import { getTutorScheduledSessions } from '../../services/api';
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'confirmed': return 'bg-green-100 text-green-800';
+    case 'confirmed': 
+    case 'scheduled': return 'bg-green-100 text-green-800';
     case 'pending': return 'bg-yellow-100 text-yellow-800';
     case 'cancelled': return 'bg-red-100 text-red-800';
     default: return 'bg-gray-100 text-gray-800';
@@ -52,6 +17,54 @@ const getStatusColor = (status) => {
 };
 
 const MySchedule = () => {
+  const { user, isSignedIn } = useUser();
+
+  // Fetch tutor's scheduled sessions
+  const { data: sessionsData, isLoading, error } = useQuery({
+    queryKey: ['tutorScheduledSessions'],
+    queryFn: getTutorScheduledSessions,
+    enabled: isSignedIn,
+    staleTime: 5 * 60 * 1000, // 5 minutes - schedule doesn't change frequently
+    cacheTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    refetchInterval: false, // No automatic polling
+  });
+
+  if (!isSignedIn) {
+    return (
+      <div className="p-6 text-center">
+        <p>Please sign in to view your schedule.</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-6 text-center">
+        <p>Loading your schedule...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-600">Error loading schedule: {error.message}</p>
+      </div>
+    );
+  }
+
+  const upcomingSessions = sessionsData?.data || [];
+
+  if (upcomingSessions.length === 0) {
+    return (
+      <div className="p-6 text-center">
+        <p>No scheduled sessions yet. Accept session requests to see them here!</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -103,14 +116,14 @@ const MySchedule = () => {
 
       <div className="grid gap-6">
         {upcomingSessions.map((session) => (
-          <Card key={session.id} className="hover:shadow-lg transition-shadow duration-300">
+          <Card key={session._id || session.id} className="hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-xl text-gray-900 mb-1">
-                    {session.title}
+                    {session.subject || session.title}
                   </CardTitle>
-                  <p className="text-gray-600 mb-3">{session.topic}</p>
+                  <p className="text-gray-600 mb-3">{session.topic || session.chapter}</p>
                   
                   <div className="flex flex-wrap gap-2">
                     <Badge className={getStatusColor(session.status)}>
@@ -120,17 +133,17 @@ const MySchedule = () => {
                       <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
-                      {session.type}
+                      {session.sessionType || session.type || 'online'}
                     </Badge>
                   </div>
                 </div>
                 
                 <div className="text-right">
                   <div className="text-2xl font-bold text-green-600 mb-1">
-                    Rs. {session.earnings.toLocaleString()}
+                    Rs. {((session.feePerStudent || 0) * (session.enrolledStudents || session.students || 0)).toLocaleString()}
                   </div>
                   <div className="text-sm text-gray-500">
-                    Rs. {Math.round(session.earnings / session.students)}/student
+                    Rs. {session.feePerStudent || 0}/student
                   </div>
                 </div>
               </div>
@@ -143,28 +156,28 @@ const MySchedule = () => {
                     <svg className="h-4 w-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span>{new Date(session.date).toLocaleDateString()}</span>
+                    <span>{new Date(session.scheduledDate || session.date).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="flex items-center text-sm text-gray-600">
                     <svg className="h-4 w-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>{session.time} ({session.duration})</span>
+                    <span>{session.scheduledTime || session.time} ({session.duration || '2 hours'})</span>
                   </div>
                   
                   <div className="flex items-center text-sm text-gray-600">
                     <svg className="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
-                    <span>{session.students} students</span>
+                    <span>{session.enrolledStudents || session.students || 0} students</span>
                   </div>
                   
                   <div className="flex items-center text-sm text-gray-600">
                     <svg className="h-4 w-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    <span className="capitalize">{session.type}</span>
+                    <span className="capitalize">{session.sessionType || session.type || 'online'}</span>
                   </div>
                 </div>
 

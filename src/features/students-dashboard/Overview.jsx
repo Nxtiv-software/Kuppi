@@ -1,4 +1,7 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getMyScheduledSessions } from '../../services/api';
+import { useUser } from '@clerk/clerk-react';
 import styles from "../students-dashboard/Overview.module.css";
 
 // Stats Cards Component
@@ -47,25 +50,28 @@ const StatsCards = () => {
 };
 
 // Quick Actions Component
-const QuickActions = () => {
+const QuickActions = ({ setActiveTab }) => {
   const actions = [
     {
       title: 'Create Poll',
       description: 'Start a new poll for a kuppi session',
       icon: '📝',
-      color: 'primary'
+      color: 'primary',
+      onClick: () => setActiveTab('vote-create')
     },
     {
       title: 'View Schedule',
       description: 'Check your upcoming sessions',
       icon: '📅',
-      color: 'secondary'
+      color: 'secondary',
+      onClick: () => setActiveTab('my-sessions')
     },
     {
       title: 'Find Study Group',
       description: 'Join or create a study group',
       icon: '👥',
-      color: 'tertiary'
+      color: 'tertiary',
+      onClick: () => {} // Placeholder for future implementation
     }
   ];
 
@@ -74,7 +80,12 @@ const QuickActions = () => {
       <h2 className={styles.sectionTitle}>Quick Actions</h2>
       <div className={styles.actionsGrid}>
         {actions.map((action, index) => (
-          <div key={index} className={`${styles.actionCard} ${styles[action.color]}`}>
+          <div 
+            key={index} 
+            className={`${styles.actionCard} ${styles[action.color]}`}
+            onClick={action.onClick}
+            style={{ cursor: action.onClick ? 'pointer' : 'default' }}
+          >
             <div className={styles.actionIcon}>{action.icon}</div>
             <h3 className={styles.actionTitle}>{action.title}</h3>
             <p className={styles.actionDescription}>{action.description}</p>
@@ -86,87 +97,177 @@ const QuickActions = () => {
 };
 
 // Upcoming Sessions Component
-const UpcomingSessions = () => {
-  const sessions = [
-    {
-      id: 1,
-      title: 'Trigonometrics Indentities',
-      subtitle: 'Sine rule and cosine rule',
-      instructor: 'Dr. Amal Perera',
-      date: 'Dec 26, 2025',
-      time: '7:00 PM - 9:00 PM',
-      students: 15,
-      price: 'Rs. 250',
-      status: 'confirmed'
-    },
-    {
-      id: 2,
-      title: 'Electronics',
-      subtitle: 'Characteristic curves of a diode',
-      instructor: 'Prof. Nimal Silva',
-      date: 'Dec 27, 2025',
-      time: '2:00 PM - 4:00 PM',
-      students: 12,
-      price: 'Rs. 300',
-      status: 'confirmed'
-    }
-  ];
+const UpcomingSessions = ({ setActiveTab }) => {
+  const { user, isSignedIn } = useUser();
+
+  // Fetch scheduled sessions for the current user
+  const { data: sessionsData, isLoading, error } = useQuery({
+    queryKey: ['myScheduledSessions'],
+    queryFn: getMyScheduledSessions,
+    enabled: isSignedIn, // Only fetch when user is signed in
+    staleTime: 3 * 60 * 1000, // 3 minutes - session data doesn't change very frequently
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    refetchInterval: false, // No automatic polling
+  });
+
+  // Filter for upcoming sessions only
+  const upcomingSessions = sessionsData?.sessions?.filter(session => 
+    session.status === 'scheduled' || session.status === 'upcoming'
+  ) || [];
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  // Format time for display
+  const formatTime = (timeString) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  if (!isSignedIn) {
+    return (
+      <div className={styles.upcomingSessions}>
+        <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
+        <div className={styles.emptyState}>
+          <p>Please sign in to view your upcoming sessions</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className={styles.upcomingSessions}>
+        <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
+        <div className={styles.loadingState}>
+          <p>Loading your upcoming sessions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.upcomingSessions}>
+        <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
+        <div className={styles.errorState}>
+          <p>Error loading sessions: {error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (upcomingSessions.length === 0) {
+    return (
+      <div className={styles.upcomingSessions}>
+        <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
+        <div className={styles.emptyState}>
+          <p>No upcoming sessions scheduled. Vote on polls to get sessions!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.upcomingSessions}>
       <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
       <div className={styles.sessionsList}>
-        {sessions.map((session) => (
-          <div key={session.id} className={styles.sessionCard}>
+        {upcomingSessions.slice(0, 3).map((session) => (
+          <div key={session._id} className={styles.sessionCard}>
             <div className={styles.sessionHeader}>
               <div className={styles.sessionInfo}>
                 <h3 className={styles.sessionTitle}>{session.title}</h3>
-                <p className={styles.sessionSubtitle}>{session.subtitle}</p>
-                <p className={styles.instructor}>by {session.instructor}</p>
+                <p className={styles.sessionSubtitle}>{session.subject} - {session.topic}</p>
+                <p className={styles.instructor}>by {session.tutorName}</p>
               </div>
               <div className={styles.statusBadge}>
-                <span className={styles.status}>{session.status}</span>
+                <span className={styles.status}>
+                  {session.status === 'scheduled' ? 'confirmed' : session.status}
+                </span>
               </div>
             </div>
             
             <div className={styles.sessionDetails}>
               <div className={styles.detailItem}>
                 <span className={styles.icon}>📅</span>
-                <span>{session.date}</span>
+                <span>{formatDate(session.date)}</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.icon}>⏰</span>
-                <span>{session.time}</span>
+                <span>{formatTime(session.time)} ({session.duration || '60'} min)</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.icon}>👥</span>
-                <span>{session.students} students</span>
+                <span>{session.currentStudents || 0}/{session.maxStudents} students</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.icon}>💰</span>
-                <span>{session.price}</span>
+                <span>Rs. {session.feePerStudent || 'TBA'}</span>
               </div>
             </div>
             
             <div className={styles.sessionActions}>
-              <button className={styles.joinButton}>Join Session</button>
+              {session.meetingLink ? (
+                <a 
+                  href={session.meetingLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={styles.joinButton}
+                >
+                  Join Session
+                </a>
+              ) : (
+                <button className={styles.joinButton} disabled>
+                  Meeting link pending
+                </button>
+              )}
               <button className={styles.calendarButton}>Add to Calendar</button>
-              <button className={styles.contactButton}>Contact Tutor</button>
+              {session.tutorEmail && (
+                <a 
+                  href={`mailto:${session.tutorEmail}`}
+                  className={styles.contactButton}
+                >
+                  Contact Tutor
+                </a>
+              )}
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Show "View All" link if there are more sessions */}
+      {upcomingSessions.length > 3 && (
+        <div className={styles.viewAllSessions}>
+          <button 
+            className={styles.viewAllButton}
+            onClick={() => setActiveTab('my-sessions')}
+          >
+            View All Sessions ({upcomingSessions.length})
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 // Main Overview Component
-const Overview = () => {
+const Overview = ({ setActiveTab }) => {
   return (
     <div className={styles.overview}>
       <StatsCards />
-      <QuickActions />
-      <UpcomingSessions />
+      <QuickActions setActiveTab={setActiveTab} />
+      <UpcomingSessions setActiveTab={setActiveTab} />
     </div>
   );
 };

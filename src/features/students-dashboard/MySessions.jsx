@@ -370,10 +370,12 @@ const MySessions = () => {
   const { data: sessionsData, isLoading, error, refetch } = useQuery({
     queryKey: ['myScheduledSessions'],
     queryFn: getMyScheduledSessions,
-    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
-    refetchInterval: 60 * 1000, // Auto-refresh every minute
-    refetchOnWindowFocus: true, // Refresh when user returns to tab
-    refetchIntervalInBackground: true, // Keep refreshing in background
+    staleTime: 2 * 60 * 1000, // 2 minutes - sessions can change when tutors schedule
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchInterval: false, // No automatic polling - use manual refresh
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchIntervalInBackground: false, // No background refreshing
+    refetchOnReconnect: true, // Only refetch on network reconnection
   });
 
   if (isLoading) {
@@ -423,10 +425,19 @@ const MySessions = () => {
   return (
     <div className={styles.mySessions}>
       <div className={styles.sessionHeader}>
-        <h2 className={styles.pageTitle}>My Sessions</h2>
-        <p className={styles.pageDescription}>
-          View and manage your scheduled learning sessions
-        </p>
+        <div>
+          <h2 className={styles.pageTitle}>My Sessions</h2>
+          <p className={styles.pageDescription}>
+            View and manage your scheduled learning sessions
+          </p>
+        </div>
+        <button 
+          onClick={() => refetch()} 
+          className={styles.refreshButton}
+          title="Refresh sessions"
+        >
+          🔄 Refresh
+        </button>
       </div>
       
       <SessionFilters 

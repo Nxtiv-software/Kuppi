@@ -80,9 +80,6 @@ const CreatePoll = ({ onBack }) => {
 
     setIsSubmitting(true);
     try {
-      // Debug: Log the data being sent
-      // console.log('Sending poll data:', JSON.stringify(pollData, null, 2));
-      
       // Add user information to the poll data
       const pollDataWithUser = {
         ...pollData,
@@ -90,8 +87,6 @@ const CreatePoll = ({ onBack }) => {
         createdBy: user.id,
         creatorName: user.name || user.firstName || 'Anonymous'
       };
-      
-      // console.log('Complete poll data with user:', JSON.stringify(pollDataWithUser, null, 2));
       
       await createPoll(pollDataWithUser);
       toast.success('Poll created successfully!');
@@ -197,11 +192,11 @@ const CreatePoll = ({ onBack }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Max Students *</label>
+            <label className={styles.label}>Min Students *</label>
             <input
               type="number"
-              value={pollData.maxStudents}
-              onChange={(e) => setPollData({ ...pollData, maxStudents: e.target.value })}
+              value={pollData.minStudents}
+              onChange={(e) => setPollData({ ...pollData, minStudents: e.target.value })}
               className={styles.input}
               min="1"
               max="50"
@@ -243,9 +238,6 @@ const CreatePoll = ({ onBack }) => {
 };
 
 const FilterPolls = () => {
-  // AUTHENTICATION: Uncomment when deploying with Clerk
-  // const { user, isSignedIn } = useUser();
-  
   // AUTHENTICATION: Use real authentication
   const { user, isSignedIn } = useUser();
 
@@ -262,18 +254,19 @@ const FilterPolls = () => {
     queryKey: ['polls', filters],
     queryFn: () => getPolls(filters),
     enabled: isSignedIn, // Only fetch when user is signed in
-    staleTime: 30 * 1000, // 30 seconds
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes - polls don't change very frequently
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    refetchInterval: false, // No automatic polling
   });
 
   const handleVote = async (pollId) => {
-    // AUTHENTICATION: Uncomment when deploying
-    /*
+    // AUTHENTICATION: Check if user is signed in
     if (!isSignedIn || !user) {
       toast.error('Please sign in to vote');
       return;
     }
-    */
 
     try {
       await voteOnPoll(pollId);
@@ -287,13 +280,11 @@ const FilterPolls = () => {
   };
 
   const handleRemoveVote = async (pollId) => {
-    // AUTHENTICATION: Uncomment when deploying
-    /*
+    // AUTHENTICATION: Check if user is signed in
     if (!isSignedIn || !user) {
       toast.error('Please sign in to remove vote');
       return;
     }
-    */
 
     try {
       await removeVote(pollId);
@@ -403,83 +394,90 @@ const FilterPolls = () => {
         {polls && polls.data && polls.data.polls.length === 0 && (
           <div className={styles.noPollsMessage}>No polls found with current filters.</div>
         )}
-        {polls && polls.data && polls.data.polls.map((poll) => (
-          <div key={poll._id} className={styles.pollCard}>
-            <div className={styles.pollHeader}>
-              <h4 className={styles.pollTitle}>{poll.title}</h4>
-              <span className={`${styles.pollStatus} ${styles[poll.status]}`}>
-                {poll.status}
-              </span>
-            </div>
-            <div className={styles.pollInfo}>
-              <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
-              <p className={styles.pollChapter}>{poll.chapter}</p>
-              <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
-              <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
-              <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
-            </div>
-            <div className={styles.pollDescription}>
-              <p>{poll.description}</p>
-            </div>
-            <div className={styles.pollProgress}>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill}
-                  style={{ width: `${Math.min((poll.voteCount / poll.maxStudents) * 100, 100)}%` }}
-                />
+        {polls && polls.data && polls.data.polls.map((poll) => {
+          const hasVoted = poll.hasVoted;
+          return (
+            <div key={poll._id} className={styles.pollCard}>
+              <div className={styles.pollHeader}>
+                <h4 className={styles.pollTitle}>{poll.title}</h4>
+                <span className={`${styles.pollStatus} ${styles[poll.status]}`}>
+                  {poll.status}
+                </span>
               </div>
-              <div className={styles.progressText}>
-                {poll.voteCount}/{poll.maxStudents} votes
+              <div className={styles.pollInfo}>
+                <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
+                <p className={styles.pollChapter}>{poll.chapter}</p>
+                <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
+                <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
+                <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
+              </div>
+              <div className={styles.pollDescription}>
+                <p>{poll.description}</p>
+              </div>
+              <div className={styles.pollProgress}>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill}
+                    style={{ width: `${Math.min((poll.voteCount / poll.maxStudents) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className={styles.progressText}>
+                  {poll.voteCount}/{poll.maxStudents} votes
+                </div>
+              </div>
+              <div className={styles.pollFooter}>
+                <div className={styles.pollActions}>
+                  {poll.status === 'active' && (
+                    <>
+                      {!hasVoted ? (
+                        <button 
+                          className={styles.voteButton} 
+                          onClick={() => handleVote(poll._id)}
+                          disabled={!isSignedIn}
+                          title={!isSignedIn ? "Please sign in to vote" : "Vote for this poll"}
+                        >
+                          {isSignedIn ? 'Vote Now' : 'Sign In to Vote'}
+                        </button>
+                      ) : (
+                        <button 
+                          className={styles.removeVoteButton} 
+                          onClick={() => handleRemoveVote(poll._id)}
+                          disabled={!isSignedIn}
+                          title={!isSignedIn ? "Please sign in to remove vote" : "Remove your vote"}
+                        >
+                          Remove Vote
+                        </button>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Allow creator to delete poll if vote count <= 3 and poll is active */}
+                  {user && poll.createdBy === user.id && 
+                   poll.voteCount <= 3 && poll.status === 'active' && (
+                    <button 
+                      className={styles.deleteButton} 
+                      onClick={() => handleDeletePoll(poll._id)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                  
+                  {/* Show info for polls that can't be deleted */}
+                  {user && poll.createdBy === user.id && 
+                   poll.voteCount > 3 && poll.status === 'active' && (
+                    <button 
+                      className={styles.deleteButton}
+                      style={{opacity: 0.5, cursor: 'not-allowed'}}
+                      onClick={() => toast.info(`Cannot delete: Poll has ${poll.voteCount} votes. Can only delete polls with 3 or fewer votes.`)}
+                    >
+                      Delete (Disabled)
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-            <div className={styles.pollFooter}>
-              <div className={styles.pollActions}>
-                {poll.status === 'active' && (
-                  <>
-                    {!poll.hasVoted ? (
-                      <button 
-                        className={styles.voteButton} 
-                        onClick={() => handleVote(poll._id)}
-                      >
-                        Vote Now
-                      </button>
-                    ) : (
-                      <button 
-                        className={styles.removeVoteButton} 
-                        onClick={() => handleRemoveVote(poll._id)}
-                      >
-                        Remove Vote
-                      </button>
-                    )}
-                  </>
-                )}
-                
-                {/* Allow creator to delete poll if vote count <= 3 and poll is active */}
-                {user && poll.createdBy === user.id && 
-                 poll.voteCount <= 3 && poll.status === 'active' && (
-                  <button 
-                    className={styles.deleteButton} 
-                    onClick={() => handleDeletePoll(poll._id)}
-                  >
-                    Delete
-                  </button>
-                )}
-                
-                {/* Show info for polls that can't be deleted */}
-                {user && poll.createdBy === user.id && 
-                 poll.voteCount > 3 && poll.status === 'active' && (
-                  <button 
-                    className={styles.deleteButton}
-                    style={{opacity: 0.5, cursor: 'not-allowed'}}
-                    onClick={() => toast.info(`Cannot delete: Poll has ${poll.voteCount} votes. Can only delete polls with 3 or fewer votes.`)}
-                  >
-                    Delete (Disabled)
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
       {/* Pagination */}
@@ -509,9 +507,6 @@ const FilterPolls = () => {
 };
 
 const TrendingPolls = () => {
-  // AUTHENTICATION: Uncomment when deploying with Clerk
-  // const { user, isSignedIn } = useUser();
-  
   // AUTHENTICATION: Use real authentication
   const { user, isSignedIn } = useUser();
 
@@ -520,8 +515,11 @@ const TrendingPolls = () => {
     queryKey: ['trendingPolls'],
     queryFn: getTrendingPolls,
     enabled: isSignedIn, // Only fetch when user is signed in
-    staleTime: 60 * 1000, // 1 minute
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes - trending polls change slowly
+    cacheTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    refetchInterval: false, // No automatic polling
   });
 
   const handleVote = async (pollId) => {
@@ -543,13 +541,11 @@ const TrendingPolls = () => {
   };
 
   const handleRemoveVote = async (pollId) => {
-    // AUTHENTICATION: Uncomment when deploying
-    /*
+    // AUTHENTICATION: Check if user is signed in
     if (!isSignedIn || !user) {
       toast.error('Please sign in to remove vote');
       return;
     }
-    */
 
     try {
       await removeVote(pollId);
@@ -575,17 +571,6 @@ const TrendingPolls = () => {
     return subjectMap[subject] || subject;
   };
 
-  // FOR LOCALHOST TESTING: Comment out authentication check
-  /*
-  if (!isSignedIn) {
-    return (
-      <div className={styles.signInPrompt}>
-        <h3>Please sign in to view trending polls</h3>
-      </div>
-    );
-  }
-  */
-
   return (
     <div className={styles.trendingPolls}>
       <h3 className={styles.sectionTitle}>🔥 Trending Polls (7+ votes)</h3>
@@ -595,63 +580,70 @@ const TrendingPolls = () => {
         {trendingPolls && trendingPolls.data && trendingPolls.data.length === 0 && (
           <div className={styles.noTrendingMessage}>No trending polls yet. Vote on polls to make them trend!</div>
         )}
-        {trendingPolls && trendingPolls.data && trendingPolls.data.map((poll) => (
-          <div key={poll._id} className={`${styles.pollCard} ${styles.trendingCard}`}>
-            <div className={styles.pollHeader}>
-              <h4 className={styles.pollTitle}>{poll.title}</h4>
-              <div className={styles.badgeContainer}>
-                <span className={`${styles.pollStatus} ${styles[poll.status]}`}>
-                  {poll.status}
-                </span>
-                <span className={styles.trendingBadge}>🔥 Trending</span>
+        {trendingPolls && trendingPolls.data && trendingPolls.data.map((poll) => {
+          const hasVoted = poll.hasVoted;
+          return (
+            <div key={poll._id} className={`${styles.pollCard} ${styles.trendingCard}`}>
+              <div className={styles.pollHeader}>
+                <h4 className={styles.pollTitle}>{poll.title}</h4>
+                <div className={styles.badgeContainer}>
+                  <span className={`${styles.pollStatus} ${styles[poll.status]}`}>
+                    {poll.status}
+                  </span>
+                  <span className={styles.trendingBadge}>🔥 Trending</span>
+                </div>
+              </div>
+              <div className={styles.pollInfo}>
+                <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
+                <p className={styles.pollChapter}>{poll.chapter}</p>
+                <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
+                <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
+                <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
+              </div>
+              <div className={styles.pollDescription}>
+                <p>{poll.description}</p>
+              </div>
+              <div className={styles.pollProgress}>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill}
+                    style={{ width: `${Math.min((poll.voteCount / poll.maxStudents) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className={styles.progressText}>
+                  {poll.voteCount}/{poll.maxStudents} votes
+                </div>
+              </div>
+              <div className={styles.pollFooter}>
+                <div className={styles.pollActions}>
+                  {poll.status === 'active' && (
+                    <>
+                      {!hasVoted ? (
+                        <button 
+                          className={styles.voteButton} 
+                          onClick={() => handleVote(poll._id)}
+                          disabled={!isSignedIn}
+                          title={!isSignedIn ? "Please sign in to vote" : "Vote for this poll"}
+                        >
+                          {isSignedIn ? 'Vote Now' : 'Sign In to Vote'}
+                        </button>
+                      ) : (
+                        <button 
+                          className={styles.removeVoteButton} 
+                          onClick={() => handleRemoveVote(poll._id)}
+                          disabled={!isSignedIn}
+                          title={!isSignedIn ? "Please sign in to remove vote" : "Remove your vote"}
+                        >
+                          Remove Vote
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-            <div className={styles.pollInfo}>
-              <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
-              <p className={styles.pollChapter}>{poll.chapter}</p>
-              <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
-              <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
-              <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
-            </div>
-            <div className={styles.pollDescription}>
-              <p>{poll.description}</p>
-            </div>
-            <div className={styles.pollProgress}>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill}
-                  style={{ width: `${Math.min((poll.voteCount / poll.maxStudents) * 100, 100)}%` }}
-                />
-              </div>
-              <div className={styles.progressText}>
-                {poll.voteCount}/{poll.maxStudents} votes
-              </div>
-            </div>
-            <div className={styles.pollFooter}>
-              <div className={styles.pollActions}>
-                {poll.status === 'active' && (
-                  <>
-                    {!poll.hasVoted ? (
-                      <button 
-                        className={styles.voteButton} 
-                        onClick={() => handleVote(poll._id)}
-                      >
-                        Vote Now
-                      </button>
-                    ) : (
-                      <button 
-                        className={styles.removeVoteButton} 
-                        onClick={() => handleRemoveVote(poll._id)}
-                      >
-                        Remove Vote
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -659,25 +651,8 @@ const TrendingPolls = () => {
 
 const VoteCreate = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
-  // AUTHENTICATION: Uncomment when deploying with Clerk
-  // const { isSignedIn } = useUser();
-  
-  // FOR LOCALHOST TESTING: Mock authentication
-  const isSignedIn = true;
-
-  // FOR LOCALHOST TESTING: Comment out authentication check
-  /*
-  if (!isSignedIn) {
-    return (
-      <div className={styles.voteCreate}>
-        <div className={styles.signInPrompt}>
-          <h2>Please sign in to access the voting system</h2>
-          <p>You need to be signed in to create polls and vote.</p>
-        </div>
-      </div>
-    );
-  }
-  */
+  // AUTHENTICATION: Use real authentication  
+  const { isSignedIn } = useUser();
 
   return (
     <div className={styles.voteCreate}>
@@ -687,6 +662,8 @@ const VoteCreate = () => {
             <button 
               className={styles.createButton}
               onClick={() => setShowCreateForm(true)}
+              disabled={!isSignedIn}
+              title={!isSignedIn ? "Please sign in to create polls" : "Create a new poll"}
             >
               + Create New Poll
             </button>

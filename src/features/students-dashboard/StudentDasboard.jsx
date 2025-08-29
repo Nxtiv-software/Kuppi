@@ -82,7 +82,7 @@ const StudentDashboard = () => {
   const renderPage = () => {
     switch (activeTab) {
       case 'overview':
-        return <Overview />;
+        return <Overview setActiveTab={setActiveTab} />;
       case 'vote-create':
         return <VoteCreate />;
       case 'my-sessions':
@@ -92,7 +92,7 @@ const StudentDashboard = () => {
       case 'browse-kuppis':
         return <BrowseKuppis />;
       default:
-        return <Overview />;
+        return <Overview setActiveTab={setActiveTab} />;
     }
   };
 
