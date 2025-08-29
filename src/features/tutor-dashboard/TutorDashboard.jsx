@@ -27,7 +27,7 @@ const TutorDashboard = () => {
           </TabsList>
 
           <TabsContent value="overview">
-            <TutorOverview />
+            <TutorOverview setActiveTab={setActiveTab} />
           </TabsContent>
 
           <TabsContent value="requests">

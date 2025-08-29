@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/card'
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
 
-const TutorOverview = () => {
+const TutorOverview = ({ setActiveTab }) => {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}

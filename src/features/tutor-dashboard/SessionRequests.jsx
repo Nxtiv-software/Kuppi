@@ -161,8 +161,11 @@ const SessionRequests = () => {
   const { data: sessionRequests, isLoading, error } = useQuery({
     queryKey: ['sessionRequests'],
     queryFn: getSessionRequests,
-    staleTime: 30 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes - session requests change occasionally
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    refetchInterval: false, // No automatic polling
   });
 
   const handleAcceptRequest = async (pollId) => {
