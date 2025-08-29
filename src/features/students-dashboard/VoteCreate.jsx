@@ -192,11 +192,11 @@ const CreatePoll = ({ onBack }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Min Students *</label>
+            <label className={styles.label}>Max Students *</label>
             <input
               type="number"
-              value={pollData.minStudents}
-              onChange={(e) => setPollData({ ...pollData, minStudents: e.target.value })}
+              value={pollData.maxStudents}
+              onChange={(e) => setPollData({ ...pollData, maxStudents: e.target.value })}
               className={styles.input}
               min="1"
               max="50"
