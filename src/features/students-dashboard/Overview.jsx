@@ -105,8 +105,11 @@ const UpcomingSessions = ({ setActiveTab }) => {
     queryKey: ['myScheduledSessions'],
     queryFn: getMyScheduledSessions,
     enabled: isSignedIn, // Only fetch when user is signed in
-    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
-    refetchOnWindowFocus: true,
+    staleTime: 3 * 60 * 1000, // 3 minutes - session data doesn't change very frequently
+    cacheTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    refetchInterval: false, // No automatic polling
   });
 
   // Filter for upcoming sessions only
