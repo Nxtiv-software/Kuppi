@@ -213,6 +213,41 @@ const AnnouncementModal = ({ isOpen, onClose, session, onSave }) => {
 };
 
 const MySchedule = () => {
+  // Helper function to get student count from various data formats
+  const getStudentCount = (session) => {
+    // If we have enrolledStudentsInfo array with real user data
+    if (session.enrolledStudentsInfo && Array.isArray(session.enrolledStudentsInfo)) {
+      return session.enrolledStudentsInfo.length;
+    }
+    
+    // If we have a clean student count number
+    if (typeof session.enrolledStudents === 'number') {
+      return session.enrolledStudents;
+    }
+    
+    // If we have students field as number
+    if (typeof session.students === 'number') {
+      return session.students;
+    }
+    
+    // If we have students as array
+    if (Array.isArray(session.students)) {
+      return session.students.length;
+    }
+    
+    // If students field contains user IDs (fallback)
+    if (typeof session.enrolledStudents === 'string' || typeof session.students === 'string') {
+      return 1; // At least 1 student if we have ID data
+    }
+    
+    return 0;
+  };
+
+  // Helper function to get student display text
+  const getStudentDisplayText = (session) => {
+    const count = getStudentCount(session);
+    return `${count} student${count !== 1 ? 's' : ''}`;
+  };
   const { user, isSignedIn } = useUser();
   const queryClient = useQueryClient();
   
@@ -382,7 +417,7 @@ const MySchedule = () => {
                 
                 <div className="text-right">
                   <div className="text-2xl font-bold text-green-600 mb-1">
-                    Rs. {((session.feePerStudent || 0) * (session.enrolledStudents || session.students || 0)).toLocaleString()}
+                    Rs. {((session.feePerStudent || 0) * getStudentCount(session)).toLocaleString()}
                   </div>
                   <div className="text-sm text-gray-500">
                     Rs. {session.feePerStudent || 0}/student
@@ -412,7 +447,7 @@ const MySchedule = () => {
                     <svg className="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
-                    <span>{session.enrolledStudents || session.students || 0} students</span>
+                    <span>{getStudentDisplayText(session)}</span>
                   </div>
                   
                   <div className="flex items-center text-sm text-gray-600">

@@ -111,7 +111,20 @@ export const createPoll = async (pollData) => {
 // Get all polls with filters
 export const getPolls = async (filters = {}) => {
   try {
+    console.log('📡 API: Fetching polls with filters:', filters);
     const response = await api.get('/polls', { params: filters });
+    
+    // Debug: Log the first poll to see structure
+    if (response.data?.data?.polls?.length > 0) {
+      console.log('📊 First Poll Data Structure:', {
+        fullPoll: response.data.data.polls[0],
+        creatorField: response.data.data.polls[0].creator,
+        creatorInfoField: response.data.data.polls[0].creatorInfo,
+        creatorNameField: response.data.data.polls[0].creatorName,
+        createdByField: response.data.data.polls[0].createdBy
+      });
+    }
+    
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch polls');
@@ -121,7 +134,20 @@ export const getPolls = async (filters = {}) => {
 // Get trending polls
 export const getTrendingPolls = async () => {
   try {
+    console.log('🔥 API: Fetching trending polls...');
     const response = await api.get('/polls/trending');
+    
+    // Debug: Log the first trending poll to see structure
+    if (response.data?.data?.length > 0) {
+      console.log('🔥 First Trending Poll Data Structure:', {
+        fullPoll: response.data.data[0],
+        creatorField: response.data.data[0].creator,
+        creatorInfoField: response.data.data[0].creatorInfo,
+        creatorNameField: response.data.data[0].creatorName,
+        createdByField: response.data.data[0].createdBy
+      });
+    }
+    
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to fetch trending polls');
