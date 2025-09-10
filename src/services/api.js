@@ -274,9 +274,21 @@ export const scheduleSession = async (pollId, sessionData) => {
 // Get scheduled sessions for students (only for sessions they voted on)
 export const getMyScheduledSessions = async () => {
   try {
+    console.log('📡 API: Fetching student scheduled sessions...');
     const response = await api.get('/sessions/my-sessions');
+    console.log('📡 API: Student sessions received:', {
+      count: response.data.data?.length || response.data.sessions?.length || 0,
+      sessions: (response.data.data || response.data.sessions || []).map(session => ({
+        id: session._id,
+        title: session.title,
+        meetingLink: session.meetingLink,
+        attachments: session.attachments,
+        announcements: session.announcements
+      }))
+    });
     return response.data;
   } catch (error) {
+    console.error('❌ API: Failed to fetch student sessions:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to fetch scheduled sessions');
   }
 };
@@ -309,6 +321,100 @@ export const getAcceptedSessions = async () => {
   } catch (error) {
     console.error('❌ API: Failed to fetch accepted sessions:', error.response?.data || error.message);
     throw new Error(error.response?.data?.message || 'Failed to fetch accepted sessions');
+  }
+};
+
+// Add meeting link to a session
+export const addMeetingLink = async (sessionId, meetingLink) => {
+  try {
+    console.log('🔗 API: Adding meeting link to session:', sessionId);
+    const response = await api.post(`/sessions/${sessionId}/meeting-link`, { meetingLink });
+    console.log('✅ Meeting link added successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to add meeting link:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to add meeting link');
+  }
+};
+
+// Add attachment to a session
+export const addSessionAttachment = async (sessionId, file, description = '') => {
+  try {
+    console.log('📎 API: Adding attachment to session:', sessionId);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('description', description);
+    
+    const response = await api.post(`/sessions/${sessionId}/attachment`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    console.log('✅ Attachment uploaded successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to upload attachment:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to upload attachment');
+  }
+};
+
+// Add announcement to a session
+export const addSessionAnnouncement = async (sessionId, announcement) => {
+  try {
+    console.log('📢 API: Adding announcement to session:', sessionId);
+    const response = await api.post(`/sessions/${sessionId}/announcement`, { announcement });
+    console.log('✅ Announcement posted successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to post announcement:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to post announcement');
+  }
+};
+
+// Download attachment from a session
+export const downloadAttachment = async (sessionId, fileName, originalName) => {
+  try {
+    console.log('⬇️ API: Downloading attachment:', { sessionId, fileName });
+    
+    const response = await api.get(`/sessions/${sessionId}/attachments/${fileName}`, {
+      responseType: 'blob'
+    });
+
+    // Create blob URL and trigger download
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = originalName || fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    console.log('✅ File downloaded successfully:', originalName);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ API: Failed to download attachment:', {
+      sessionId,
+      fileName,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to download attachment');
   }
 };
 
