@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getMyScheduledSessions } from '../../services/api';
+import { getMyScheduledSessions, downloadAttachment } from '../../services/api';
 import styles from "../students-dashboard/MySessions.module.css";
+import toast from 'react-hot-toast';
 
 // Utility function to calculate time until session
 const getTimeUntilSession = (sessionDate, sessionTime) => {
@@ -52,6 +53,7 @@ const LoadingSkeleton = () => (
     ))}
   </div>
 );
+
 const SessionCountdown = ({ session }) => {
   const [timeLeft, setTimeLeft] = useState(
     getTimeUntilSession(session.date, session.time)
@@ -140,7 +142,21 @@ const SessionFilters = ({ filter, setFilter, sortBy, setSortBy, sessionsData }) 
 const SessionsList = ({ filter, sortBy, sessionsData }) => {
   if (!sessionsData) return null;
 
-  const allSessions = sessionsData.sessions || [];
+  // Handle different response structures from backend
+  const allSessions = sessionsData.sessions || sessionsData.data || [];
+  
+  console.log('📊 SessionsList - Data structure:', {
+    hasSessionsData: !!sessionsData,
+    hasSessions: !!(sessionsData.sessions),
+    hasData: !!(sessionsData.data),
+    totalSessions: allSessions.length,
+    firstSessionSample: allSessions[0] ? {
+      id: allSessions[0]._id,
+      title: allSessions[0].title,
+      hasAttachments: !!allSessions[0].attachments,
+      attachmentsCount: allSessions[0].attachments?.length || 0
+    } : null
+  });
 
   // Filter sessions based on selected filter
   let filteredSessions = filter === 'all' 
@@ -185,6 +201,23 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
     });
   };
 
+  const handleDownloadAttachment = async (sessionId, attachment) => {
+    try {
+      console.log('🔽 Starting download:', { sessionId, attachment });
+      
+      const result = await downloadAttachment(sessionId, attachment);
+      
+      if (result.success) {
+        toast.success(`Downloaded ${attachment.originalName || attachment.filename || 'file'}`);
+      } else {
+        toast.error('Failed to download file');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Error downloading file');
+    }
+  };
+
   if (filteredSessions.length === 0) {
     return (
       <div className={styles.sessionsList}>
@@ -211,152 +244,307 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
 
   return (
     <div className={styles.sessionsList}>
-      {filteredSessions.map((session) => (
-        <div key={session._id} className={`${styles.sessionCard} ${styles[session.status]}`}>
-          <div className={styles.sessionHeader}>
-            <div className={styles.sessionInfo}>
-              <h3 className={styles.sessionTitle}>{session.title}</h3>
-              <p className={styles.sessionSubject}>
-                {session.subject} {session.topic && `- ${session.topic}`}
-              </p>
-              <p className={styles.sessionInstructor}>
-                👨‍🏫 Tutor: {session.tutorName || 'TBA'}
-                {session.tutorEmail && (
-                  <a href={`mailto:${session.tutorEmail}`} className={styles.tutorEmail}>
-                    ({session.tutorEmail})
-                  </a>
+      {filteredSessions.map((session) => {
+        // Debug: Log session data to see attachments
+        console.log('🔍 Student Session Debug:', {
+          id: session._id,
+          title: session.title,
+          meetingLink: session.meetingLink,
+          attachments: session.attachments,
+          announcements: session.announcements,
+          status: session.status
+        });
+
+        return (
+          <div key={session._id} className={`${styles.sessionCard} ${styles[session.status]} ${styles.compact}`}>
+            {/* Enhanced Debug Logging with Real User Data */}
+            {(() => {
+              console.log('🔍 Enhanced Session Debug with Real User Data:', {
+                id: session._id,
+                title: session.title,
+                // Real User Data
+                tutorInfo: session.tutorInfo,
+                pollCreatorInfo: session.pollDetails?.creatorInfo,
+                pollAcceptorInfo: session.pollDetails?.acceptorInfo,
+                enrolledStudentsInfo: session.enrolledStudentsInfo,
+                // Legacy data for comparison
+                tutorName: session.tutorName,
+                pollCreator: session.pollDetails?.creator,
+                acceptedBy: session.acceptedBy,
+                // Resources
+                meetingLink: session.meetingLink,
+                attachments: session.attachments,
+                announcements: session.announcements,
+                status: session.status
+              });
+              return null;
+            })()}
+            
+            {/* Status Indicator Strip */}
+            <div className={`${styles.statusStrip} ${styles[session.status]}`}></div>
+            
+            {/* Main Card Header */}
+            <div className={styles.cardHeader}>
+              <div className={styles.headerLeft}>
+                <h3 className={styles.sessionTitle}>{session.title}</h3>
+                <div className={styles.sessionSubject}>
+                  📚 {session.subject} {session.topic && `• ${session.topic}`}
+                </div>
+              </div>
+              <div className={styles.headerRight}>
+                <span className={`${styles.statusBadge} ${styles[session.status]}`}>
+                  {session.status === 'scheduled' ? 'upcoming' : session.status}
+                </span>
+                {session.feePerStudent && (
+                  <div className={styles.feeDisplay}>Rs. {session.feePerStudent}</div>
                 )}
-              </p>
+              </div>
             </div>
-            <div className={styles.sessionStatus}>
-              <span className={`${styles.statusBadge} ${styles[session.status]}`}>
-                {session.status === 'scheduled' ? 'upcoming' : session.status}
-              </span>
+
+            {/* Compact Session Meta */}
+            <div className={styles.sessionMetaCompact}>
+              <div className={styles.metaGrid}>
+                <div className={styles.metaCell}>
+                  <span className={styles.metaIcon}>📅</span>
+                  <span className={styles.metaText}>{formatDate(session.date)}</span>
+                </div>
+                <div className={styles.metaCell}>
+                  <span className={styles.metaIcon}>⏰</span>
+                  <span className={styles.metaText}>{formatTime(session.time)}</span>
+                </div>
+                <div className={styles.metaCell}>
+                  <span className={styles.metaIcon}>👥</span>
+                  <span className={styles.metaText}>{session.currentStudents || session.enrolledStudentsInfo?.length || 0}/{session.maxStudents || '∞'}</span>
+                </div>
+                <div className={styles.metaCell}>
+                  <span className={styles.metaIcon}>👨‍🏫</span>
+                  <span className={styles.metaText}>
+                    {session.tutorInfo?.name || 
+                     session.tutorName || 
+                     'TBA'}
+                  </span>
+                  {session.tutorInfo?.email && (
+                    <a 
+                      href={`mailto:${session.tutorInfo.email}`} 
+                      className={styles.tutorEmailLink}
+                      title={`Email ${session.tutorInfo.name}`}
+                    >
+                      📧
+                    </a>
+                  )}
+                </div>
+              </div>
+              
               {(session.status === 'scheduled' || session.status === 'upcoming') && (
                 <SessionCountdown session={session} />
               )}
             </div>
-          </div>
 
-          <div className={styles.sessionDetails}>
-            <div className={styles.sessionMeta}>
-              <div className={styles.metaItem}>
-                <span className={styles.metaIcon}>📅</span>
-                <span className={styles.metaLabel}>Date:</span>
-                <span className={styles.metaValue}>{formatDate(session.date)}</span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaIcon}>⏰</span>
-                <span className={styles.metaLabel}>Time:</span>
-                <span className={styles.metaValue}>
-                  {formatTime(session.time)} ({session.duration || '60'} min)
-                </span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaIcon}>👥</span>
-                <span className={styles.metaLabel}>Students:</span>
-                <span className={styles.metaValue}>
-                  {session.currentStudents || 0}/{session.maxStudents || 'TBA'}
-                </span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaIcon}>💰</span>
-                <span className={styles.metaLabel}>Fee:</span>
-                <span className={styles.metaValue}>Rs. {session.feePerStudent || 'TBA'}</span>
-              </div>
-            </div>
-
+            {/* Session Description (if exists) */}
             {session.description && (
-              <div className={styles.sessionDescription}>
-                <h4>Description</h4>
+              <div className={styles.descriptionCompact}>
                 <p>{session.description}</p>
               </div>
             )}
 
-            {/* Show original poll details for context */}
+            {/* Poll Context (Enhanced with Real User Data) */}
             {session.pollDetails && (
-              <div className={styles.pollContext}>
-                <h4>🗳️ Original Poll</h4>
-                <div className={styles.pollInfo}>
-                  <strong>{session.pollDetails.title}</strong>
-                  <p>{session.pollDetails.description}</p>
-                  <small>{session.pollDetails.subject} - {session.pollDetails.chapter}</small>
+              <div className={styles.pollContextCompact}>
+                <div className={styles.pollHeaderCompact}>
+                  <span className={styles.pollIcon}>🗳️</span>
+                  <span className={styles.pollTitle}>Poll: {session.pollDetails.title}</span>
+                  <span className={styles.pollVotes}>{session.pollDetails.voteCount || session.voteCount || 0} votes</span>
+                </div>
+                
+                <div className={styles.pollPeopleCompact}>
+                  {/* Enhanced Poll Creator with Real Data */}
+                  <div className={styles.pollPerson}>
+                    <span className={styles.personRole}>Creator:</span>
+                    <span className={styles.personName}>
+                      {session.pollDetails.creatorInfo?.name || 
+                       session.pollDetails.creator?.name || 
+                       session.creator?.name || 
+                       'Anonymous'}
+                    </span>
+                    {(session.pollDetails.creatorInfo?.email || session.pollDetails.creator?.email) && (
+                      <span className={styles.personEmail}>
+                        📧 {session.pollDetails.creatorInfo?.email || session.pollDetails.creator?.email}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Enhanced Poll Acceptor with Real Data */}
+                  {(session.acceptedBy || session.pollDetails.acceptorInfo) && (
+                    <div className={styles.pollPerson}>
+                      <span className={styles.personRole}>Accepted:</span>
+                      <span className={styles.personName}>
+                        {session.pollDetails.acceptorInfo?.name || 
+                         session.acceptedBy?.name || 
+                         session.tutorName || 
+                         'Tutor'}
+                      </span>
+                      {(session.pollDetails.acceptorInfo?.email || session.acceptedBy?.email) && (
+                        <span className={styles.personEmail}>
+                          📧 {session.pollDetails.acceptorInfo?.email || session.acceptedBy?.email}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
+            {/* Action Buttons & Resources */}
             {(session.status === 'scheduled' || session.status === 'upcoming') && (
-              <div className={styles.sessionActions}>
+              <div className={styles.sessionActionsCompact}>
+                {/* Join Button */}
                 {session.meetingLink ? (
                   <a 
                     href={session.meetingLink} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className={styles.joinButton}
+                    className={styles.joinButtonPrimary}
                   >
                     🔗 Join Session
                   </a>
                 ) : (
                   <button className={styles.joinButtonDisabled} disabled>
-                    Meeting link will be shared soon
+                    Meeting link pending
                   </button>
                 )}
-                
-                {session.materials && session.materials.length > 0 && (
-                  <div className={styles.materials}>
-                    <h4>📚 Materials:</h4>
-                    <ul>
-                      {session.materials.map((material, index) => (
-                        <li key={index}>📄 {material}</li>
+
+                {/* Quick Resources */}
+                <div className={styles.quickResources}>
+                  {session.attachments && session.attachments.length > 0 && (
+                    <div className={styles.resourceItem}>
+                      <span className={styles.resourceIcon}>📎</span>
+                      <span className={styles.resourceCount}>{session.attachments.length} files</span>
+                    </div>
+                  )}
+                  
+                  {session.announcements && session.announcements.length > 0 && (
+                    <div className={styles.resourceItem}>
+                      <span className={styles.resourceIcon}>📢</span>
+                      <span className={styles.resourceCount}>{session.announcements.length} updates</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Expandable Resources Section */}
+            {((session.attachments && session.attachments.length > 0) || 
+              (session.announcements && session.announcements.length > 0) ||
+              (session.enrolledStudentsInfo && session.enrolledStudentsInfo.length > 0)) && (
+              <div className={styles.expandableResources}>
+                {/* Enrolled Students Info */}
+                {session.enrolledStudentsInfo && session.enrolledStudentsInfo.length > 0 && (
+                  <div className={styles.resourceSection}>
+                    <div className={styles.resourceHeader}>👥 Enrolled Students ({session.enrolledStudentsInfo.length})</div>
+                    <div className={styles.studentsGrid}>
+                      {session.enrolledStudentsInfo.slice(0, 5).map((student, index) => (
+                        <div key={index} className={styles.studentItem}>
+                          <div className={styles.studentIcon}>👤</div>
+                          <div className={styles.studentDetails}>
+                            <span className={styles.studentName}>
+                              {student.name || student.firstName || 'Student'}
+                            </span>
+                            {student.email && (
+                              <span className={styles.studentEmail}>
+                                {student.email}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       ))}
-                    </ul>
+                      {session.enrolledStudentsInfo.length > 5 && (
+                        <div className={styles.moreStudents}>
+                          +{session.enrolledStudentsInfo.length - 5} more students
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-                
-                {session.notes && (
-                  <div className={styles.sessionNotes}>
-                    <h4>📝 Notes:</h4>
-                    <p>{session.notes}</p>
+
+                {/* Announcements */}
+                {session.announcements && session.announcements.length > 0 && (
+                  <div className={styles.resourceSection}>
+                    <div className={styles.resourceHeader}>📢 Announcements</div>
+                    {session.announcements.slice(-2).map((announcement, index) => (
+                      <div key={index} className={styles.announcementCompact}>
+                        <p>{announcement.message || announcement}</p>
+                        {(announcement.addedAt || announcement.createdAt) && (
+                          <small>
+                            {new Date(announcement.addedAt || announcement.createdAt).toLocaleDateString()}
+                          </small>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Attachments */}
+                {session.attachments && session.attachments.length > 0 && (
+                  <div className={styles.resourceSection}>
+                    <div className={styles.resourceHeader}>📎 Materials</div>
+                    <div className={styles.attachmentsGrid}>
+                      {session.attachments.map((attachment, index) => (
+                        <div key={index} className={styles.attachmentCompact}>
+                          <div className={styles.attachmentIcon}>
+                            {(attachment.mimeType || attachment.fileType)?.includes('pdf') ? '📄' : 
+                             (attachment.mimeType || attachment.fileType)?.includes('image') ? '🖼️' : '📁'}
+                          </div>
+                          <div className={styles.attachmentDetails}>
+                            <span className={styles.attachmentName}>
+                              {attachment.originalName || attachment.filename || attachment.name || `File ${index + 1}`}
+                            </span>
+                            {(attachment.fileSize || attachment.size) && (
+                              <span className={styles.attachmentSize}>
+                                {((attachment.fileSize || attachment.size) / 1024 / 1024).toFixed(1)}MB
+                              </span>
+                            )}
+                          </div>
+                          <button 
+                            className={styles.downloadButtonCompact}
+                            onClick={() => handleDownloadAttachment(session._id, attachment)}
+                            title="Download"
+                          >
+                            ⬇️
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
+            {/* Completed Session Info */}
             {session.status === 'completed' && (
-              <div className={styles.completedSession}>
+              <div className={styles.completedInfo}>
                 {session.rating && (
-                  <div className={styles.sessionRating}>
-                    <span>Rating: {'⭐'.repeat(Math.floor(session.rating))} ({session.rating})</span>
+                  <div className={styles.ratingDisplay}>
+                    {'⭐'.repeat(Math.floor(session.rating))} {session.rating}/5
                   </div>
                 )}
                 {session.notes && (
-                  <div className={styles.sessionNotes}>
-                    <h4>Your Notes:</h4>
-                    <p>{session.notes}</p>
-                  </div>
-                )}
-                {session.materials && session.materials.length > 0 && (
-                  <div className={styles.materials}>
-                    <h4>Materials:</h4>
-                    <ul>
-                      {session.materials.map((material, index) => (
-                        <li key={index}>📄 {material}</li>
-                      ))}
-                    </ul>
+                  <div className={styles.notesCompact}>
+                    <strong>Notes:</strong> {session.notes}
                   </div>
                 )}
               </div>
             )}
 
+            {/* Cancelled Session Info */}
             {session.status === 'cancelled' && session.reason && (
-              <div className={styles.cancelReason}>
-                <h4>Cancellation Reason:</h4>
-                <p>{session.reason}</p>
+              <div className={styles.cancelledInfo}>
+                <span className={styles.cancelIcon}>❌</span>
+                <span className={styles.cancelReason}>{session.reason}</span>
               </div>
             )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
@@ -366,34 +554,25 @@ const MySessions = () => {
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
 
-  // Fetch scheduled sessions for the current user with auto-refresh
-  const { data: sessionsData, isLoading, error, refetch } = useQuery({
+  const { 
+    data: sessionsData, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
     queryKey: ['myScheduledSessions'],
     queryFn: getMyScheduledSessions,
-    staleTime: 2 * 60 * 1000, // 2 minutes - sessions can change when tutors schedule
-    cacheTime: 5 * 60 * 1000, // 5 minutes cache
-    refetchInterval: false, // No automatic polling - use manual refresh
-    refetchOnWindowFocus: false, // Don't refetch on window focus
-    refetchIntervalInBackground: false, // No background refreshing
-    refetchOnReconnect: true, // Only refetch on network reconnection
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 2,
+    refetchOnWindowFocus: false
   });
 
   if (isLoading) {
     return (
-      <div className={styles.mySessions}>
-        <div className={styles.sessionHeader}>
-          <h2 className={styles.pageTitle}>My Sessions</h2>
-          <p className={styles.pageDescription}>Loading your scheduled sessions...</p>
-        </div>
-        <div className={styles.sessionFilters}>
-          <div className={styles.filterTabs}>
-            {['All Sessions', 'Upcoming', 'Completed', 'Cancelled'].map((tab) => (
-              <div key={tab} className={`${styles.skeleton} ${styles.skeletonTab}`}></div>
-            ))}
-          </div>
-          <div className={styles.sortControls}>
-            <div className={`${styles.skeleton} ${styles.skeletonSort}`}></div>
-          </div>
+      <div className={styles.mySessionsContainer}>
+        <div className={styles.mySessionsHeader}>
+          <h2>My Sessions</h2>
+          <p>Loading your scheduled sessions...</p>
         </div>
         <LoadingSkeleton />
       </div>
@@ -402,55 +581,39 @@ const MySessions = () => {
 
   if (error) {
     return (
-      <div className={styles.mySessions}>
-        <div className={styles.sessionHeader}>
-          <h2 className={styles.pageTitle}>My Sessions</h2>
-          <p className={styles.pageDescription}>Error loading your sessions</p>
-        </div>
-        <div className={styles.errorState}>
-          <div className={styles.errorIcon}>❌</div>
-          <h3>Error Loading Sessions</h3>
-          <p>{error.message}</p>
-          <button 
-            onClick={() => refetch()} 
-            className={styles.retryButton}
-          >
-            🔄 Retry
-          </button>
+      <div className={styles.mySessionsContainer}>
+        <div className={styles.mySessionsHeader}>
+          <h2>My Sessions</h2>
+          <div className={styles.errorState}>
+            <p>Failed to load sessions. Please try again.</p>
+            <button onClick={refetch} className={styles.retryButton}>
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.mySessions}>
-      <div className={styles.sessionHeader}>
-        <div>
-          <h2 className={styles.pageTitle}>My Sessions</h2>
-          <p className={styles.pageDescription}>
-            View and manage your scheduled learning sessions
-          </p>
-        </div>
-        <button 
-          onClick={() => refetch()} 
-          className={styles.refreshButton}
-          title="Refresh sessions"
-        >
-          🔄 Refresh
-        </button>
+    <div className={styles.mySessionsContainer}>
+      <div className={styles.mySessionsHeader}>
+        <h2>My Sessions</h2>
+        <p>View and manage your scheduled learning sessions</p>
       </div>
       
-      <SessionFilters 
-        filter={filter} 
-        setFilter={setFilter} 
+      <SessionFilters
+        filter={filter}
+        setFilter={setFilter}
         sortBy={sortBy}
         setSortBy={setSortBy}
-        sessionsData={sessionsData} 
+        sessionsData={sessionsData}
       />
-      <SessionsList 
-        filter={filter} 
+      
+      <SessionsList
+        filter={filter}
         sortBy={sortBy}
-        sessionsData={sessionsData} 
+        sessionsData={sessionsData}
       />
     </div>
   );
