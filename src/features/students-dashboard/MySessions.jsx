@@ -279,6 +279,29 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
               });
               return null;
             })()}
+
+            {/* Additional Creator Data Debug */}
+            {(() => {
+              console.log('👤 MySessions Creator Data Analysis:', {
+                sessionId: session._id,
+                sessionTitle: session.title,
+                // All possible creator data sources
+                'session.pollDetails?.creatorInfo': session.pollDetails?.creatorInfo,
+                'session.pollDetails?.creatorName': session.pollDetails?.creatorName,
+                'session.pollDetails?.creator': session.pollDetails?.creator,
+                'session.creator': session.creator,
+                // What will be displayed
+                displayName: session.pollDetails?.creatorInfo?.name || 
+                           session.pollDetails?.creatorInfo?.firstName ||
+                           session.pollDetails?.creatorName ||
+                           session.pollDetails?.creator?.name || 
+                           session.pollDetails?.creator?.firstName ||
+                           session.creator?.name || 
+                           session.creator?.firstName ||
+                           'Anonymous'
+              });
+              return null;
+            })()}
             
             {/* Status Indicator Strip */}
             <div className={`${styles.statusStrip} ${styles[session.status]}`}></div>
@@ -344,53 +367,6 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
             {session.description && (
               <div className={styles.descriptionCompact}>
                 <p>{session.description}</p>
-              </div>
-            )}
-
-            {/* Poll Context (Enhanced with Real User Data) */}
-            {session.pollDetails && (
-              <div className={styles.pollContextCompact}>
-                <div className={styles.pollHeaderCompact}>
-                  <span className={styles.pollIcon}>🗳️</span>
-                  <span className={styles.pollTitle}>Poll: {session.pollDetails.title}</span>
-                  <span className={styles.pollVotes}>{session.pollDetails.voteCount || session.voteCount || 0} votes</span>
-                </div>
-                
-                <div className={styles.pollPeopleCompact}>
-                  {/* Enhanced Poll Creator with Real Data */}
-                  <div className={styles.pollPerson}>
-                    <span className={styles.personRole}>Creator:</span>
-                    <span className={styles.personName}>
-                      {session.pollDetails.creatorInfo?.name || 
-                       session.pollDetails.creator?.name || 
-                       session.creator?.name || 
-                       'Anonymous'}
-                    </span>
-                    {(session.pollDetails.creatorInfo?.email || session.pollDetails.creator?.email) && (
-                      <span className={styles.personEmail}>
-                        📧 {session.pollDetails.creatorInfo?.email || session.pollDetails.creator?.email}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Enhanced Poll Acceptor with Real Data */}
-                  {(session.acceptedBy || session.pollDetails.acceptorInfo) && (
-                    <div className={styles.pollPerson}>
-                      <span className={styles.personRole}>Accepted:</span>
-                      <span className={styles.personName}>
-                        {session.pollDetails.acceptorInfo?.name || 
-                         session.acceptedBy?.name || 
-                         session.tutorName || 
-                         'Tutor'}
-                      </span>
-                      {(session.pollDetails.acceptorInfo?.email || session.acceptedBy?.email) && (
-                        <span className={styles.personEmail}>
-                          📧 {session.pollDetails.acceptorInfo?.email || session.acceptedBy?.email}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 
