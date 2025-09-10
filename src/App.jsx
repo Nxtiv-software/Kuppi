@@ -1,9 +1,7 @@
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { SignUp } from "./ui/signup";
-import Login from "./ui/login";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import HomeLayout from "./ui/HomeLayout";
 import { Toaster } from "react-hot-toast";
 import AboutPage from "./ui/AboutPage";
