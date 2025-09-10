@@ -29,10 +29,11 @@ const TutorDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="flex border-b border-gray-200 bg-white rounded-lg overflow-hidden sticky top-20 z-10">
+        
+          <TabsList className="flex border-b w-full border-gray-200 bg-white rounded-lg overflow-hidden sticky top-20 z-10">
             <TabsTrigger
               value="overview"
-              className={`flex-1 px-4 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
+              className={`flex-1 px-5 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
                 activeTab === "overview"
                   ? "text-gray-900 border-b-2 border-blue-600 bg-gray-50"
                   : ""
@@ -42,7 +43,7 @@ const TutorDashboard = () => {
             </TabsTrigger>
             <TabsTrigger
               value="requests"
-              className={`flex-1 px-4 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
+              className={`flex-1 px-5 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
                 activeTab === "requests"
                   ? "text-gray-900 border-b-2 border-blue-600 bg-gray-50"
                   : ""
@@ -52,7 +53,7 @@ const TutorDashboard = () => {
             </TabsTrigger>
             <TabsTrigger
               value="schedule"
-              className={`flex-1 px-4 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
+              className={`flex-1 px-5 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
                 activeTab === "schedule"
                   ? "text-gray-900 border-b-2 border-blue-600 bg-gray-50"
                   : ""
@@ -62,7 +63,7 @@ const TutorDashboard = () => {
             </TabsTrigger>
             <TabsTrigger
               value="earnings"
-              className={`flex-1 px-4 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
+              className={`flex-1 px-5 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
                 activeTab === "earnings"
                   ? "text-gray-900 border-b-2 border-blue-600 bg-gray-50"
                   : ""
@@ -72,7 +73,7 @@ const TutorDashboard = () => {
             </TabsTrigger>
             <TabsTrigger
               value="feedback"
-              className={`flex-1 px-4 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
+              className={`flex-1 px-5 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
                 activeTab === "feedback"
                   ? "text-gray-900 border-b-2 border-blue-600 bg-gray-50"
                   : ""
@@ -81,6 +82,7 @@ const TutorDashboard = () => {
               Feedback
             </TabsTrigger>
           </TabsList>
+       
 
           {/* Tab Pages */}
           <TabsContent value="overview">
@@ -99,6 +101,7 @@ const TutorDashboard = () => {
             <StudentFeedback />
           </TabsContent>
         </Tabs>
+
       </div>
     </div>
   );
