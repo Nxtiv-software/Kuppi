@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { Button } from '../../components/Button';
 import { ArrowRight, Users, BookOpen } from 'lucide-react';
+import heroImg from "../../assets/images/hero.jpg"
 
 const Hero = () => {
   const { t } = useTranslation('global');
@@ -63,7 +64,8 @@ const Hero = () => {
           </div>
 
           {/* Right Section - Card */}
-          <div className="relative lg:ml-8 animate-fade-in">
+          <img src={heroImg} alt="" />
+          {/* <div className="relative lg:ml-8 animate-fade-in">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-orange-400 rounded-3xl transform rotate-6 opacity-20"></div>
               <div className="relative bg-white rounded-3xl p-8 shadow-2xl">
@@ -80,7 +82,7 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
         </div>
       </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
+import logo from "../../assets/images/logo.png";
 import {
   SignedIn,
   SignedOut,
@@ -74,7 +75,8 @@ const Header = () => {
         style={{ boxShadow: "0 0 20px rgba(64, 139, 219, 0.4)" }}
       >
         {/* Logo */}
-        <div className="text-3xl font-bold text-blue-500">{t("brand")}</div>
+        {/* <div className="text-3xl font-bold text-blue-500">{logo}</div> */}
+        <img className="h-15 w-auto object-contain" src={logo} alt="logo" />
 
         {/* Navigation Links */}
         <ul className="hidden md:flex space-x-6 text-sm font-medium text-gray-700">
