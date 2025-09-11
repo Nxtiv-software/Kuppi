@@ -409,15 +409,29 @@ const FilterPolls = () => {
         {polls && polls.data && polls.data.polls.map((poll) => {
           const hasVoted = poll.hasVoted;
           
-          // Debug: Log poll data and user info
-          console.log('Poll data for voting:', {
+          // Debug: Log complete poll data to see available user fields
+          console.log('🔍 Complete Poll Data Analysis:', {
             pollId: poll._id,
             pollTitle: poll.title,
             hasVoted,
             currentUserId: user?.id,
             pollCreator: poll.createdBy,
             voteCount: poll.voteCount,
-            pollStatus: poll.status
+            pollStatus: poll.status,
+            // Check all possible creator fields
+            creatorField: poll.creator,
+            creatorInfoField: poll.creatorInfo,
+            creatorNameField: poll.creatorName,
+            // Complete poll object for analysis
+            fullPoll: poll
+          });
+          
+          // Debug: Check what creator data is available
+          console.log('👤 Creator Data Available:', {
+            'poll.creator': poll.creator,
+            'poll.creatorInfo': poll.creatorInfo,
+            'poll.creatorName': poll.creatorName,
+            'poll.createdBy': poll.createdBy
           });
           
           return (
@@ -431,7 +445,17 @@ const FilterPolls = () => {
               <div className={styles.pollInfo}>
                 <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
                 <p className={styles.pollChapter}>{poll.chapter}</p>
-                <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
+                <p className={styles.pollCreator}>
+                  Created by {
+                    // Try multiple possible creator fields in order of preference
+                    poll.creatorInfo?.name || 
+                    poll.creatorInfo?.firstName || 
+                    poll.creatorName || 
+                    poll.creator?.name || 
+                    poll.creator?.firstName ||
+                    'Unknown'
+                  }
+                </p>
                 <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
                 <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
               </div>
@@ -631,15 +655,29 @@ const TrendingPolls = () => {
         {trendingPolls && trendingPolls.data && trendingPolls.data.map((poll) => {
           const hasVoted = poll.hasVoted;
           
-          // Debug: Log trending poll data and user info
-          console.log('Trending poll data for voting:', {
+          // Debug: Log complete trending poll data to see available user fields
+          console.log('🔥 Complete Trending Poll Data Analysis:', {
             pollId: poll._id,
             pollTitle: poll.title,
             hasVoted,
             currentUserId: user?.id,
             pollCreator: poll.createdBy,
             voteCount: poll.voteCount,
-            pollStatus: poll.status
+            pollStatus: poll.status,
+            // Check all possible creator fields
+            creatorField: poll.creator,
+            creatorInfoField: poll.creatorInfo,
+            creatorNameField: poll.creatorName,
+            // Complete poll object for analysis
+            fullPoll: poll
+          });
+          
+          // Debug: Check what creator data is available
+          console.log('👤 Trending Poll Creator Data Available:', {
+            'poll.creator': poll.creator,
+            'poll.creatorInfo': poll.creatorInfo,
+            'poll.creatorName': poll.creatorName,
+            'poll.createdBy': poll.createdBy
           });
           
           return (
@@ -656,7 +694,17 @@ const TrendingPolls = () => {
               <div className={styles.pollInfo}>
                 <p className={styles.pollSubject}>{getSubjectDisplayName(poll.subject)}</p>
                 <p className={styles.pollChapter}>{poll.chapter}</p>
-                <p className={styles.pollCreator}>Created by {poll.creator?.name || 'Unknown'}</p>
+                <p className={styles.pollCreator}>
+                  Created by {
+                    // Try multiple possible creator fields in order of preference
+                    poll.creatorInfo?.name || 
+                    poll.creatorInfo?.firstName || 
+                    poll.creatorName || 
+                    poll.creator?.name || 
+                    poll.creator?.firstName ||
+                    'Unknown'
+                  }
+                </p>
                 <p className={styles.pollDate}>Preferred: {formatDate(poll.preferredDate)}</p>
                 <p className={styles.pollTimeSlot}>Time: {poll.timeSlot}</p>
               </div>
