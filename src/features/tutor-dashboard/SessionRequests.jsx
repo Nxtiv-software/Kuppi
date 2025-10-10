@@ -170,6 +170,14 @@ const SessionRequests = () => {
     refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnReconnect: false, // Don't refetch on reconnect
     refetchInterval: false, // No automatic polling
+    onSuccess: (data) => {
+      console.log('📊 Session requests data received:', data);
+      if (data?.data && data.data.length > 0) {
+        console.log('📋 First request sample:', data.data[0]);
+        console.log('👤 Creator info in first request:', data.data[0].creator);
+        console.log('👤 CreatorInfo field:', data.data[0].creatorInfo);
+      }
+    }
   });
 
   // Fetch accepted sessions awaiting scheduling
@@ -181,6 +189,13 @@ const SessionRequests = () => {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchInterval: false,
+    onSuccess: (data) => {
+      console.log('📅 Accepted sessions data received:', data);
+      if (data?.data && data.data.length > 0) {
+        console.log('📋 First accepted session sample:', data.data[0]);
+        console.log('👤 Creator info in first accepted session:', data.data[0].creator);
+      }
+    }
   });
 
   const handleAcceptRequest = async (pollId) => {
@@ -402,7 +417,7 @@ const SessionRequests = () => {
                         <svg className="h-4 w-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        <span>Created by {request.creator?.name || 'Unknown'}</span>
+                        <span>Created by {request.creator?.name || request.creatorInfo?.name || request.creatorName || 'Unknown'}</span>
                       </div>
                       
                       <div className="flex items-center text-sm text-gray-600">
@@ -529,7 +544,7 @@ const SessionRequests = () => {
                         <svg className="h-4 w-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        <span>Created by {session.creator?.name || 'Unknown'}</span>
+                        <span>Created by {session.creator?.name || session.creatorInfo?.name || session.creatorName || 'Unknown'}</span>
                       </div>
                       
                       <div className="flex items-center text-sm text-gray-600">
