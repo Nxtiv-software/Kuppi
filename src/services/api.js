@@ -444,4 +444,37 @@ export const downloadAttachment = async (sessionId, fileName, originalName) => {
   }
 };
 
+// Get available sessions for browsing
+export const getAvailableSessions = async (filters = {}) => {
+  try {
+    console.log('📡 API: Fetching available sessions for browsing...', filters);
+    const response = await api.get('/sessions/available', { params: filters });
+    console.log('📡 API: Available sessions received:', {
+      count: response.data.data?.sessions?.length || 0,
+      pagination: response.data.data?.pagination
+    });
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to fetch available sessions:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch available sessions');
+  }
+};
+
+// Join a session
+export const joinSession = async (sessionId) => {
+  try {
+    console.log('🚀 API: Joining session:', sessionId);
+    const response = await api.post(`/sessions/${sessionId}/join`);
+    console.log('✅ API: Successfully joined session:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to join session:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to join session');
+  }
+};
+
 export { api };
