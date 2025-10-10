@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getAvailableSessions, joinSession } from '../../services/api';
+import { toast } from 'react-hot-toast';
 import styles from "../students-dashboard/BrowseKuppi.module.css";
 import img from "../../assets/images/img.png"
 
@@ -82,148 +85,84 @@ const SearchFilters = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
 
 // Kuppi Grid Component
 const KuppiGrid = ({ filters, searchTerm }) => {
-  const allKuppis = [
-    {
-      id: 1,
-      title: 'Vectors',
-      subject: 'Combined Mathematics',
-      instructor: 'John Smith',
-      rating: 4.8,
-      reviews: 124,
-      price: 350,
-      originalPrice: 500,
-      date: 'Dec 28, 2025',
-      time: '2:00 PM - 4:00 PM',
-      enrolled: 15,
-      maxStudents: 25,
-      level: 'intermediate',
-      tags: ['Vectors', 'Mathematics'],
-      description: 'Deep dive into Vectors with practical examples',
-      image: img
-    },
-    {
-      id: 2,
-      title: 'Thermal Physics',
-      subject: 'Physics',
-      instructor: 'Dr. Sarah Wilson',
-      rating: 4.9,
-      reviews: 89,
-      price: 400,
-      originalPrice: 600,
-      date: 'Dec 29, 2025',
-      time: '10:00 AM - 12:00 PM',
-      enrolled: 20,
-      maxStudents: 30,
-      level: 'beginner',
-      tags: ['Thermal', 'Physics'],
-      description: 'Learn about thermal physics concepts and applications',
-      image: img
-    },
-    {
-      id: 3,
-      title: 'Chemical calculations',
-      subject: 'Chemistry',
-      instructor: 'Prof. Mike Chen',
-      rating: 4.7,
-      reviews: 156,
-      price: 600,
-      originalPrice: 800,
-      date: 'Dec 30, 2025',
-      time: '7:00 PM - 9:00 PM',
-      enrolled: 12,
-      maxStudents: 20,
-      level: 'intermediate',
-      tags: ['Chemical', 'Calculations'],
-      description: 'Introduction to chemical calculations and their applications',
-      image: img
-    },
-    {
-      id: 4,
-      title: 'Mechanical Properties of Matter',
-      subject: 'Physics',
-      instructor: 'Alex Rodriguez',
-      rating: 4.6,
-      reviews: 203,
-      price: 450,
-      originalPrice: 650,
-      date: 'Jan 2, 2025',
-      time: '3:00 PM - 6:00 PM',
-      enrolled: 25,
-      maxStudents: 35,
-      level: 'intermediate',
-      tags: ['Mechanical', 'Properties', 'Matter'],
-      description: 'Comprehensive guide to mechanical properties of matter',
-      image: img
-    },
-    {
-      id: 5,
-      title: 'Derivatives',
-      subject: 'Combined Mathematics',
-      instructor: 'Emma Johnson',
-      rating: 4.5,
-      reviews: 78,
-      price: 550,
-      originalPrice: 750,
-      date: 'Jan 3, 2025',
-      time: '6:00 PM - 8:30 PM',
-      enrolled: 8,
-      maxStudents: 15,
-      level: 'advanced',
-      tags: ['Derivatives', 'Calculus'],
-      description: 'Introduction to derivatives and their applications',
-      image: img
-    },
-    {
-      id: 6,
-      title: 'Electro chemistry',
-      subject: 'Chemistry',
-      instructor: 'David Kim',
-      rating: 4.7,
-      reviews: 145,
-      price: 300,
-      originalPrice: 450,
-      date: 'Jan 4, 2025',
-      time: '1:00 PM - 3:00 PM',
-      enrolled: 18,
-      maxStudents: 25,
-      level: 'intermediate',
-      tags: ['Electro', 'Chemistry'],
-      description: 'Master advanced electrochemistry concepts and applications',
-      image: img
-    }
-  ];
+  const queryClient = useQueryClient();
+  const [joinLoading, setJoinLoading] = useState({});
 
-  // Filter kuppis based on filters and search term
-  const filteredKuppis = allKuppis.filter(kuppi => {
-    const matchesSearch = searchTerm === '' || 
-      kuppi.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      kuppi.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      kuppi.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Build API filters
+  const apiFilters = {
+    subject: filters.subject !== 'all' ? filters.subject : undefined,
+    level: filters.level !== 'all' ? filters.level : undefined,
+    page: 1,
+    limit: 20
+  };
 
-    const matchesSubject = filters.subject === 'all' || 
-      kuppi.subject.toLowerCase().replace(/\s+/g, '-') === filters.subject;
-
-    const matchesLevel = filters.level === 'all' || kuppi.level === filters.level;
-
-    const matchesPrice = filters.priceRange === 'all' || 
-      (filters.priceRange === '0-200' && kuppi.price <= 200) ||
-      (filters.priceRange === '200-500' && kuppi.price > 200 && kuppi.price <= 500) ||
-      (filters.priceRange === '500-1000' && kuppi.price > 500 && kuppi.price <= 1000) ||
-      (filters.priceRange === '1000+' && kuppi.price > 1000);
-
-    return matchesSearch && matchesSubject && matchesLevel && matchesPrice;
+  // Fetch available sessions
+  const { data: sessions, isLoading, error } = useQuery({
+    queryKey: ['availableSessions', apiFilters],
+    queryFn: () => getAvailableSessions(apiFilters)
   });
 
-  const handleJoinKuppi = (kuppiId) => {
-    // console.log('Joining kuppi:', kuppiId);
-    // Handle join kuppi logic here
+  // Filter sessions based on search term and client-side filters
+  const filteredSessions = sessions?.data?.sessions?.filter(session => {
+    const matchesSearch = searchTerm === '' || 
+      session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      session.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      session.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      session.subject.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesPrice = filters.priceRange === 'all' || 
+      (filters.priceRange === '0-200' && session.price <= 200) ||
+      (filters.priceRange === '200-500' && session.price > 200 && session.price <= 500) ||
+      (filters.priceRange === '500-1000' && session.price > 500 && session.price <= 1000) ||
+      (filters.priceRange === '1000+' && session.price > 1000);
+
+    return matchesSearch && matchesPrice;
+  }) || [];
+
+  const handleJoinSession = async (sessionId) => {
+    try {
+      setJoinLoading(prev => ({ ...prev, [sessionId]: true }));
+      await joinSession(sessionId);
+      toast.success('Successfully joined the session!');
+      
+      // Refresh the data
+      queryClient.invalidateQueries(['availableSessions']);
+      queryClient.invalidateQueries(['myScheduledSessions']);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setJoinLoading(prev => ({ ...prev, [sessionId]: false }));
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className={styles.kuppiGrid}>
+        <div className={styles.loadingState}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Loading available sessions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.kuppiGrid}>
+        <div className={styles.errorState}>
+          <div className={styles.errorIcon}>⚠️</div>
+          <h3 className={styles.errorTitle}>Failed to load sessions</h3>
+          <p className={styles.errorText}>{error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.kuppiGrid}>
       <div className={styles.resultsHeader}>
         <h3 className={styles.resultsTitle}>
-          Available Kuppis ({filteredKuppis.length})
+          Available Sessions ({filteredSessions.length})
         </h3>
         <div className={styles.sortOptions}>
           <select className={styles.sortSelect}>
@@ -236,76 +175,83 @@ const KuppiGrid = ({ filters, searchTerm }) => {
         </div>
       </div>
 
-      {filteredKuppis.length === 0 ? (
+      {filteredSessions.length === 0 ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🔍</div>
-          <h3 className={styles.emptyTitle}>No kuppis found</h3>
+          <h3 className={styles.emptyTitle}>No sessions found</h3>
           <p className={styles.emptyText}>
             Try adjusting your filters or search terms to find more sessions.
           </p>
         </div>
       ) : (
         <div className={styles.grid}>
-          {filteredKuppis.map((kuppi) => (
-            <div key={kuppi.id} className={styles.kuppiCard}>
+          {filteredSessions.map((session) => (
+            <div key={session.id} className={styles.kuppiCard}>
               <div className={styles.cardImage}>
-                <img src={kuppi.image} alt={kuppi.title} />
+                <img src={img} alt={session.title} />
                 <div className={styles.levelBadge}>
-                  {kuppi.level}
+                  {session.level}
                 </div>
+                {session.isEnrolled && (
+                  <div className={styles.enrolledBadge}>
+                    Enrolled
+                  </div>
+                )}
               </div>
 
               <div className={styles.cardContent}>
                 <div className={styles.cardHeader}>
-                  <h4 className={styles.cardTitle}>{kuppi.title}</h4>
+                  <h4 className={styles.cardTitle}>{session.title}</h4>
                   <div className={styles.rating}>
                     <span className={styles.ratingStars}>⭐</span>
-                    <span className={styles.ratingValue}>{kuppi.rating}</span>
-                    <span className={styles.reviewCount}>({kuppi.reviews})</span>
+                    <span className={styles.ratingValue}>{session.rating.toFixed(1)}</span>
+                    <span className={styles.reviewCount}>({session.reviews})</span>
                   </div>
                 </div>
 
                 <div className={styles.cardMeta}>
-                  <p className={styles.instructor}>by {kuppi.instructor}</p>
-                  <p className={styles.subject}>{kuppi.subject}</p>
+                  <p className={styles.instructor}>by {session.instructor}</p>
+                  <p className={styles.subject}>{session.subject.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                 </div>
 
                 <div className={styles.tags}>
-                  {kuppi.tags.map((tag, index) => (
+                  {session.tags.map((tag, index) => (
                     <span key={index} className={styles.tag}>{tag}</span>
                   ))}
                 </div>
 
-                <p className={styles.description}>{kuppi.description}</p>
+                <p className={styles.description}>{session.description}</p>
 
                 <div className={styles.sessionInfo}>
                   <div className={styles.infoItem}>
                     <span className={styles.icon}>📅</span>
-                    <span>{kuppi.date}</span>
+                    <span>{new Date(session.date).toLocaleDateString()}</span>
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.icon}>⏰</span>
-                    <span>{kuppi.time}</span>
+                    <span>{session.time} ({session.duration}h)</span>
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.icon}>👥</span>
-                    <span>{kuppi.enrolled}/{kuppi.maxStudents} enrolled</span>
+                    <span>{session.enrolled}/{session.maxStudents} enrolled</span>
                   </div>
                 </div>
 
                 <div className={styles.cardFooter}>
                   <div className={styles.pricing}>
-                    <span className={styles.currentPrice}>Rs. {kuppi.price}</span>
-                    <span className={styles.originalPrice}>Rs. {kuppi.originalPrice}</span>
-                    <span className={styles.discount}>
-                      {Math.round((1 - kuppi.price / kuppi.originalPrice) * 100)}% off
+                    <span className={styles.currentPrice}>Rs. {session.price}</span>
+                    <span className={styles.availableSpots}>
+                      {session.availableSpots} spots left
                     </span>
                   </div>
                   <button 
-                    className={styles.joinButton}
-                    onClick={() => handleJoinKuppi(kuppi.id)}
+                    className={`${styles.joinButton} ${session.isEnrolled ? styles.enrolledButton : ''}`}
+                    onClick={() => !session.isEnrolled && handleJoinSession(session.id)}
+                    disabled={session.isEnrolled || joinLoading[session.id] || session.availableSpots === 0}
                   >
-                    Join Kuppi
+                    {joinLoading[session.id] ? '...' : 
+                     session.isEnrolled ? 'Enrolled' : 
+                     session.availableSpots === 0 ? 'Full' : 'Join Session'}
                   </button>
                 </div>
               </div>
