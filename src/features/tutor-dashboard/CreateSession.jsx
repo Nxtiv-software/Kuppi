@@ -394,6 +394,10 @@ const CreateSession = () => {
   const [createModal, setCreateModal] = useState(false);
   const [scheduleModal, setScheduleModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
+  
+  // Filter states
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch tutor's created sessions
   const { data: createdSessions, isLoading, error } = useQuery({
@@ -449,6 +453,41 @@ const CreateSession = () => {
     }
   };
 
+  // Filter and search logic
+  const filterSessions = (sessions) => {
+    if (!sessions) return [];
+    
+    let filtered = sessions;
+
+    // Apply status filter
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(session => session.status === activeFilter);
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(session => 
+        session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.topic.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  };
+
+  // Get filter counts
+  const getFilterCounts = (sessions) => {
+    if (!sessions) return {};
+    
+    return {
+      all: sessions.length,
+      open_for_interest: sessions.filter(s => s.status === 'open_for_interest').length,
+      ready_to_schedule: sessions.filter(s => s.status === 'ready_to_schedule').length,
+      scheduled: sessions.filter(s => s.status === 'scheduled').length
+    };
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -488,6 +527,8 @@ const CreateSession = () => {
   }
 
   const sessions = createdSessions?.data || [];
+  const filteredSessions = filterSessions(sessions);
+  const filterCounts = getFilterCounts(sessions);
 
   return (
     <div className="space-y-6">
@@ -504,12 +545,110 @@ const CreateSession = () => {
         </Button>
       </div>
 
+      {/* Filters and Search Section */}
+      {sessions.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search sessions by title, subject, or topic..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                {searchTerm && (
+                  <Button
+                    onClick={() => setSearchTerm('')}
+                    variant="outline"
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+
+              {/* Status Filter Tabs */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: 'all', label: 'All Sessions', count: filterCounts.all },
+                  { key: 'ready_to_schedule', label: 'Ready to Schedule', count: filterCounts.ready_to_schedule },
+                  { key: 'scheduled', label: 'Scheduled', count: filterCounts.scheduled },
+                  { key: 'open_for_interest', label: 'Open for Interest', count: filterCounts.open_for_interest }
+                ].map((filter) => (
+                  <button
+                    key={filter.key}
+                    onClick={() => setActiveFilter(filter.key)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      activeFilter === filter.key
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {filter.label} ({filter.count || 0})
+                  </button>
+                ))}
+              </div>
+
+              {/* Active Filters Display */}
+              {(activeFilter !== 'all' || searchTerm) && (
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <span>Active filters:</span>
+                  {activeFilter !== 'all' && (
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Status: {activeFilter.replace('_', ' ')}
+                    </Badge>
+                  )}
+                  {searchTerm && (
+                    <Badge className="bg-green-100 text-green-800">
+                      Search: {searchTerm}
+                    </Badge>
+                  )}
+                  <button
+                    onClick={() => {
+                      setActiveFilter('all');
+                      setSearchTerm('');
+                    }}
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Session Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-gray-600">Total Sessions</div>
+            <div className="text-sm text-gray-600">Active Sessions</div>
             <div className="text-2xl font-bold">{sessions.length}</div>
+            <div className="text-xs text-gray-500 mt-1">Excluding completed</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-gray-600">Ready to Schedule</div>
+            <div className="text-2xl font-bold text-green-600">
+              {sessions.filter(s => s.status === 'ready_to_schedule').length}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">High priority</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-gray-600">Scheduled</div>
+            <div className="text-2xl font-bold text-purple-600">
+              {sessions.filter(s => s.status === 'scheduled').length}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">Upcoming sessions</div>
           </CardContent>
         </Card>
         <Card>
@@ -518,22 +657,7 @@ const CreateSession = () => {
             <div className="text-2xl font-bold text-blue-600">
               {sessions.filter(s => s.status === 'open_for_interest').length}
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-gray-600">Scheduled</div>
-            <div className="text-2xl font-bold text-green-600">
-              {sessions.filter(s => s.status === 'scheduled').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-gray-600">Completed</div>
-            <div className="text-2xl font-bold text-gray-600">
-              {sessions.filter(s => s.status === 'completed').length}
-            </div>
+            <div className="text-xs text-gray-500 mt-1">Collecting students</div>
           </CardContent>
         </Card>
       </div>
@@ -556,13 +680,50 @@ const CreateSession = () => {
                 Create Your First Session
               </Button>
             </div>
+          ) : filteredSessions.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-gray-400 text-4xl mb-4">🔍</div>
+              <h3 className="text-lg font-medium text-gray-600 mb-2">No sessions match your filters</h3>
+              <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria.</p>
+              <Button
+                onClick={() => {
+                  setActiveFilter('all');
+                  setSearchTerm('');
+                }}
+                variant="outline"
+                className="text-blue-600 border-blue-600 hover:bg-blue-50"
+              >
+                Clear Filters
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
-              {sessions.map((session) => (
-                <div key={session._id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-gray-600">
+                  Showing {filteredSessions.length} of {sessions.length} sessions
+                </p>
+              </div>
+              {filteredSessions.map((session) => (
+                <div key={session._id} className={`border rounded-lg p-4 ${
+                  session.status === 'ready_to_schedule' ? 'border-green-300 bg-green-50' :
+                  session.status === 'scheduled' ? 'border-purple-300 bg-purple-50' : 
+                  'border-gray-200'
+                }`}>
                   <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h4 className="font-medium text-lg">{session.title}</h4>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-lg">{session.title}</h4>
+                        {session.status === 'ready_to_schedule' && (
+                          <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                            🚀 Priority
+                          </span>
+                        )}
+                        {session.status === 'scheduled' && session.date && (
+                          <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+                            📅 {new Date(session.date).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600">{session.subject} • {session.topic}</p>
                     </div>
                     {getStatusBadge(session.status, session.interestedStudents?.length || 0, session.minStudents, session.maxStudents)}
