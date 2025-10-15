@@ -1,36 +1,37 @@
 /* Dashboard Styles */
 .dashboard {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
 }
 
 /* Push dashboard content below header */
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  margin-top: 80px; /* Adjust based on your Header height */
+  padding: 1.5rem;
+  margin-top: 120px; /* Adjust based on your Header height + spacing */
 }
 
 .headerSection {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.025em;
 }
 
 .subtitle {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #6b7280;
   font-weight: 400;
 }
 
 .content {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 /* Header Styles */
@@ -112,13 +113,14 @@
 
 /* Navigation Styles */
 .navigation {
-  border-bottom: 1px solid #e5e7eb;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
   overflow: hidden;
   position: sticky;
   top: 80px; /* Keeps nav under header */
   z-index: 10;
+  margin-bottom: 1.5rem;
 }
 
 .tabList {
@@ -128,29 +130,43 @@
 
 .tab {
   flex: 1;
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1.25rem;
   background: none;
   border: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 3px solid transparent;
+  transition: all 0.15s ease;
+  position: relative;
 }
 
 .tab:hover {
-  background: #f9fafb;
+  background: #f8fafc;
   color: #374151;
 }
 
 .tab.active {
   color: #1f2937;
-  background: #f8f9fa;
-  border-bottom-color: #2563eb;
+  background: #f1f5f9;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
 }
 
 @media (max-width: 768px) {
+  .container {
+    margin-top: 100px;
+    padding: 1rem;
+  }
+  
   .tabList {
     flex-direction: column;
   }

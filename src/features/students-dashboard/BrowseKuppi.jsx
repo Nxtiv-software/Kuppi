@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAvailableSessions, joinSession } from '../../services/api';
 import { toast } from 'react-hot-toast';
+import { IoSearchOutline, IoCalendarOutline, IoPeopleOutline, IoStarOutline } from 'react-icons/io5';
 import styles from "../students-dashboard/BrowseKuppi.module.css";
 import img from "../../assets/images/img.png"
 
@@ -17,7 +18,7 @@ const SearchFilters = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className={styles.searchInput}
         />
-        <button className={styles.searchButton}>🔍</button>
+        <button className={styles.searchButton}><IoSearchOutline /></button>
       </div>
       
       <div className={styles.filtersRow}>
@@ -177,7 +178,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
 
       {filteredSessions.length === 0 ? (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>🔍</div>
+          <div className={styles.emptyIcon}><IoSearchOutline /></div>
           <h3 className={styles.emptyTitle}>No sessions found</h3>
           <p className={styles.emptyText}>
             Try adjusting your filters or search terms to find more sessions.
@@ -203,7 +204,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
                 <div className={styles.cardHeader}>
                   <h4 className={styles.cardTitle}>{session.title}</h4>
                   <div className={styles.rating}>
-                    <span className={styles.ratingStars}>⭐</span>
+                    <span className={styles.ratingStars}><IoStarOutline /></span>
                     <span className={styles.ratingValue}>{session.rating.toFixed(1)}</span>
                     <span className={styles.reviewCount}>({session.reviews})</span>
                   </div>
@@ -224,7 +225,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
 
                 <div className={styles.sessionInfo}>
                   <div className={styles.infoItem}>
-                    <span className={styles.icon}>📅</span>
+                    <span className={styles.icon}><IoCalendarOutline /></span>
                     <span>{new Date(session.date).toLocaleDateString()}</span>
                   </div>
                   <div className={styles.infoItem}>
@@ -232,7 +233,7 @@ const KuppiGrid = ({ filters, searchTerm }) => {
                     <span>{session.time} ({session.duration}h)</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.icon}>👥</span>
+                    <span className={styles.icon}><IoPeopleOutline /></span>
                     <span>{session.enrolled}/{session.maxStudents} enrolled</span>
                   </div>
                 </div>

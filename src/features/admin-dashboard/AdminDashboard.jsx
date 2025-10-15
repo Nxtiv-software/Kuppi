@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import styles from './TutorDashboard.module.css';
-import TutorOverview from '../tutor-dashboard/TutorOverview';
-import MySchedule from '../tutor-dashboard/MySchedule';
-import SessionRequests from '../tutor-dashboard/SessionRequests';
-import Earnings from '../tutor-dashboard/Earnings';
-import StudentFeedback from '../tutor-dashboard/StudentFeedback';
+import styles from './AdminDashboard.module.css';
+import AdminOverview from './AdminOverview';
+import UserManagement from './UserManagement';
+import SessionManagement from './SessionManagement';
+import PaymentFinance from './PaymentFinance';
+import NotificationsCommunication from './NotificationsCommunication';
+import SystemSettings from './SystemSettings';
 import Header from "../../ui/Home/Header";
-
 
 // Navigation Component
 const Navigation = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
-    { id: 'requests', label: 'Session Requests' },
-    { id: 'schedule', label: 'My Schedule' },
-    { id: 'earnings', label: 'Earnings' },
-    { id: 'feedback', label: 'Student Feedback' }
+    { id: 'users', label: 'User Management' },
+    { id: 'sessions', label: 'Session Management' },
+    { id: 'payments', label: 'Payments' },
+    { id: 'notifications', label: 'Notifications' },
+    { id: 'settings', label: 'System Settings' }
   ];
 
   return (
@@ -36,23 +37,25 @@ const Navigation = ({ activeTab, setActiveTab }) => {
 };
 
 // Main Dashboard Component
-const TutorDashboard = () => {
+const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const renderPage = () => {
     switch (activeTab) {
       case 'overview':
-        return <TutorOverview setActiveTab={setActiveTab} />;
-      case 'requests':
-        return <SessionRequests />;
-      case 'schedule':
-        return <MySchedule />;
-      case 'earnings':
-        return <Earnings />;
-      case 'feedback':
-        return <StudentFeedback />;
+        return <AdminOverview setActiveTab={setActiveTab} />;
+      case 'users':
+        return <UserManagement />;
+      case 'sessions':
+        return <SessionManagement />;
+      case 'payments':
+        return <PaymentFinance />;
+      case 'notifications':
+        return <NotificationsCommunication />;
+      case 'settings':
+        return <SystemSettings />;
       default:
-        return <TutorOverview setActiveTab={setActiveTab} />;
+        return <AdminOverview setActiveTab={setActiveTab} />;
     }
   };
 
@@ -61,9 +64,9 @@ const TutorDashboard = () => {
       <Header />
       <div className={styles.container}>
         <div className={styles.headerSection}>
-          <h1 className={styles.title}>Tutor Dashboard</h1>
+          <h1 className={styles.title}>Admin Dashboard</h1>
           <p className={styles.subtitle}>
-            Manage your sessions, schedule, and student interactions
+            Manage users, sessions, payments, and platform settings
           </p>
         </div>
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -75,4 +78,4 @@ const TutorDashboard = () => {
   );
 };
 
-export default TutorDashboard;
+export default AdminDashboard;

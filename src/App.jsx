@@ -1,4 +1,5 @@
 import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
+import AdminDashboard from "./features/admin-dashboard/AdminDashboard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Routes, Route } from "react-router-dom";
@@ -10,8 +11,14 @@ import ContactUsPage from "./ui/ContactUsPage";
 import StudentDashboard from "./features/students-dashboard/StudentDasboard";
 import SignUpClerk from "./ui/SignUpClerk";
 import LoginClerk from "./ui/LoginClerk";
+import TutorRegistrationPage from "./ui/Home/TutorRegistrationPage";
 // AUTHENTICATION: Import Clerk components
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+// ROLE-BASED ACCESS: Import role-based components
+import { RoleProtectedRoute, PublicRoute } from './components/RoleProtectedRoute';
+import { USER_ROLES } from './utils/roleUtils';
+import DashboardRedirect from './components/DashboardRedirect';
+import RoleManager from './components/RoleManager';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,22 +33,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// AUTHENTICATION: Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  return (
-    <SignedIn>
-      {children}
-    </SignedIn>
-  );
-};
-
-const PublicRoute = ({ children }) => {
-  return (
-    <SignedOut>
-      {children}
-    </SignedOut>
-  );
-};
+// Note: ProtectedRoute and PublicRoute are now imported from RoleProtectedRoute component
 
 function App() {
   return (
@@ -71,22 +63,51 @@ function App() {
         
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactUsPage />} />
+        <Route path="become-tutor" element={<TutorRegistrationPage />} />
         
-        {/* AUTHENTICATION: Protected dashboard routes */}
+        {/* DEVELOPMENT: Role management route (remove in production) */}
+        <Route 
+          path="manage-role" 
+          element={
+            <RoleProtectedRoute allowedRoles={[USER_ROLES.STUDENT, USER_ROLES.TUTOR, USER_ROLES.ADMIN]}>
+              <RoleManager />
+            </RoleProtectedRoute>
+          } 
+        />
+        
+        {/* ROLE-BASED: Dashboard redirect route */}
+        <Route 
+          path="dashboard" 
+          element={
+            <RoleProtectedRoute allowedRoles={[USER_ROLES.STUDENT, USER_ROLES.TUTOR, USER_ROLES.ADMIN]}>
+              <DashboardRedirect />
+            </RoleProtectedRoute>
+          } 
+        />
+        
+        {/* ROLE-BASED: Protected dashboard routes */}
         <Route 
           path="student-dashboard" 
           element={
-            <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
               <StudentDashboard />
-            </ProtectedRoute>
+            </RoleProtectedRoute>
           } 
         />
         <Route 
           path="tutor-dashboard" 
           element={
-            <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={[USER_ROLES.TUTOR]}>
               <TutorDashboard />
-            </ProtectedRoute>
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="admin-dashboard" 
+          element={
+            <RoleProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+              <AdminDashboard />
+            </RoleProtectedRoute>
           } 
         />
         

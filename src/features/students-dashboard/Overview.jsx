@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getMyScheduledSessions } from '../../services/api';
 import { useUser } from '@clerk/clerk-react';
+import { IoBookOutline, IoStatsChartOutline, IoTrendingUpOutline, IoCashOutline, IoCalendarOutline, IoPeopleOutline, IoCreateOutline, IoTimeOutline } from 'react-icons/io5';
 import styles from "../students-dashboard/Overview.module.css";
 
 // Stats Cards Component
@@ -11,25 +12,25 @@ const StatsCards = () => {
       title: 'Sessions Attended',
       value: '12',
       subtitle: '+2 this week',
-      icon: '📚'
+      icon: <IoBookOutline />
     },
     {
       title: 'Active Polls',
       value: '5',
       subtitle: '3 created by you',
-      icon: '📊'
+      icon: <IoStatsChartOutline />
     },
     {
       title: 'Hours Learned',
       value: '24',
       subtitle: 'This month',
-      icon: '⏰'
+      icon: <IoStatsChartOutline />
     },
     {
       title: 'Money Saved',
       value: 'Rs. 3,500',
       subtitle: 'Vs individual tutoring',
-      icon: '💰'
+      icon: <IoCashOutline />
     }
   ];
 
@@ -55,21 +56,21 @@ const QuickActions = ({ setActiveTab }) => {
     {
       title: 'Create Poll',
       description: 'Start a new poll for a kuppi session',
-      icon: '📝',
+      icon: <IoCreateOutline />,
       color: 'primary',
       onClick: () => setActiveTab('vote-create')
     },
     {
       title: 'View Schedule',
       description: 'Check your upcoming sessions',
-      icon: '📅',
+      icon: <IoCalendarOutline />,
       color: 'secondary',
       onClick: () => setActiveTab('my-sessions')
     },
     {
       title: 'Find Study Group',
       description: 'Join or create a study group',
-      icon: '👥',
+      icon: <IoPeopleOutline />,
       color: 'tertiary',
       onClick: () => {} // Placeholder for future implementation
     }
@@ -200,19 +201,19 @@ const UpcomingSessions = ({ setActiveTab }) => {
             
             <div className={styles.sessionDetails}>
               <div className={styles.detailItem}>
-                <span className={styles.icon}>📅</span>
+                <span className={styles.icon}><IoCalendarOutline /></span>
                 <span>{formatDate(session.date)}</span>
               </div>
               <div className={styles.detailItem}>
-                <span className={styles.icon}>⏰</span>
+                <span className={styles.icon}><IoTimeOutline /></span>
                 <span>{formatTime(session.time)} ({session.duration || '60'} min)</span>
               </div>
               <div className={styles.detailItem}>
-                <span className={styles.icon}>👥</span>
+                <span className={styles.icon}><IoPeopleOutline /></span>
                 <span>{session.currentStudents || 0}/{session.maxStudents} students</span>
               </div>
               <div className={styles.detailItem}>
-                <span className={styles.icon}>💰</span>
+                <span className={styles.icon}><IoCashOutline /></span>
                 <span>Rs. {session.feePerStudent || 'TBA'}</span>
               </div>
             </div>

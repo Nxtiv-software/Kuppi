@@ -3,33 +3,33 @@ import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
   {
-    name: 'Thevini Perera',
-    text: 'Great help! I was really struggling with Organic Chemistry. The tutor explained everything so clearly.',
+    name: 'Kavindya Silva',
+    text: 'I was failing Chemistry before joining Kuppi.lk. The organic chemistry sessions helped me understand molecular structures and reactions. Got an A for my O/L!',
     rating: 5,
     subject: 'Chemistry'
   },
   {
-    name: 'Thevini Perera',
-    text: 'Great help! I was really struggling with Organic Chemistry. The tutor explained everything so clearly.',
+    name: 'Ravindu Jayasinghe',
+    text: 'Mathematics was my biggest fear, especially algebra and geometry. The tutors here made calculus so simple with step-by-step explanations. Highly recommend!',
     rating: 5,
     subject: 'Mathematics'
   },
   {
-    name: 'Thevini Perera',
-    text: 'Great help! I was really struggling with Organic Chemistry. The tutor explained everything so clearly.',
-    rating: 5,
+    name: 'Ishara Kumari',
+    text: 'Physics concepts like electricity and motion were confusing until I found this platform. The interactive sessions and real-world examples made everything clear.',
+    rating: 4,
     subject: 'Physics'
   },
   {
-    name: 'Thevini Perera',
-    text: 'Great help! I was really struggling with Organic Chemistry. The tutor explained everything so clearly.',
+    name: 'Sandun Fernando',
+    text: 'Biology diagrams and processes seemed impossible to memorize. The tutors taught me amazing techniques for human biology and plant systems. Excellent platform!',
     rating: 5,
     subject: 'Biology'
   },
   {
-    name: 'Thevini Perera',
-    text: 'Great help! I was really struggling with Organic Chemistry. The tutor explained everything so clearly.',
-    rating: 5,
+    name: 'Nimasha Rathnayake',
+    text: 'Economics theories and market concepts were too abstract for me. The practical examples and case studies here made microeconomics so much easier to understand.',
+    rating: 4,
     subject: 'Economics'
   }
 ];

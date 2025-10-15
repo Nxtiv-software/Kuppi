@@ -1,91 +1,148 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
-import { ArrowRight, Users, BookOpen } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Star, Trophy, Target } from 'lucide-react';
 import heroImg from "../../assets/images/hero.jpg"
+import styles from './Hero.module.css';
+import TutorRegistrationForm from './TutorRegistrationForm';
 
 const Hero = () => {
   const { t } = useTranslation('global');
+  const navigate = useNavigate();
   const isSinhala = (text) => /[\u0D80-\u0DFF]/.test(text);
+  const [currentStatIndex, setCurrentStatIndex] = useState(0);
+  const [showTutorForm, setShowTutorForm] = useState(false);
+
+  const stats = [
+    { icon: Users, value: "10,000+", label: "Active Students" },
+    { icon: BookOpen, value: "500+", label: "Expert Tutors" },
+    { icon: Star, value: "4.9", label: "Average Rating" },
+    { icon: Trophy, value: "95%", label: "Success Rate" }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStatIndex((prev) => (prev + 1) % stats.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-orange-50 py-20 h-screen flex items-center">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+    <section className={styles.heroSection}>
+      {/* Animated Background Elements */}
+      <div className={styles.backgroundElements}>
+        <div className={styles.floatingShape1}></div>
+        <div className={styles.floatingShape2}></div>
+        <div className={styles.floatingShape3}></div>
+        <div className={styles.gradientOrb1}></div>
+        <div className={styles.gradientOrb2}></div>
+      </div>
+
+      <div className={styles.container}>
+        <div className={styles.content}>
 
           {/* Left Section */}
-          <div className="text-center lg:text-left animate-fade-in">
-            <h1
-  className={`font-bold text-gray-900 mb-6 leading-tight ${
-    isSinhala(t('hero.title')) ? 'text-3xl md:text-5xl' : 'text-4xl md:text-6xl'
-  }`}
->
-  <Trans i18nKey="hero.title">
-    Get the help you need, <span className="text-blue-600">Right when you need it!</span>
-  </Trans>
-</h1>
+          <div className={styles.textSection}>
+            <h1 className={`${styles.title} ${isSinhala(t('hero.title')) ? styles.sinhalaTitle : ''}`}>
+              <Trans i18nKey="hero.title">
+                Get the help you need, <span className={styles.highlight}>Right when you need it!</span>
+              </Trans>
+            </h1>
 
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl">
+            <p className={styles.description}>
               {t("hero.description")}
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+            <div className={styles.ctaButtons}>
               <Button
                 type="button"
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-8 py-3 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group"
+                className={styles.primaryButton}
               >
-                {t("hero.vote")}
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                <span>{t("hero.vote")}</span>
+                <ArrowRight className={styles.buttonIcon} />
               </Button>
 
               <Button
                 type="button"
                 size="lg"
                 variant="outline"
-                className="border border-blue-600 text-blue-600 hover:bg-blue-50 hover:shadow-md px-8 py-3 text-lg font-semibold rounded-full transition-all duration-300"
+                className={styles.secondaryButton}
               >
                 {t("hero.explore")}
               </Button>
+
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                className={styles.tutorButton}
+                onClick={() => navigate('/become-tutor')}
+              >
+                Become a Tutor
+              </Button>
             </div>
 
-            {/* Stats */}
-            <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-500">
-              <div className="flex items-center">
-                <Users className="h-4 w-4 mr-2" />
-                <span>{t("hero.stat1")}</span>
+            {/* Animated Stats */}
+            <div className={styles.statsContainer}>
+              <div className={styles.animatedStat}>
+                <div className={styles.statIcon}>
+                  {React.createElement(stats[currentStatIndex].icon, { className: styles.statIconSvg })}
+                </div>
+                <div className={styles.statContent}>
+                  <div className={styles.statValue}>{stats[currentStatIndex].value}</div>
+                  <div className={styles.statLabel}>{stats[currentStatIndex].label}</div>
+                </div>
               </div>
-              <div className="flex items-center">
-                <BookOpen className="h-4 w-4 mr-2" />
-                <span>{t("hero.stat2")}</span>
+              
+              <div className={styles.staticStats}>
+                <div className={styles.statItem}>
+                  <Users className={styles.statIconSmall} />
+                  <span>{t("hero.stat1") || "10,000+ Students"}</span>
+                </div>
+                <div className={styles.statItem}>
+                  <BookOpen className={styles.statIconSmall} />
+                  <span>{t("hero.stat2") || "500+ Tutors"}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Card */}
-          <img src={heroImg} alt="" />
-          {/* <div className="relative lg:ml-8 animate-fade-in">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-orange-400 rounded-3xl transform rotate-6 opacity-20"></div>
-              <div className="relative bg-white rounded-3xl p-8 shadow-2xl">
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="h-10 w-10 text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {t("hero.card_title")}
-                    </h3>
-                    <p className="text-gray-600">{t("hero.card_text")}</p>
+          {/* Right Section - Interactive Image */}
+          <div className={styles.imageSection}>
+            <div className={styles.imageContainer}>
+              <div className={styles.imageWrapper}>
+                <img src={heroImg} alt="Kuppi Learning Platform" className={styles.heroImage} />
+                <div className={styles.imageOverlay}>
+                  <div className={styles.floatingCard1}>
+                    <Target className={styles.cardIcon} />
+                    <span>Goal-Oriented Learning</span>
+                  </div>
+                  <div className={styles.floatingCard2}>
+                    <Star className={styles.cardIcon} />
+                    <span>Expert Tutors</span>
+                  </div>
+                  <div className={styles.floatingCard3}>
+                    <Trophy className={styles.cardIcon} />
+                    <span>Proven Results</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
 
         </div>
       </div>
+      
+      {/* Tutor Registration Modal - Optional for modal usage */}
+      {showTutorForm && (
+        <TutorRegistrationForm 
+          isOpen={showTutorForm}
+          onClose={() => setShowTutorForm(false)}
+        />
+      )}
     </section>
   );
 };

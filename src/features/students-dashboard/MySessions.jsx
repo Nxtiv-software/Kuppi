@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getMyScheduledSessions, downloadAttachment } from '../../services/api';
+import { IoTimeOutline, IoBookOutline, IoBulbOutline } from 'react-icons/io5';
 import styles from "../students-dashboard/MySessions.module.css";
 import toast from 'react-hot-toast';
 
@@ -71,7 +72,7 @@ const SessionCountdown = ({ session }) => {
 
   return (
     <div className={styles.countdown}>
-      <span className={styles.countdownIcon}>⏱️</span>
+      <span className={styles.countdownIcon}><IoTimeOutline /></span>
       <span className={styles.countdownText}>Starts in {timeLeft}</span>
     </div>
   );
@@ -222,7 +223,7 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
     return (
       <div className={styles.sessionsList}>
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>📚</div>
+          <div className={styles.emptyIcon}><IoBookOutline /></div>
           <h3>No {filter === 'all' ? '' : filter} sessions found</h3>
           <p>
             {filter === 'all' 
@@ -233,7 +234,7 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
           {filter === 'all' && (
             <div className={styles.emptyActions}>
               <p className={styles.emptyHint}>
-                💡 <strong>How it works:</strong> Vote on polls → Polls reach 50% → Tutors schedule sessions → You get notified!
+                <IoBulbOutline /> <strong>How it works:</strong> Vote on polls → Polls reach 50% → Tutors schedule sessions → You get notified!
               </p>
             </div>
           )}

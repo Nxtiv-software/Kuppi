@@ -1,50 +1,130 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Brain, Users, Clock, DollarSign } from 'lucide-react';
-
-const colors = ['bg-blue-600', 'bg-green-600', 'bg-purple-600', 'bg-orange-600'];
+import { Brain, Users, Clock, DollarSign, ArrowRight } from 'lucide-react';
+import styles from './Features.module.css';
 
 const Features = () => {
   const { t, i18n } = useTranslation();
+  const [visibleCards, setVisibleCards] = useState([]);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const sectionRef = useRef(null);
 
   const featureItems = t('features.items', { returnObjects: true });
 
+  const icons = [Brain, Users, Clock, DollarSign];
+  const gradients = [
+    'linear-gradient(135deg, #2563eb, #1d4ed8)',     // Blue - for learning/brain
+    'linear-gradient(135deg, #059669, #047857)',     // Green - for community/users
+    'linear-gradient(135deg, #dc2626, #b91c1c)',     // Red - for urgency/time
+    'linear-gradient(135deg, #7c3aed, #6d28d9)'      // Purple - for premium/money
+  ];
+
+  const accentColors = [
+    'rgba(37, 99, 235, 0.1)',    // Light blue
+    'rgba(5, 150, 105, 0.1)',    // Light green  
+    'rgba(220, 38, 38, 0.1)',    // Light red
+    'rgba(124, 58, 237, 0.1)'    // Light purple
+  ];
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cards = entry.target.querySelectorAll(`.${styles.featureCard}`);
+            cards.forEach((card, index) => {
+              setTimeout(() => {
+                setVisibleCards(prev => [...new Set([...prev, index])]);
+              }, index * 200);
+            });
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <section className={styles.featuresSection} ref={sectionRef}>
+      <div className={styles.backgroundPattern}>
+        <div className={styles.patternDot}></div>
+        <div className={styles.patternDot}></div>
+        <div className={styles.patternDot}></div>
+      </div>
+      
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>
             {t('features.heading')}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          
+          <p className={styles.subtitle}>
             {t('features.subheading')}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={styles.featuresGrid}>
           {featureItems.map((feature, index) => {
-            const Icon = [Brain, Users, Clock, DollarSign][index];
-            const color = colors[index];
+            const Icon = icons[index];
+            const isVisible = visibleCards.includes(index);
+            const isHovered = hoveredCard === index;
 
             return (
               <div 
                 key={index}
-                className="group hover:scale-105 transition-all duration-300 cursor-pointer"
+                className={`${styles.featureCard} ${isVisible ? styles.visible : ''}`}
+                onMouseEnter={() => setHoveredCard(index)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{
+                  '--delay': `${index * 0.2}s`,
+                  '--gradient': gradients[index],
+                  '--accent-color': accentColors[index]
+                }}
               >
-                <div className="bg-gray-50 rounded-2xl p-8 text-center hover:bg-white hover:shadow-xl transition-all duration-300 h-full">
-                  <div className={`w-16 h-16 ${color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="h-8 w-8 text-white" />
+                <div className={styles.cardInner}>
+                  <div className={styles.iconContainer}>
+                    <div className={styles.iconWrapper}>
+                      <Icon className={styles.icon} />
+                    </div>
+                    <div className={styles.iconRipple}></div>
                   </div>
-                  <h3 className={`text-xl font-semibold text-gray-900 mb-4 ${i18n.language === 'si' ? 'text-[18px]' : ''}`}>
-                    {feature.title}
-                  </h3>
-                  <p className={`text-gray-600 leading-relaxed ${i18n.language === 'si' ? 'text-[16px]' : ''}`}>
-                    {feature.description}
-                  </p>
+                  
+                  <div className={styles.content}>
+                    <h3 className={`${styles.featureTitle} ${i18n.language === 'si' ? styles.sinhalaTitle : ''}`}>
+                      {feature.title}
+                    </h3>
+                    
+                    <p className={`${styles.featureDescription} ${i18n.language === 'si' ? styles.sinhalaText : ''}`}>
+                      {feature.description}
+                    </p>
+                  </div>
+
+                  <div className={styles.cardFooter}>
+                    <div className={styles.learnMore}>
+                      <span>Learn More</span>
+                      <ArrowRight className={`${styles.arrowIcon} ${isHovered ? styles.arrowHovered : ''}`} />
+                    </div>
+                  </div>
+
+                  <div className={styles.cardGlow}></div>
+                  <div className={styles.cardBorder}></div>
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* Interactive Elements */}
+        <div className={styles.decorativeElements}>
+          <div className={styles.floatingElement1}></div>
+          <div className={styles.floatingElement2}></div>
+          <div className={styles.floatingElement3}></div>
         </div>
       </div>
     </section>

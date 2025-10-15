@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { IoTimeOutline, IoCheckmarkDoneOutline, IoFlameOutline, IoTrophyOutline } from 'react-icons/io5';
 import styles from "../students-dashboard/Progress.module.css";
 
 // Progress Stats Component
@@ -8,28 +9,28 @@ const ProgressStats = () => {
       title: 'Total Study Hours',
       value: '127',
       subtitle: '+8 this week',
-      icon: '⏱️',
+      icon: <IoTimeOutline />,
       color: '#2563eb'
     },
     {
       title: 'Sessions Completed',
       value: '18',
       subtitle: '94% attendance rate',
-      icon: '✅',
+      icon: <IoCheckmarkDoneOutline />,
       color: '#10b981'
     },
     {
       title: 'Current Streak',
       value: '12 days',
       subtitle: 'Personal best!',
-      icon: '🔥',
+      icon: <IoFlameOutline />,
       color: '#f59e0b'
     },
     {
       title: 'Certificates Earned',
       value: '6',
       subtitle: '3 this month',
-      icon: '🏆',
+      icon: <IoTrophyOutline />,
       color: '#8b5cf6'
     }
   ];
@@ -156,36 +157,7 @@ const LearningAnalytics = () => {
   const data = timeRange === 'week' ? weeklyData : monthlyData;
   const maxHours = Math.max(...data.map(d => d.hours));
 
-  const achievements = [
-    {
-      title: 'First Session',
-      description: 'Completed your first kuppi session',
-      date: 'Nov 15, 2024',
-      icon: '🎯',
-      earned: true
-    },
-    {
-      title: 'Week Warrior',
-      description: 'Attended sessions for 7 consecutive days',
-      date: 'Dec 10, 2024',
-      icon: '⚡',
-      earned: true
-    },
-    {
-      title: 'Knowledge Seeker',
-      description: 'Completed 10 sessions in different subjects',
-      date: 'Dec 20, 2024',
-      icon: '📚',
-      earned: true
-    },
-    {
-      title: 'Master Learner',
-      description: 'Complete 50 sessions (Progress: 18/50)',
-      date: 'In Progress',
-      icon: '🎓',
-      earned: false
-    }
-  ];
+
 
   return (
     <div className={styles.learningAnalytics}>
@@ -221,27 +193,6 @@ const LearningAnalytics = () => {
               <div className={styles.barValue}>{item.hours}h</div>
               <div className={styles.barLabel}>
                 {timeRange === 'week' ? item.day : item.week}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.achievements}>
-        <h4 className={styles.achievementsTitle}>Achievements</h4>
-        <div className={styles.achievementsList}>
-          {achievements.map((achievement, index) => (
-            <div 
-              key={index} 
-              className={`${styles.achievementItem} ${achievement.earned ? styles.earned : styles.locked}`}
-            >
-              <div className={styles.achievementIcon}>
-                {achievement.earned ? achievement.icon : '🔒'}
-              </div>
-              <div className={styles.achievementInfo}>
-                <h5 className={styles.achievementTitle}>{achievement.title}</h5>
-                <p className={styles.achievementDescription}>{achievement.description}</p>
-                <span className={styles.achievementDate}>{achievement.date}</span>
               </div>
             </div>
           ))}

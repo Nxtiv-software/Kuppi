@@ -1,0 +1,76 @@
+/* Page Container */
+.pageContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+  padding: 2rem 1rem;
+}
+
+.pageHeader {
+  max-width: 900px;
+  margin: 0 auto 2rem auto;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.backButton:hover {
+  background: #f9fafb;
+  border-color: #059669;
+  color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.formContainer {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Override modal styles for standalone page */
+.formContainer .modalOverlay {
+  position: static;
+  background: none;
+  backdrop-filter: none;
+  padding: 0;
+  z-index: 1;
+}
+
+.formContainer .modalContent {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 1rem 0.5rem;
+  }
+
+  .pageHeader {
+    margin-bottom: 1rem;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageContainer {
+    padding: 0.5rem 0.25rem;
+  }
+}

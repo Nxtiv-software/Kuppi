@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, MessageCircle, Send, Users, Clock, Star } from 'lucide-react';
 import styles from "../ContactUs/contact.module.css";
 import img from "../../assets/images/img.png";
 
@@ -11,6 +12,21 @@ const ContactUs = () => {
     receiveUpdates: false,
     giveConsent: false
   });
+
+  const [isVisible, setIsVisible] = useState(false);
+  const [focusedInput, setFocusedInput] = useState(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+
+    const element = document.querySelector(`.${styles.container}`);
+    if (element) observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -25,77 +41,145 @@ const ContactUs = () => {
     console.log('Form submitted:', formData);
   };
 
-  return (
-    <div className={styles.contactContainer}>
+  const contactMethods = [
+    {
+      icon: Mail,
+      title: "Email Support",
+      primary: "support@kuppi.lk",
+      secondary: "We typically respond within 2 hours",
+      color: "#2563eb"
+    },
+    {
+      icon: Phone,
+      title: "Phone & WhatsApp",
+      primary: "+94 77 123 4567",
+      secondary: "Available 9 AM - 9 PM daily",
+      color: "#059669"
+    },
+    {
+      icon: MapPin,
+      title: "Head Office",
+      primary: "No. 21, Student Lane, Colombo 07",
+      secondary: "Sri Lanka",
+      color: "#7c3aed"
+    }
+  ];
 
+  return (
+    <div className={styles.container}>
+      {/* Hero Section */}
       <div className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <button className={styles.writeToUsBtn}>WRITE TO US</button>
-          <h1 className={styles.heroTitle}>Get In Touch</h1>
-        </div>
-        <div className={styles.heroDecoration}>
-          <div className={styles.circleOuter}></div>
-          <div className={styles.circleInner}></div>
-        </div>
-        <div className={styles.heroDecorationLeft}>
-          <div className={styles.circleLeft}></div>
+        <div className={styles.heroContainer}>
+          <h1 className={`${styles.heroTitle} ${isVisible ? styles.visible : ''}`}>
+            Let's Start a 
+            <span className={styles.highlight}> Conversation</span>
+          </h1>
+          
+          <p className={styles.heroDescription}>
+            Have questions about Kuppi.lk? Want to suggest a feature? Or looking to partner with us? 
+            We'd love to hear from you and help make learning better together.
+          </p>
+
+          <div className={styles.heroStats}>
+            <div className={styles.statItem}>
+              <Users className={styles.statIcon} />
+              <div>
+                <div className={styles.statNumber}>10,000+</div>
+                <div className={styles.statLabel}>Happy Students</div>
+              </div>
+            </div>
+            <div className={styles.statItem}>
+              <Clock className={styles.statIcon} />
+              <div>
+                <div className={styles.statNumber}>&lt; 2hrs</div>
+                <div className={styles.statLabel}>Response Time</div>
+              </div>
+            </div>
+            <div className={styles.statItem}>
+              <Star className={styles.statIcon} />
+              <div>
+                <div className={styles.statNumber}>4.9/5</div>
+                <div className={styles.statLabel}>Support Rating</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       
+      {/* Main Content */}
       <div className={styles.mainContent}>
         <div className={styles.contentWrapper}>
           
+          {/* Form Section */}
           <div className={styles.formSection}>
-            <h2 className={styles.formTitle}>Let's Talk!</h2>
-            <p className={styles.formDescription}>
-              Get in touch with us using the form below whether you have 
-              questions, suggestions, or partnership ideas.
-            </p>
+            <div className={styles.formHeader}>
+              <MessageCircle className={styles.formIcon} />
+              <h2 className={styles.formTitle}>Send us a Message</h2>
+              <p className={styles.formDescription}>
+                Fill out the form below and we'll get back to you as soon as possible. 
+                Our team is here to help with any questions or feedback you have.
+              </p>
+            </div>
 
             <form onSubmit={handleSubmit} className={styles.contactForm}>
               <div className={styles.nameRow}>
-                <div className={styles.inputGroup}>
+                <div className={`${styles.inputGroup} ${focusedInput === 'firstName' ? styles.focused : ''}`}>
                   <label className={styles.label}>First Name</label>
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
+                    onFocus={() => setFocusedInput('firstName')}
+                    onBlur={() => setFocusedInput(null)}
                     className={styles.input}
+                    placeholder="Enter your first name"
                   />
                 </div>
-                <div className={styles.inputGroup}>
+                <div className={`${styles.inputGroup} ${focusedInput === 'lastName' ? styles.focused : ''}`}>
                   <label className={styles.label}>Last Name</label>
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
+                    onFocus={() => setFocusedInput('lastName')}
+                    onBlur={() => setFocusedInput(null)}
                     className={styles.input}
+                    placeholder="Enter your last name"
                   />
                 </div>
               </div>
 
-              <div className={styles.inputGroup}>
+              <div className={`${styles.inputGroup} ${focusedInput === 'email' ? styles.focused : ''}`}>
                 <label className={styles.label}>Email Address</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                />
+                <div className={styles.inputWrapper}>
+                  <Mail className={styles.inputIcon} />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    onFocus={() => setFocusedInput('email')}
+                    onBlur={() => setFocusedInput(null)}
+                    className={styles.input}
+                    placeholder="your.email@example.com"
+                  />
+                </div>
               </div>
 
-              <div className={styles.inputGroup}>
+              <div className={`${styles.inputGroup} ${focusedInput === 'message' ? styles.focused : ''}`}>
                 <label className={styles.label}>Message</label>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
+                  onFocus={() => setFocusedInput('message')}
+                  onBlur={() => setFocusedInput(null)}
                   className={styles.textarea}
                   rows="5"
+                  placeholder="Tell us what you're thinking about..."
                 />
               </div>
 
@@ -134,48 +218,34 @@ const ContactUs = () => {
               </div>
 
               <button type="submit" className={styles.submitBtn}>
+                <Send className={styles.submitIcon} />
                 Send Message
               </button>
             </form>
           </div>
 
           <div className={styles.contactInfo}>
-            <div className={styles.illustration}>
-              <img src={img} alt="Contact illustration" className={styles.illustrationImage} />
+            <div className={styles.contactMethods}>
+              {contactMethods.map((method, index) => (
+                <div 
+                  key={index} 
+                  className={`${styles.contactMethod} ${isVisible ? styles.slideUp : ''}`}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className={styles.methodIcon}>
+                    {React.createElement(method.icon)}
+                  </div>
+                  <div className={styles.methodContent}>
+                    <h3 className={styles.methodTitle}>{method.title}</h3>
+                    <p className={styles.methodText}>{method.primary}</p>
+                    <p className={styles.methodSubText}>{method.secondary}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className={styles.contactDetails}>
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <div className={styles.emailIcon}>📧</div>
-                </div>
-                <div>
-                  <h3 className={styles.contactTitle}>Quick Contact:</h3>
-                  <p className={styles.contactText}>Email: support@kuppi.lk</p>
-                </div>
-              </div>
-
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <div className={styles.phoneIcon}>📞</div>
-                </div>
-                <div>
-                  <h3 className={styles.contactTitle}>Phone Number:</h3>
-                  <p className={styles.contactText}>Sri Lanka: +94 77 123 4567</p>
-                  <p className={styles.contactText}>WhatsApp: +94 76 654 3210</p>
-                </div>
-              </div>
-
-              <div className={styles.contactItem}>
-                <div className={styles.contactIcon}>
-                  <div className={styles.locationIcon}>📍</div>
-                </div>
-                <div>
-                  <h3 className={styles.contactTitle}>Head Office:</h3>
-                  <p className={styles.contactText}>No. 21, Student Lane, Colombo 07,</p>
-                  <p className={styles.contactText}>Sri Lanka</p>
-                </div>
-              </div>
+            <div className={styles.illustration}>
+              <img src={img} alt="Contact illustration" className={styles.illustrationImage} />
             </div>
 
             <div className={styles.socialSection}>

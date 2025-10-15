@@ -16,6 +16,7 @@ import StudentDashboard from "../../features/students-dashboard/StudentDasboard"
 import StudentDashBoardButton from "../../features/students-dashboard/StudentDashBoardButton";
 import TuttorDashBoardButton from "../../features/tutor-dashboard/TuttorDashBoardButton";
 import AdminDashBoardButton from "../../features/admin-dashboard/AdminDashBoardButton";
+import { useUserRole, USER_ROLES } from "../../utils/roleUtils";
 
 const LoginButton = styled.button`
   border: 1px solid;
@@ -65,11 +66,13 @@ const Header = () => {
   }, [isDropdownOpen]);
 
   if (!isLoaded) return <div>Loading...</div>;
-  const role = user?.publicMetadata?.role;
-  console.log(role);
+  
+  // Use our role utility to get user role
+  const { role } = useUserRole();
+  console.log('User role:', role);
 
   return (
-    <header className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[95%] max-w-7xl">
+    <header className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[95%] max-w-7xl">
       <nav
         className="flex items-center justify-between px-8 py-3 backdrop-blur-md rounded-xl border border-white/30"
         style={{ boxShadow: "0 0 20px rgba(64, 139, 219, 0.4)" }}
@@ -91,6 +94,9 @@ const Header = () => {
           </li>
           <li className="hover:text-blue-500 cursor-pointer">
             <Link to="/contact">{t("nav.contact")}</Link>
+          </li>
+          <li className="hover:text-green-600 cursor-pointer">
+            <Link to="/become-tutor" className="text-green-600 font-semibold">Become a Tutor</Link>
           </li>
         </ul>
 
@@ -173,12 +179,15 @@ const Header = () => {
             </SignedOut>
             <SignedIn>
               <div className="flex items-center gap-3">
-                {role === "student" ? (
+                {role === USER_ROLES.STUDENT ? (
                   <StudentDashBoardButton />
-                ) : role === "tutor" ? (
+                ) : role === USER_ROLES.TUTOR ? (
                   <TuttorDashBoardButton />
-                ) : (
+                ) : role === USER_ROLES.ADMIN ? (
                   <AdminDashBoardButton />
+                ) : (
+                  // Default to student dashboard if role is not determined
+                  <StudentDashBoardButton />
                 )}
                 <UserButton />
               </div>
