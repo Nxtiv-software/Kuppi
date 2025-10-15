@@ -4,7 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
-import { getTutorScheduledSessions, addMeetingLink, addSessionAttachment, addSessionAnnouncement, downloadAttachment } from '../../services/api';
+import { getTutorScheduledSessions, addMeetingLink, addSessionAttachment, addSessionAnnouncement, downloadAttachment, markSessionCompleted } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const getStatusColor = (status) => {
@@ -308,6 +308,22 @@ const MySchedule = () => {
     }
   };
 
+  const handleMarkCompleted = async (sessionId, sessionTitle) => {
+    if (window.confirm(`Are you sure you want to mark "${sessionTitle}" as completed? This action cannot be undone.`)) {
+      try {
+        await markSessionCompleted(sessionId);
+        toast.success('Session marked as completed successfully!');
+        // Refresh data to move session to completed section
+        queryClient.invalidateQueries(['tutorScheduledSessions']);
+        queryClient.invalidateQueries(['tutorCreatedSessions']);
+        queryClient.invalidateQueries(['myScheduledSessions']);
+        queryClient.invalidateQueries(['availableSessions']);
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+
   if (!isSignedIn) {
     return (
       <div className="p-6 text-center">
@@ -524,7 +540,7 @@ const MySchedule = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     <Button 
                       variant="outline" 
                       className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700"
@@ -556,6 +572,17 @@ const MySchedule = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                       </svg>
                       Add Announcement
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="text-sm bg-orange-50 hover:bg-orange-100 text-orange-700"
+                      onClick={() => handleMarkCompleted(session._id || session.id, session.title)}
+                    >
+                      <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Mark as Completed
                     </Button>
                   </div>
                 </div>
