@@ -241,15 +241,44 @@ const KuppiGrid = ({ filters, searchTerm }) => {
                 <div className={styles.sessionInfo}>
                   <div className={styles.infoItem}>
                     <span className={styles.icon}><IoCalendarOutline /></span>
-                    <span>{new Date(session.date).toLocaleDateString()}</span>
+                    <span>
+                      {session.date 
+                        ? (() => {
+                            try {
+                              return new Date(session.date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              });
+                            } catch (e) {
+                              return 'Date TBD';
+                            }
+                          })()
+                        : session.source === 'tutor_created' 
+                          ? 'To be scheduled'
+                          : 'Date TBD'
+                      }
+                    </span>
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.icon}>⏰</span>
-                    <span>{session.time} ({session.duration}h)</span>
+                    <span>
+                      {session.time 
+                        ? `${session.time} (${session.duration}h)`
+                        : session.source === 'tutor_created'
+                          ? 'Time TBD'
+                          : `Duration: ${session.duration}h`
+                      }
+                    </span>
                   </div>
                   <div className={styles.infoItem}>
                     <span className={styles.icon}><IoPeopleOutline /></span>
-                    <span>{session.enrolled}/{session.maxStudents} enrolled</span>
+                    <span>
+                      {session.source === 'tutor_created' && session.status !== 'scheduled'
+                        ? `${session.interestedStudents?.length || 0} interested`
+                        : `${session.enrolled}/${session.maxStudents} enrolled`
+                      }
+                    </span>
                   </div>
                 </div>
 
@@ -257,8 +286,10 @@ const KuppiGrid = ({ filters, searchTerm }) => {
                   <div className={styles.pricing}>
                     <span className={styles.currentPrice}>Rs. {session.price}</span>
                     <span className={styles.availableSpots}>
-                      {session.source === 'tutor_created' 
-                        ? `${session.interestedStudents?.length || 0}/${session.minStudents || session.maxStudents} interested`
+                      {session.source === 'tutor_created' && session.status !== 'scheduled'
+                        ? session.maxStudents === 999 
+                          ? `${session.interestedStudents?.length || 0} interested (unlimited)`
+                          : `${session.interestedStudents?.length || 0}/${Math.min(session.minStudents, session.maxStudents)} needed`
                         : `${session.availableSpots} spots left`
                       }
                     </span>
@@ -266,15 +297,29 @@ const KuppiGrid = ({ filters, searchTerm }) => {
                   
                   {/* Different buttons based on session source and status */}
                   {session.source === 'tutor_created' ? (
-                    // Tutor-created session: Show Interest button
-                    <button 
-                      className={`${styles.joinButton} ${session.hasShownInterest ? styles.interestShownButton : ''}`}
-                      onClick={() => !session.hasShownInterest && handleShowInterest(session.id)}
-                      disabled={session.hasShownInterest || joinLoading[session.id]}
-                    >
-                      {joinLoading[session.id] ? '...' : 
-                       session.hasShownInterest ? 'Interest Shown' : 'Show Interest'}
-                    </button>
+                    // Tutor-created session: Show Interest or Enroll based on status
+                    session.status === 'scheduled' ? (
+                      // Scheduled tutor session: Enroll button
+                      <button 
+                        className={`${styles.joinButton} ${session.isEnrolled ? styles.enrolledButton : ''}`}
+                        onClick={() => !session.isEnrolled && handleJoinSession(session.id)}
+                        disabled={session.isEnrolled || joinLoading[session.id] || session.availableSpots === 0}
+                      >
+                        {joinLoading[session.id] ? '...' : 
+                         session.isEnrolled ? 'Enrolled' : 
+                         session.availableSpots === 0 ? 'Full' : 'Enroll Now'}
+                      </button>
+                    ) : (
+                      // Non-scheduled tutor session: Show Interest button
+                      <button 
+                        className={`${styles.joinButton} ${session.hasShownInterest ? styles.interestShownButton : ''}`}
+                        onClick={() => !session.hasShownInterest && handleShowInterest(session.id)}
+                        disabled={session.hasShownInterest || joinLoading[session.id]}
+                      >
+                        {joinLoading[session.id] ? '...' : 
+                         session.hasShownInterest ? 'Interest Shown' : 'Show Interest'}
+                      </button>
+                    )
                   ) : (
                     // Poll-based session: Join Session button
                     <button 
