@@ -256,6 +256,10 @@ const MySchedule = () => {
   const [attachmentModal, setAttachmentModal] = useState({ isOpen: false, session: null });
   const [announcementModal, setAnnouncementModal] = useState({ isOpen: false, session: null });
 
+  // Filter states
+  const [activeFilter, setActiveFilter] = useState('upcoming');
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Fetch tutor's scheduled sessions
   const { data: sessionsData, isLoading, error } = useQuery({
     queryKey: ['tutorScheduledSessions'],
@@ -348,7 +352,48 @@ const MySchedule = () => {
     );
   }
 
-  const upcomingSessions = sessionsData?.data || [];
+  const upcomingSessions = sessionsData?.data?.filter(session => 
+    session.status !== 'ready_to_schedule' // Extra safety: exclude ready_to_schedule sessions
+  ) || [];
+
+  // Filter sessions based on completion status and search
+  const filteredSessions = upcomingSessions.filter(session => {
+    // Categorize sessions
+    const isCompleted = session.status === 'completed';
+    const isUpcoming = !isCompleted;
+    const isToday = session.date && new Date(session.date).toDateString() === new Date().toDateString();
+
+    // Apply filter
+    if (activeFilter === 'upcoming' && !isUpcoming) return false;
+    if (activeFilter === 'completed' && !isCompleted) return false;
+    if (activeFilter === 'today' && (!isToday || isCompleted)) return false;
+
+    // Apply search
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (session.title && session.title.toLowerCase().includes(searchLower)) ||
+        (session.subject && session.subject.toLowerCase().includes(searchLower)) ||
+        (session.topic && session.topic.toLowerCase().includes(searchLower))
+      );
+    }
+
+    return true;
+  });
+
+  // Sort sessions: upcoming by date (earliest first), completed by date (most recent first)
+  const sortedSessions = filteredSessions.sort((a, b) => {
+    const aCompleted = a.status === 'completed';
+    const bCompleted = b.status === 'completed';
+    
+    if (aCompleted === bCompleted && a.date && b.date) {
+      const aDate = new Date(a.date).getTime();
+      const bDate = new Date(b.date).getTime();
+      return aCompleted ? bDate - aDate : aDate - bDate; // Completed: recent first, Upcoming: earliest first
+    }
+    
+    return aCompleted ? 1 : -1; // Upcoming sessions first
+  });
 
   if (upcomingSessions.length === 0) {
     return (
@@ -381,6 +426,42 @@ const MySchedule = () => {
         </div>
       </div>
 
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search sessions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-2">
+              {[
+                { key: 'upcoming', label: '📅 Upcoming', count: upcomingSessions.filter(s => s.status !== 'completed').length },
+                { key: 'today', label: '⏰ Today', count: upcomingSessions.filter(s => s.date && new Date(s.date).toDateString() === new Date().toDateString() && s.status !== 'completed').length },
+                { key: 'completed', label: '✅ Completed', count: upcomingSessions.filter(s => s.status === 'completed').length }
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => setActiveFilter(filter.key)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeFilter === filter.key
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {filter.label} ({filter.count})
+                </button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>This Week Overview</CardTitle>
@@ -408,20 +489,65 @@ const MySchedule = () => {
       </Card>
 
       <div className="grid gap-6">
-        {upcomingSessions.map((session) => (
-          <Card key={session._id || session.id} className="hover:shadow-lg transition-shadow duration-300">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-xl text-gray-900 mb-1">
-                    {session.subject || session.title}
-                  </CardTitle>
-                  <p className="text-gray-600 mb-3">{session.topic || session.chapter}</p>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <Badge className={getStatusColor(session.status)}>
-                      {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
-                    </Badge>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-gray-600">
+            Showing {sortedSessions.length} of {upcomingSessions.length} sessions
+          </p>
+        </div>
+        {sortedSessions.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <div className="text-gray-500">
+                <div className="text-gray-400 text-4xl mb-4">
+                  {activeFilter === 'completed' ? '✅' : activeFilter === 'today' ? '⏰' : '📅'}
+                </div>
+                <h3 className="text-lg font-medium text-gray-600 mb-2">
+                  No {activeFilter} sessions
+                </h3>
+                <p className="text-gray-500">
+                  {activeFilter === 'completed' ? 'Complete some sessions to see them here' : 
+                   activeFilter === 'today' ? 'No sessions scheduled for today' :
+                   'No upcoming sessions scheduled'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          sortedSessions.map((session) => {
+            const isToday = session.date && new Date(session.date).toDateString() === new Date().toDateString();
+            const isCompleted = session.status === 'completed';
+            
+            return (
+              <Card key={session._id || session.id} className={`hover:shadow-lg transition-shadow duration-300 ${
+                isCompleted ? 'opacity-75 border-gray-300' : 
+                isToday ? 'border-green-400 bg-green-50' : 'border-blue-200'
+              }`}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className={`text-xl ${isCompleted ? 'text-gray-600' : 'text-gray-900'}`}>
+                          {session.subject || session.title}
+                        </CardTitle>
+                        {isCompleted && (
+                          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
+                            ✅ Completed
+                          </span>
+                        )}
+                        {isToday && !isCompleted && (
+                          <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                            ⏰ Today
+                          </span>
+                        )}
+                      </div>
+                      <p className={`mb-3 ${isCompleted ? 'text-gray-500' : 'text-gray-600'}`}>
+                        {session.topic || session.chapter}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className={getStatusColor(session.status)}>
+                          {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                        </Badge>
                     <Badge variant="outline">
                       <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -589,7 +715,9 @@ const MySchedule = () => {
               </div>
             </CardContent>
           </Card>
-        ))}
+            );
+          })
+        )}
       </div>
 
       {/* Modals */}
