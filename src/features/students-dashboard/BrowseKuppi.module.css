@@ -334,6 +334,15 @@
   background: #334155;
 }
 
+.interestShownButton {
+  background: #16a34a !important;
+  cursor: default;
+}
+
+.interestShownButton:hover {
+  background: #16a34a !important;
+}
+
 /* Empty State */
 .emptyState {
   text-align: center;
