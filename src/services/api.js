@@ -477,4 +477,86 @@ export const joinSession = async (sessionId) => {
   }
 };
 
+// Create a new session by tutor
+export const createTutorSession = async (sessionData) => {
+  try {
+    console.log('🚀 API: Creating tutor session:', sessionData);
+    const response = await api.post('/sessions/create', sessionData);
+    console.log('✅ API: Successfully created tutor session:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to create tutor session:', {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to create session');
+  }
+};
+
+// Get tutor's created sessions
+export const getTutorCreatedSessions = async () => {
+  try {
+    console.log('📡 API: Fetching tutor created sessions...');
+    const response = await api.get('/sessions/tutor/created');
+    console.log('📡 API: Tutor created sessions received:', {
+      count: response.data.data?.length || 0
+    });
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to fetch tutor created sessions:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch created sessions');
+  }
+};
+
+// Show interest in a session (for students)
+export const showInterestInSession = async (sessionId) => {
+  try {
+    console.log('👋 API: Showing interest in session:', sessionId);
+    const response = await api.post(`/sessions/${sessionId}/interest`);
+    console.log('✅ API: Successfully showed interest in session:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to show interest:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to show interest in session');
+  }
+};
+
+// Schedule a tutor-created session (when enough students show interest)
+export const scheduleTutorSession = async (sessionId, scheduleData) => {
+  try {
+    console.log('📅 API: Scheduling tutor session:', sessionId, scheduleData);
+    const response = await api.post(`/sessions/${sessionId}/schedule-tutor`, scheduleData);
+    console.log('✅ API: Successfully scheduled tutor session:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to schedule tutor session:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to schedule session');
+  }
+};
+
+// Mark a session as completed (for tutors)
+export const markSessionCompleted = async (sessionId) => {
+  try {
+    console.log('✅ API: Marking session as completed:', sessionId);
+    const response = await api.post(`/sessions/${sessionId}/complete`);
+    console.log('✅ API: Successfully marked session as completed:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to mark session as completed:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to mark session as completed');
+  }
+};
+
 export { api };

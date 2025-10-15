@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAvailableSessions, joinSession } from '../../services/api';
+import { getAvailableSessions, joinSession, showInterestInSession } from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { IoSearchOutline, IoCalendarOutline, IoPeopleOutline, IoStarOutline } from 'react-icons/io5';
 import styles from "../students-dashboard/BrowseKuppi.module.css";
@@ -136,6 +136,21 @@ const KuppiGrid = ({ filters, searchTerm }) => {
     }
   };
 
+  const handleShowInterest = async (sessionId) => {
+    try {
+      setJoinLoading(prev => ({ ...prev, [sessionId]: true }));
+      await showInterestInSession(sessionId);
+      toast.success('Interest shown successfully! Tutor will be notified.');
+      
+      // Refresh the data
+      queryClient.invalidateQueries(['availableSessions']);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setJoinLoading(prev => ({ ...prev, [sessionId]: false }));
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.kuppiGrid}>
@@ -242,18 +257,36 @@ const KuppiGrid = ({ filters, searchTerm }) => {
                   <div className={styles.pricing}>
                     <span className={styles.currentPrice}>Rs. {session.price}</span>
                     <span className={styles.availableSpots}>
-                      {session.availableSpots} spots left
+                      {session.source === 'tutor_created' 
+                        ? `${session.interestedStudents?.length || 0}/${session.minStudents || session.maxStudents} interested`
+                        : `${session.availableSpots} spots left`
+                      }
                     </span>
                   </div>
-                  <button 
-                    className={`${styles.joinButton} ${session.isEnrolled ? styles.enrolledButton : ''}`}
-                    onClick={() => !session.isEnrolled && handleJoinSession(session.id)}
-                    disabled={session.isEnrolled || joinLoading[session.id] || session.availableSpots === 0}
-                  >
-                    {joinLoading[session.id] ? '...' : 
-                     session.isEnrolled ? 'Enrolled' : 
-                     session.availableSpots === 0 ? 'Full' : 'Join Session'}
-                  </button>
+                  
+                  {/* Different buttons based on session source and status */}
+                  {session.source === 'tutor_created' ? (
+                    // Tutor-created session: Show Interest button
+                    <button 
+                      className={`${styles.joinButton} ${session.hasShownInterest ? styles.interestShownButton : ''}`}
+                      onClick={() => !session.hasShownInterest && handleShowInterest(session.id)}
+                      disabled={session.hasShownInterest || joinLoading[session.id]}
+                    >
+                      {joinLoading[session.id] ? '...' : 
+                       session.hasShownInterest ? 'Interest Shown' : 'Show Interest'}
+                    </button>
+                  ) : (
+                    // Poll-based session: Join Session button
+                    <button 
+                      className={`${styles.joinButton} ${session.isEnrolled ? styles.enrolledButton : ''}`}
+                      onClick={() => !session.isEnrolled && handleJoinSession(session.id)}
+                      disabled={session.isEnrolled || joinLoading[session.id] || session.availableSpots === 0}
+                    >
+                      {joinLoading[session.id] ? '...' : 
+                       session.isEnrolled ? 'Enrolled' : 
+                       session.availableSpots === 0 ? 'Full' : 'Join Session'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
