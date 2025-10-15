@@ -6,55 +6,12 @@ import SessionRequests from '../tutor-dashboard/SessionRequests';
 import CreateSession from '../tutor-dashboard/CreateSession';
 import StudentFeedback from '../tutor-dashboard/StudentFeedback';
 import Header from "../../ui/Home/Header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 
-
-// Navigation Component
-const Navigation = ({ activeTab, setActiveTab }) => {
-  const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'requests', label: 'Session Requests' },
-    { id: 'schedule', label: 'My Schedule' },
-    { id: 'earnings', label: 'Earnings' },
-    { id: 'feedback', label: 'Student Feedback' }
-  ];
-
-  return (
-    <nav className={styles.navigation}>
-      <div className={styles.tabList}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`${styles.tab} ${activeTab === tab.id ? styles.active : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-    </nav>
-  );
-};
 
 // Main Dashboard Component
 const TutorDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
-
-  const renderPage = () => {
-    switch (activeTab) {
-      case 'overview':
-        return <TutorOverview setActiveTab={setActiveTab} />;
-      case 'requests':
-        return <SessionRequests />;
-      case 'schedule':
-        return <MySchedule />;
-      case 'earnings':
-        return <Earnings />;
-      case 'feedback':
-        return <StudentFeedback />;
-      default:
-        return <TutorOverview setActiveTab={setActiveTab} />;
-    }
-  };
 
   return (
     <div className={styles.dashboard}>
