@@ -158,6 +158,10 @@ const SessionRequests = () => {
   const { user, isSignedIn } = useUser();
   const queryClient = useQueryClient();
   const [scheduleModal, setScheduleModal] = useState({ isOpen: false, pollData: null });
+  
+  // Filter and search states
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const currentUserId = user?.id;
 
@@ -322,6 +326,47 @@ const SessionRequests = () => {
 
   console.log(`📊 Filtering results: ${requests.length} total → ${filteredRequests.length} filtered (Current user: ${currentUserId})`);
 
+  // Enhanced filtering and search logic
+  const applyFiltersAndSearch = (sessions) => {
+    if (!sessions) return [];
+    
+    let filtered = sessions;
+
+    // Apply subject filter
+    if (activeFilter !== 'all') {
+      filtered = filtered.filter(session => session.subject === activeFilter);
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(session => 
+        session.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.chapter.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  };
+
+  // Get filter counts
+  const getFilterCounts = (sessions) => {
+    if (!sessions) return {};
+    
+    const subjects = [...new Set(sessions.map(s => s.subject))];
+    const counts = { all: sessions.length };
+    
+    subjects.forEach(subject => {
+      counts[subject] = sessions.filter(s => s.subject === subject).length;
+    });
+    
+    return counts;
+  };
+
+  // Apply enhanced filters to the already filtered requests
+  const finalFilteredRequests = applyFiltersAndSearch(filteredRequests);
+  const filterCounts = getFilterCounts(filteredRequests);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -330,25 +375,135 @@ const SessionRequests = () => {
           <p className="text-gray-600">Review and respond to student requests for group sessions (polls with &gt;50% votes)</p>
         </div>
         <Badge variant="outline" className="text-sm">
-          {filteredRequests.length} Available Requests
+          {finalFilteredRequests.length} Available Requests
         </Badge>
       </div>
 
-      {filteredRequests.length === 0 ? (
+      {/* Filters and Search Section */}
+      {filteredRequests.length > 0 && (
         <Card>
-          <CardContent className="text-center py-8">
-            <div className="text-gray-500">
-              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Session Requests</h3>
-              <p className="text-gray-600">No polls have reached the 50% vote threshold yet.</p>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search requests by title, subject, or chapter..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                {searchTerm && (
+                  <Button
+                    onClick={() => setSearchTerm('')}
+                    variant="outline"
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+
+              {/* Subject Filter Tabs */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setActiveFilter('all')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeFilter === 'all'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  All Subjects ({filterCounts.all || 0})
+                </button>
+                {Object.keys(filterCounts)
+                  .filter(key => key !== 'all')
+                  .map((subject) => (
+                    <button
+                      key={subject}
+                      onClick={() => setActiveFilter(subject)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        activeFilter === subject
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {getSubjectDisplayName(subject)} ({filterCounts[subject] || 0})
+                    </button>
+                  ))}
+              </div>
+
+              {/* Active Filters Display */}
+              {(activeFilter !== 'all' || searchTerm) && (
+                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <span>Active filters:</span>
+                  {activeFilter !== 'all' && (
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Subject: {getSubjectDisplayName(activeFilter)}
+                    </Badge>
+                  )}
+                  {searchTerm && (
+                    <Badge className="bg-green-100 text-green-800">
+                      Search: {searchTerm}
+                    </Badge>
+                  )}
+                  <button
+                    onClick={() => {
+                      setActiveFilter('all');
+                      setSearchTerm('');
+                    }}
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {finalFilteredRequests.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-8">
+            {filteredRequests.length === 0 ? (
+              <div className="text-gray-500">
+                <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Session Requests</h3>
+                <p className="text-gray-600">No polls have reached the 50% vote threshold yet.</p>
+              </div>
+            ) : (
+              <div className="text-gray-500">
+                <div className="text-gray-400 text-4xl mb-4">🔍</div>
+                <h3 className="text-lg font-medium text-gray-600 mb-2">No requests match your filters</h3>
+                <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria.</p>
+                <Button
+                  onClick={() => {
+                    setActiveFilter('all');
+                    setSearchTerm('');
+                  }}
+                  variant="outline"
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-6">
-          {filteredRequests.map((request) => {
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-600">
+              Showing {finalFilteredRequests.length} of {filteredRequests.length} requests
+            </p>
+          </div>
+          <div className="grid gap-6">
+          {finalFilteredRequests.map((request) => {
             const votePercentage = (request.voteCount / request.maxStudents) * 100;
             
             // Debug: Log poll reaching threshold
@@ -465,6 +620,7 @@ const SessionRequests = () => {
               </Card>
             );
           })}
+          </div>
         </div>
       )}
 
