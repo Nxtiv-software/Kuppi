@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/tabs'
 import TutorOverview from '../tutor-dashboard/TutorOverview';
 import MySchedule from '../tutor-dashboard/MySchedule';
 import SessionRequests from '../tutor-dashboard/SessionRequests';
-import Earnings from '../tutor-dashboard/Earnings';
+import CreateSession from '../tutor-dashboard/CreateSession';
 import StudentFeedback from '../tutor-dashboard/StudentFeedback';
 import Header from "../../ui/Home/Header";
 
@@ -62,14 +62,14 @@ const TutorDashboard = () => {
               My Schedule
             </TabsTrigger>
             <TabsTrigger
-              value="earnings"
+              value="create-session"
               className={`flex-1 px-5 py-3 text-center font-medium text-gray-600 hover:bg-gray-50 transition ${
-                activeTab === "earnings"
+                activeTab === "create-session"
                   ? "text-gray-900 border-b-2 border-blue-600 bg-gray-50"
                   : ""
               }`}
             >
-              Earnings
+              Create Session
             </TabsTrigger>
             <TabsTrigger
               value="feedback"
@@ -94,8 +94,8 @@ const TutorDashboard = () => {
           <TabsContent value="schedule">
             <MySchedule />
           </TabsContent>
-          <TabsContent value="earnings">
-            <Earnings />
+          <TabsContent value="create-session">
+            <CreateSession />
           </TabsContent>
           <TabsContent value="feedback">
             <StudentFeedback />
