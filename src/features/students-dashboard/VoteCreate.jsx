@@ -645,7 +645,7 @@ const TrendingPolls = () => {
 
   return (
     <div className={styles.trendingPolls}>
-      <h3 className={styles.sectionTitle}>🔥 Trending Polls (7+ votes)</h3>
+      <h3 className={styles.sectionTitle}>🔥 Trending Polls (70%+ votes)</h3>
       <div className={styles.pollsGrid}>
         {isLoading && <div className={styles.loading}>Loading trending polls...</div>}
         {error && <div className={styles.error}>Error loading trending polls: {error.message}</div>}
