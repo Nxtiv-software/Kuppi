@@ -1,36 +1,93 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getMyScheduledSessions } from '../../services/api';
+import { getMyScheduledSessions, getPolls, getTrendingPolls } from '../../services/api';
 import { useUser } from '@clerk/clerk-react';
 import { IoBookOutline, IoStatsChartOutline, IoTrendingUpOutline, IoCashOutline, IoCalendarOutline, IoPeopleOutline, IoCreateOutline, IoTimeOutline } from 'react-icons/io5';
 import styles from "../students-dashboard/Overview.module.css";
 
-// Stats Cards Component
+// Stats Cards Component with Real Data
 const StatsCards = () => {
+  const { user, isSignedIn } = useUser();
+
+  // Fetch student's sessions
+  const { data: sessionsData } = useQuery({
+    queryKey: ['myScheduledSessions'],
+    queryFn: getMyScheduledSessions,
+    enabled: isSignedIn,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Fetch regular polls
+  const { data: pollsData } = useQuery({
+    queryKey: ['polls', { status: 'all' }],
+    queryFn: () => getPolls({ status: 'all' }),
+    enabled: isSignedIn,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Fetch trending polls
+  const { data: trendingPollsData } = useQuery({
+    queryKey: ['trendingPolls'],
+    queryFn: getTrendingPolls,
+    enabled: isSignedIn,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Calculate stats from real data
+  const sessions = sessionsData?.sessions || [];
+  const regularPolls = pollsData?.data?.polls || [];
+  const trendingPolls = trendingPollsData?.data || [];
+
+  // 1. Sessions Attended: Count completed sessions
+  const completedSessions = sessions.filter(s => s.status === 'completed');
+  const sessionsAttended = completedSessions.length;
+
+  // 2. Active Polls: Count all active polls (regular + trending) + accepted polls
+  const activePolls = regularPolls.filter(p => p.status === 'active' || p.status === 'accepted');
+  const activeTrendingPolls = trendingPolls.filter(p => p.status === 'active' || p.status === 'accepted');
+  const totalActivePolls = activePolls.length + activeTrendingPolls.length;
+
+  // Count polls created by current user
+  const myPolls = [...activePolls, ...activeTrendingPolls].filter(p => 
+    p.creatorInfo?.id === user?.id || p.creator?.id === user?.id || p.createdBy === user?.id
+  );
+
+  // 3. Hours Learned: Sum of completed session durations
+  const hoursLearned = completedSessions.reduce((total, session) => {
+    const duration = parseFloat(session.duration) || 0;
+    return total + duration;
+  }, 0);
+
+  // 4. Active Sessions: Count sessions that are not completed
+  const activeSessions = sessions.filter(s => 
+    s.status !== 'completed' && s.status !== 'cancelled'
+  );
+  const activeSessionsCount = activeSessions.length;
+
   const stats = [
     {
       title: 'Sessions Attended',
-      value: '12',
-      subtitle: '+2 this week',
+      value: sessionsAttended.toString(),
+      subtitle: `${sessionsAttended} completed`,
       icon: <IoBookOutline />
     },
     {
       title: 'Active Polls',
-      value: '5',
-      subtitle: '3 created by you',
+      value: totalActivePolls.toString(),
+      subtitle: `${myPolls.length} created by you`,
       icon: <IoStatsChartOutline />
     },
     {
       title: 'Hours Learned',
-      value: '24',
-      subtitle: 'This month',
-      icon: <IoStatsChartOutline />
+      value: `${hoursLearned.toFixed(1)}h`,
+      subtitle: 'From completed sessions',
+      icon: <IoTimeOutline />
     },
     {
-      title: 'Money Saved',
-      value: 'Rs. 3,500',
-      subtitle: 'Vs individual tutoring',
-      icon: <IoCashOutline />
+      title: 'Active Sessions',
+      value: activeSessionsCount.toString(),
+      subtitle: 'Enrolled & upcoming',
+      icon: <IoCalendarOutline />
     }
   ];
 
