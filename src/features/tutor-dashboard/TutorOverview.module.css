@@ -331,6 +331,21 @@
   background: #f9fafb;
 }
 
+/* Loading and Empty States */
+.loadingMessage {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.emptyMessage {
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 768px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
