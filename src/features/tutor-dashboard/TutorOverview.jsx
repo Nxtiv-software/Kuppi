@@ -24,7 +24,7 @@ const TutorOverview = ({ setActiveTab }) => {
 
   // Format date and time
   const formatDateTime = (dateString, timeString) => {
-    if (!dateString || !timeString) return 'Date TBD';
+    if (!dateString) return 'Date TBD';
     
     const date = new Date(dateString);
     const today = new Date();
@@ -34,13 +34,16 @@ const TutorOverview = ({ setActiveTab }) => {
     const isToday = date.toDateString() === today.toDateString();
     const isTomorrow = date.toDateString() === tomorrow.toDateString();
     
+    // Format time or show "Time TBD"
+    const timeDisplay = timeString || 'Time TBD';
+    
     if (isToday) {
-      return `Today, ${timeString}`;
+      return `Today, ${timeDisplay}`;
     } else if (isTomorrow) {
-      return `Tomorrow, ${timeString}`;
+      return `Tomorrow, ${timeDisplay}`;
     } else {
       const options = { weekday: 'long', month: 'short', day: 'numeric' };
-      return `${date.toLocaleDateString('en-US', options)}, ${timeString}`;
+      return `${date.toLocaleDateString('en-US', options)}, ${timeDisplay}`;
     }
   };
 
@@ -155,7 +158,7 @@ const TutorOverview = ({ setActiveTab }) => {
                         {session.enrolledStudents && ` • ${session.enrolledStudents.length} students`}
                       </p>
                       <p className={styles.sessionTime}>
-                        {formatDateTime(session.scheduledDate, session.scheduledTime)}
+                        {formatDateTime(session.date, session.time)}
                       </p>
                     </div>
                     <span className={`${styles.badge} ${getStatusClass(session.status)}`}>
