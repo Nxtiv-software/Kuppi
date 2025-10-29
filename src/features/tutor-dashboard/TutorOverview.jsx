@@ -1,7 +1,63 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getTutorScheduledSessions, getSessionRequests } from '../../services/api';
 import styles from './TutorOverview.module.css';
 
 const TutorOverview = ({ setActiveTab }) => {
+  // Fetch upcoming sessions
+  const { data: upcomingSessionsData, isLoading: loadingSessions } = useQuery({
+    queryKey: ['tutorScheduledSessions'],
+    queryFn: getTutorScheduledSessions,
+  });
+
+  // Fetch session requests
+  const { data: sessionRequestsData, isLoading: loadingRequests } = useQuery({
+    queryKey: ['sessionRequests'],
+    queryFn: getSessionRequests,
+  });
+
+  // Filter out completed and cancelled sessions from upcoming sessions
+  const upcomingSessions = (upcomingSessionsData?.data || []).filter(
+    session => session.status !== 'completed' && session.status !== 'cancelled'
+  );
+  const sessionRequests = sessionRequestsData?.data || [];
+
+  // Format date and time
+  const formatDateTime = (dateString, timeString) => {
+    if (!dateString || !timeString) return 'Date TBD';
+    
+    const date = new Date(dateString);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const isToday = date.toDateString() === today.toDateString();
+    const isTomorrow = date.toDateString() === tomorrow.toDateString();
+    
+    if (isToday) {
+      return `Today, ${timeString}`;
+    } else if (isTomorrow) {
+      return `Tomorrow, ${timeString}`;
+    } else {
+      const options = { weekday: 'long', month: 'short', day: 'numeric' };
+      return `${date.toLocaleDateString('en-US', options)}, ${timeString}`;
+    }
+  };
+
+  // Get status badge class
+  const getStatusClass = (status) => {
+    if (status === 'upcoming' || status === 'scheduled') return styles.confirmed;
+    if (status === 'ready_to_schedule') return styles.pending;
+    return styles.pending;
+  };
+
+  // Get status label
+  const getStatusLabel = (status) => {
+    if (status === 'upcoming' || status === 'scheduled') return 'Upcoming';
+    if (status === 'ready_to_schedule') return 'Ready to Schedule';
+    return status;
+  };
+
   return (
     <div className={styles.overview}>
       {/* Stats Cards */}
@@ -83,39 +139,41 @@ const TutorOverview = ({ setActiveTab }) => {
             <h2 className={styles.sessionHeaderTitle}>Upcoming Sessions</h2>
           </div>
           <div className={styles.sessionList}>
-            <div className={`${styles.sessionItem} ${styles.confirmed}`}>
-              <div className={styles.sessionItemHeader}>
-                <div>
-                  <h4 className={styles.sessionTitle}>Data Structures & Algorithms</h4>
-                  <p className={styles.sessionDetails}>Binary Trees • 15 students</p>
-                  <p className={styles.sessionTime}>Today, 3:00 PM</p>
+            {loadingSessions ? (
+              <div className={styles.loadingMessage}>Loading sessions...</div>
+            ) : upcomingSessions.length === 0 ? (
+              <div className={styles.emptyMessage}>No upcoming sessions</div>
+            ) : (
+              upcomingSessions.slice(0, 3).map((session) => (
+                <div key={session._id} className={`${styles.sessionItem} ${getStatusClass(session.status)}`}>
+                  <div className={styles.sessionItemHeader}>
+                    <div>
+                      <h4 className={styles.sessionTitle}>{session.title}</h4>
+                      <p className={styles.sessionDetails}>
+                        {session.subject && `${session.subject.replace('-', ' ').toUpperCase()}`}
+                        {session.topic && ` • ${session.topic}`}
+                        {session.enrolledStudents && ` • ${session.enrolledStudents.length} students`}
+                      </p>
+                      <p className={styles.sessionTime}>
+                        {formatDateTime(session.scheduledDate, session.scheduledTime)}
+                      </p>
+                    </div>
+                    <span className={`${styles.badge} ${getStatusClass(session.status)}`}>
+                      {getStatusLabel(session.status)}
+                    </span>
+                  </div>
                 </div>
-                <span className={`${styles.badge} ${styles.confirmed}`}>Confirmed</span>
-              </div>
-            </div>
-            
-            <div className={`${styles.sessionItem} ${styles.confirmed}`}>
-              <div className={styles.sessionItemHeader}>
-                <div>
-                  <h4 className={styles.sessionTitle}>Database Systems</h4>
-                  <p className={styles.sessionDetails}>SQL Joins • 12 students</p>
-                  <p className={styles.sessionTime}>Tomorrow, 2:00 PM</p>
-                </div>
-                <span className={`${styles.badge} ${styles.confirmed}`}>Confirmed</span>
-              </div>
-            </div>
-            
-            <div className={`${styles.sessionItem} ${styles.pending}`}>
-              <div className={styles.sessionItemHeader}>
-                <div>
-                  <h4 className={styles.sessionTitle}>Object Oriented Programming</h4>
-                  <p className={styles.sessionDetails}>Inheritance • 8 students</p>
-                  <p className={`${styles.sessionTime} ${styles.pending}`}>Friday, 4:00 PM</p>
-                </div>
-                <span className={`${styles.badge} ${styles.pending}`}>Pending</span>
-              </div>
-            </div>
+              ))
+            )}
           </div>
+          {upcomingSessions.length > 3 && (
+            <button 
+              className={styles.viewAllButton}
+              onClick={() => setActiveTab('schedule')}
+            >
+              View All Sessions
+            </button>
+          )}
         </div>
 
         <div className={styles.sessionContainer}>
@@ -123,44 +181,47 @@ const TutorOverview = ({ setActiveTab }) => {
             <h2 className={styles.sessionHeaderTitle}>Session Requests</h2>
           </div>
           <div className={styles.sessionList}>
-            <div className={styles.requestItem}>
-              <div className={styles.requestHeader}>
-                <div>
-                  <h4 className={styles.requestTitle}>Machine Learning Basics</h4>
-                  <p className={styles.requestDetails}>22 students interested</p>
-                  <p className={styles.requestRate}>Suggested rate: Rs. 300/student</p>
+            {loadingRequests ? (
+              <div className={styles.loadingMessage}>Loading requests...</div>
+            ) : sessionRequests.length === 0 ? (
+              <div className={styles.emptyMessage}>No pending session requests</div>
+            ) : (
+              sessionRequests.slice(0, 2).map((request) => (
+                <div key={request._id} className={styles.requestItem}>
+                  <div className={styles.requestHeader}>
+                    <div>
+                      <h4 className={styles.requestTitle}>{request.title}</h4>
+                      <p className={styles.requestDetails}>
+                        {request.votes?.length || 0} students interested
+                      </p>
+                      <p className={styles.requestRate}>
+                        {request.subject && `Subject: ${request.subject.replace('-', ' ').toUpperCase()}`}
+                      </p>
+                    </div>
+                    <div className={styles.requestActions}>
+                      <button 
+                        className={styles.acceptButton}
+                        onClick={() => setActiveTab('requests')}
+                      >
+                        <svg className={styles.acceptIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        View
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.requestActions}>
-                  <button className={styles.acceptButton}>
-                    <svg className={styles.acceptIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Accept
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className={styles.requestItem}>
-              <div className={styles.requestHeader}>
-                <div>
-                  <h4 className={styles.requestTitle}>Web Development</h4>
-                  <p className={styles.requestDetails}>18 students interested</p>
-                  <p className={styles.requestRate}>Suggested rate: Rs. 250/student</p>
-                </div>
-                <div className={styles.requestActions}>
-                  <button className={styles.acceptButton}>
-                    <svg className={styles.acceptIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Accept
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <button className={styles.viewAllButton}>View All Requests</button>
+              ))
+            )}
           </div>
+          {sessionRequests.length > 0 && (
+            <button 
+              className={styles.viewAllButton}
+              onClick={() => setActiveTab('requests')}
+            >
+              View All Requests
+            </button>
+          )}
         </div>
       </div>
     </div>
