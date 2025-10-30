@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { ArrowRight, Users, BookOpen, Star, Trophy, Target } from 'lucide-react';
-import heroImg from "../../assets/images/hero.jpg"
+import heroImg from "../../assets/images/student_holding_books.png"
 import styles from './Hero.module.css';
 import TutorRegistrationForm from './TutorRegistrationForm';
 
@@ -15,10 +15,9 @@ const Hero = () => {
   const [showTutorForm, setShowTutorForm] = useState(false);
 
   const stats = [
-    { icon: Users, value: "10,000+", label: "Active Students" },
-    { icon: BookOpen, value: "500+", label: "Expert Tutors" },
-    { icon: Star, value: "4.9", label: "Average Rating" },
-    { icon: Trophy, value: "95%", label: "Success Rate" }
+    { icon: Users, value: "500+", label: "Active Students" },
+    { icon: BookOpen, value: "30+", label: "Expert Tutors" },
+    
   ];
 
   useEffect(() => {
@@ -100,11 +99,15 @@ const Hero = () => {
               <div className={styles.staticStats}>
                 <div className={styles.statItem}>
                   <Users className={styles.statIconSmall} />
-                  <span>{t("hero.stat1") || "10,000+ Students"}</span>
+                  <span>500+ Students</span>
                 </div>
                 <div className={styles.statItem}>
                   <BookOpen className={styles.statIconSmall} />
-                  <span>{t("hero.stat2") || "500+ Tutors"}</span>
+                  <span>30+ Expert Tutors</span>
+                </div>
+                <div className={styles.statItem}>
+                  <Star className={styles.statIconSmall} />
+                  <span>10+ Subjects</span>
                 </div>
               </div>
             </div>
@@ -114,7 +117,11 @@ const Hero = () => {
           <div className={styles.imageSection}>
             <div className={styles.imageContainer}>
               <div className={styles.imageWrapper}>
-                <img src={heroImg} alt="Kuppi Learning Platform" className={styles.heroImage} />
+                <img 
+                  src={heroImg} 
+                  alt="Student learning online" 
+                  className={styles.heroImage} 
+                />
                 <div className={styles.imageOverlay}>
                   <div className={styles.floatingCard1}>
                     <Target className={styles.cardIcon} />

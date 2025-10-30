@@ -11,25 +11,28 @@
   justify-content: center;
   align-items: center;
   font-family: 'Poppins', sans-serif;
+  position: relative;
 }
 
 /* Header Section */
 .header {
   text-align: center;
   margin-bottom: 60px;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 /* Services Tag with arrows */
 .servicesTag {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   padding: 12px 24px;
   border-radius: 25px;
   font-size: 16px;
   font-weight: 500;
-  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  animation: fadeInDown 0.8s ease-out;
 }
 
 .leftArrow {
@@ -62,41 +65,80 @@
 
 /* Individual Card */
 .card {
-  background: linear-gradient(135deg, #74b9ff, #0984e3, #6c5ce7);
-  border-radius: 25px;
-  padding: 35px 50px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #7c3aed 100%);
+  border-radius: 28px;
+  padding: 40px 50px;
   text-align: center;
-  box-shadow: 0 15px 35px rgba(116, 185, 255, 0.3);
-  transition: all 0.3s ease;
+  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.25);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(50px) scale(0.95);
+  animation: cardSlideUp 0.8s ease-out forwards;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.card:nth-child(1) { 
+  animation-delay: 0.2s;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+}
+.card:nth-child(2) { 
+  animation-delay: 0.4s;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 25px 45px rgba(116, 185, 255, 0.4);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 30px 80px rgba(37, 99, 235, 0.35);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Card Title */
 .cardTitle {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-weight: 800;
   color: #ffffff;
-  margin: 0 0 20px 0;
+  margin: 0 0 25px 0;
   line-height: 1.2;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .cardTitle {
+  transform: scale(1.05);
 }
 
 /* Card Description */
 .cardDescription {
   font-size: 17px;
-  color: #ffffff;
-  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
   margin: 0 0 15px 0;
   font-weight: 500;
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
 }
 
 .cardDescription:last-child {
@@ -155,5 +197,35 @@
   
   .cardsContainer {
     gap: 25px;
+  }
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

@@ -95,9 +95,6 @@ const Header = () => {
           <li className="hover:text-blue-500 cursor-pointer">
             <Link to="/contact">{t("nav.contact")}</Link>
           </li>
-          <li className="hover:text-green-600 cursor-pointer">
-            <Link to="/become-tutor" className="text-green-600 font-semibold">Become a Tutor</Link>
-          </li>
         </ul>
 
         {/* Right Actions */}
