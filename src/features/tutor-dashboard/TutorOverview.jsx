@@ -1,31 +1,155 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getTutorScheduledSessions, getSessionRequests } from '../../services/api';
 import styles from './TutorOverview.module.css';
 
 const TutorOverview = ({ setActiveTab }) => {
+  // Fetch upcoming sessions
+  const { data: upcomingSessionsData, isLoading: loadingSessions } = useQuery({
+    queryKey: ['tutorScheduledSessions'],
+    queryFn: getTutorScheduledSessions,
+  });
+
+  // Fetch session requests
+  const { data: sessionRequestsData, isLoading: loadingRequests } = useQuery({
+    queryKey: ['sessionRequests'],
+    queryFn: getSessionRequests,
+  });
+
+  // Filter out completed and cancelled sessions from upcoming sessions
+  const upcomingSessions = (upcomingSessionsData?.data || []).filter(
+    session => session.status !== 'completed' && session.status !== 'cancelled'
+  );
+  const sessionRequests = sessionRequestsData?.data || [];
+
+  // Calculate statistics from all sessions
+  const allSessions = upcomingSessionsData?.data || [];
+  
+  console.log('📊 RAW API Response:', upcomingSessionsData);
+  console.log('📊 All Sessions Array:', allSessions);
+  console.log('📊 First Session (if exists):', allSessions[0]);
+  
+  // Get current month's start and end dates
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  // Filter ALL completed sessions (not just this month for testing)
+  const completedSessions = allSessions.filter(session => session.status === 'completed');
+  
+  console.log('📊 TutorOverview - Completed Sessions:', completedSessions);
+  console.log('📊 TutorOverview - Current Month Range:', { start: currentMonthStart, end: currentMonthEnd });
+
+  // Calculate total earnings from ALL completed sessions
+  const totalEarnings = completedSessions.reduce((total, session) => {
+    // Use enrolledStudentsCount or enrolledStudentsInfo.length
+    const students = session.enrolledStudentsCount || session.enrolledStudentsInfo?.length || session.currentStudents || 0;
+    const feePerStudent = session.feePerStudent || 0;
+    const sessionTotal = students * feePerStudent;
+    console.log('📊 Session earnings:', { 
+      title: session.title, 
+      students, 
+      feePerStudent, 
+      sessionTotal,
+      enrolledStudentsCount: session.enrolledStudentsCount,
+      enrolledStudentsInfo: session.enrolledStudentsInfo,
+      currentStudents: session.currentStudents
+    });
+    return total + sessionTotal;
+  }, 0);
+
+  // Count completed sessions
+  const completedSessionsCount = completedSessions.length;
+
+  // Get unique enrolled students count (across all sessions)
+  const uniqueStudents = new Set();
+  allSessions.forEach(session => {
+    console.log('📊 Processing session for student count:', {
+      title: session.title,
+      enrolledStudentsInfo: session.enrolledStudentsInfo,
+      enrolledStudentsCount: session.enrolledStudentsCount,
+      currentStudents: session.currentStudents
+    });
+    // Use enrolledStudentsInfo array to get unique student IDs
+    if (session.enrolledStudentsInfo && Array.isArray(session.enrolledStudentsInfo)) {
+      session.enrolledStudentsInfo.forEach(student => {
+        console.log('📊 Adding student:', student.id);
+        uniqueStudents.add(student.id);
+      });
+    }
+  });
+  const activeStudentsCount = uniqueStudents.size;
+  console.log('📊 Total unique students:', activeStudentsCount, 'Set:', Array.from(uniqueStudents));
+
+  // Format date and time
+  const formatDateTime = (dateString, timeString) => {
+    if (!dateString) return 'Date TBD';
+    
+    const date = new Date(dateString);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const isToday = date.toDateString() === today.toDateString();
+    const isTomorrow = date.toDateString() === tomorrow.toDateString();
+    
+    // Format time or show "Time TBD"
+    const timeDisplay = timeString || 'Time TBD';
+    
+    if (isToday) {
+      return `Today, ${timeDisplay}`;
+    } else if (isTomorrow) {
+      return `Tomorrow, ${timeDisplay}`;
+    } else {
+      const options = { weekday: 'long', month: 'short', day: 'numeric' };
+      return `${date.toLocaleDateString('en-US', options)}, ${timeDisplay}`;
+    }
+  };
+
+  // Get status badge class
+  const getStatusClass = (status) => {
+    if (status === 'upcoming' || status === 'scheduled') return styles.confirmed;
+    if (status === 'ready_to_schedule') return styles.pending;
+    return styles.pending;
+  };
+
+  // Get status label
+  const getStatusLabel = (status) => {
+    if (status === 'upcoming' || status === 'scheduled') return 'Upcoming';
+    if (status === 'ready_to_schedule') return 'Ready to Schedule';
+    return status;
+  };
+
   return (
     <div className={styles.overview}>
       {/* Stats Cards */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statHeader}>
-            <h3 className={styles.statTitle}>This Month Earnings</h3>
+            <h3 className={styles.statTitle}>Total Earnings</h3>
             <svg className={styles.statIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
             </svg>
           </div>
-          <div className={styles.statValue}>Rs. 45,000</div>
-          <p className={styles.statSubtitle}>+12% from last month</p>
+          <div className={styles.statValue}>
+            {loadingSessions ? '...' : `Rs. ${totalEarnings.toLocaleString()}`}
+          </div>
+          <p className={styles.statSubtitle}>
+            From {completedSessionsCount} completed sessions
+          </p>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statHeader}>
-            <h3 className={styles.statTitle}>Sessions This Month</h3>
+            <h3 className={styles.statTitle}>Completed Sessions</h3>
             <svg className={styles.statIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <div className={styles.statValue}>18</div>
-          <p className={styles.statSubtitle}>+3 from last month</p>
+          <div className={styles.statValue}>
+            {loadingSessions ? '...' : completedSessionsCount}
+          </div>
+          <p className={styles.statSubtitle}>Total completed</p>
         </div>
 
         <div className={styles.statCard}>
@@ -35,8 +159,10 @@ const TutorOverview = ({ setActiveTab }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
             </svg>
           </div>
-          <div className={styles.statValue}>156</div>
-          <p className={styles.statSubtitle}>+8 new this week</p>
+          <div className={styles.statValue}>
+            {loadingSessions ? '...' : activeStudentsCount}
+          </div>
+          <p className={styles.statSubtitle}>Total enrolled students</p>
         </div>
 
         <div className={styles.statCard}>
@@ -83,39 +209,41 @@ const TutorOverview = ({ setActiveTab }) => {
             <h2 className={styles.sessionHeaderTitle}>Upcoming Sessions</h2>
           </div>
           <div className={styles.sessionList}>
-            <div className={`${styles.sessionItem} ${styles.confirmed}`}>
-              <div className={styles.sessionItemHeader}>
-                <div>
-                  <h4 className={styles.sessionTitle}>Data Structures & Algorithms</h4>
-                  <p className={styles.sessionDetails}>Binary Trees • 15 students</p>
-                  <p className={styles.sessionTime}>Today, 3:00 PM</p>
+            {loadingSessions ? (
+              <div className={styles.loadingMessage}>Loading sessions...</div>
+            ) : upcomingSessions.length === 0 ? (
+              <div className={styles.emptyMessage}>No upcoming sessions</div>
+            ) : (
+              upcomingSessions.slice(0, 3).map((session) => (
+                <div key={session._id} className={`${styles.sessionItem} ${getStatusClass(session.status)}`}>
+                  <div className={styles.sessionItemHeader}>
+                    <div>
+                      <h4 className={styles.sessionTitle}>{session.title}</h4>
+                      <p className={styles.sessionDetails}>
+                        {session.subject && `${session.subject.replace('-', ' ').toUpperCase()}`}
+                        {session.topic && ` • ${session.topic}`}
+                        {session.enrolledStudents && ` • ${session.enrolledStudents.length} students`}
+                      </p>
+                      <p className={styles.sessionTime}>
+                        {formatDateTime(session.date, session.time)}
+                      </p>
+                    </div>
+                    <span className={`${styles.badge} ${getStatusClass(session.status)}`}>
+                      {getStatusLabel(session.status)}
+                    </span>
+                  </div>
                 </div>
-                <span className={`${styles.badge} ${styles.confirmed}`}>Confirmed</span>
-              </div>
-            </div>
-            
-            <div className={`${styles.sessionItem} ${styles.confirmed}`}>
-              <div className={styles.sessionItemHeader}>
-                <div>
-                  <h4 className={styles.sessionTitle}>Database Systems</h4>
-                  <p className={styles.sessionDetails}>SQL Joins • 12 students</p>
-                  <p className={styles.sessionTime}>Tomorrow, 2:00 PM</p>
-                </div>
-                <span className={`${styles.badge} ${styles.confirmed}`}>Confirmed</span>
-              </div>
-            </div>
-            
-            <div className={`${styles.sessionItem} ${styles.pending}`}>
-              <div className={styles.sessionItemHeader}>
-                <div>
-                  <h4 className={styles.sessionTitle}>Object Oriented Programming</h4>
-                  <p className={styles.sessionDetails}>Inheritance • 8 students</p>
-                  <p className={`${styles.sessionTime} ${styles.pending}`}>Friday, 4:00 PM</p>
-                </div>
-                <span className={`${styles.badge} ${styles.pending}`}>Pending</span>
-              </div>
-            </div>
+              ))
+            )}
           </div>
+          {upcomingSessions.length > 3 && (
+            <button 
+              className={styles.viewAllButton}
+              onClick={() => setActiveTab('schedule')}
+            >
+              View All Sessions
+            </button>
+          )}
         </div>
 
         <div className={styles.sessionContainer}>
@@ -123,44 +251,47 @@ const TutorOverview = ({ setActiveTab }) => {
             <h2 className={styles.sessionHeaderTitle}>Session Requests</h2>
           </div>
           <div className={styles.sessionList}>
-            <div className={styles.requestItem}>
-              <div className={styles.requestHeader}>
-                <div>
-                  <h4 className={styles.requestTitle}>Machine Learning Basics</h4>
-                  <p className={styles.requestDetails}>22 students interested</p>
-                  <p className={styles.requestRate}>Suggested rate: Rs. 300/student</p>
+            {loadingRequests ? (
+              <div className={styles.loadingMessage}>Loading requests...</div>
+            ) : sessionRequests.length === 0 ? (
+              <div className={styles.emptyMessage}>No pending session requests</div>
+            ) : (
+              sessionRequests.slice(0, 2).map((request) => (
+                <div key={request._id} className={styles.requestItem}>
+                  <div className={styles.requestHeader}>
+                    <div>
+                      <h4 className={styles.requestTitle}>{request.title}</h4>
+                      <p className={styles.requestDetails}>
+                        {request.votes?.length || 0} students interested
+                      </p>
+                      <p className={styles.requestRate}>
+                        {request.subject && `Subject: ${request.subject.replace('-', ' ').toUpperCase()}`}
+                      </p>
+                    </div>
+                    <div className={styles.requestActions}>
+                      <button 
+                        className={styles.acceptButton}
+                        onClick={() => setActiveTab('requests')}
+                      >
+                        <svg className={styles.acceptIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        View
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.requestActions}>
-                  <button className={styles.acceptButton}>
-                    <svg className={styles.acceptIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Accept
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className={styles.requestItem}>
-              <div className={styles.requestHeader}>
-                <div>
-                  <h4 className={styles.requestTitle}>Web Development</h4>
-                  <p className={styles.requestDetails}>18 students interested</p>
-                  <p className={styles.requestRate}>Suggested rate: Rs. 250/student</p>
-                </div>
-                <div className={styles.requestActions}>
-                  <button className={styles.acceptButton}>
-                    <svg className={styles.acceptIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Accept
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <button className={styles.viewAllButton}>View All Requests</button>
+              ))
+            )}
           </div>
+          {sessionRequests.length > 0 && (
+            <button 
+              className={styles.viewAllButton}
+              onClick={() => setActiveTab('requests')}
+            >
+              View All Requests
+            </button>
+          )}
         </div>
       </div>
     </div>

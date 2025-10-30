@@ -317,7 +317,9 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
               </div>
               <div className={styles.headerRight}>
                 <span className={`${styles.statusBadge} ${styles[session.status]}`}>
-                  {session.status === 'scheduled' ? 'upcoming' : session.status}
+                  {session.status === 'upcoming' ? 'Upcoming' : 
+                   session.status === 'scheduled' ? 'Upcoming' : 
+                   session.status.charAt(0).toUpperCase() + session.status.slice(1)}
                 </span>
                 {session.feePerStudent && (
                   <div className={styles.feeDisplay}>Rs. {session.feePerStudent}</div>

@@ -83,42 +83,6 @@ const ScheduleSessionModal = ({ isOpen, onClose, session, onScheduleSession }) =
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Meeting Platform</label>
-            <select
-              value={scheduleData.meetingPlatform}
-              onChange={(e) => setScheduleData({...scheduleData, meetingPlatform: e.target.value})}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="zoom">Zoom</option>
-              <option value="google-meet">Google Meet</option>
-              <option value="teams">Microsoft Teams</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Meeting Link</label>
-            <input
-              type="url"
-              value={scheduleData.meetingLink}
-              onChange={(e) => setScheduleData({...scheduleData, meetingLink: e.target.value})}
-              className="w-full p-2 border rounded-md"
-              placeholder="https://zoom.us/j/..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Additional Notes</label>
-            <textarea
-              value={scheduleData.additionalNotes}
-              onChange={(e) => setScheduleData({...scheduleData, additionalNotes: e.target.value})}
-              className="w-full p-2 border rounded-md"
-              rows="3"
-              placeholder="Any additional instructions for students..."
-            />
-          </div>
-
           <div className="flex justify-end space-x-3 pt-4">
             <Button
               type="button"
@@ -417,6 +381,7 @@ const CreateSession = () => {
     queryClient.invalidateQueries(['tutorCreatedSessions']);
     queryClient.invalidateQueries(['availableSessions']); // Refresh browse kuppi
     queryClient.invalidateQueries(['myScheduledSessions']); // Refresh student schedules
+    queryClient.invalidateQueries(['tutorScheduledSessions']); // Refresh tutor's My Schedule
   };
 
   const handleMarkCompleted = async (sessionId) => {
@@ -444,8 +409,10 @@ const CreateSession = () => {
         return <Badge className="bg-blue-100 text-blue-800">Open for Interest</Badge>;
       case 'ready_to_schedule':
         return <Badge className="bg-green-100 text-green-800">Ready to Schedule</Badge>;
+      case 'upcoming':
+        return <Badge className="bg-purple-100 text-purple-800">Upcoming</Badge>;
       case 'scheduled':
-        return <Badge className="bg-purple-100 text-purple-800">Scheduled</Badge>;
+        return <Badge className="bg-purple-100 text-purple-800">Upcoming</Badge>;
       case 'completed':
         return <Badge className="bg-gray-100 text-gray-800">Completed</Badge>;
       default:
@@ -771,7 +738,7 @@ const CreateSession = () => {
                     </div>
                   )}
 
-                  {session.status === 'scheduled' && (
+                  {(session.status === 'scheduled' || session.status === 'upcoming') && (
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
                       <div className="flex justify-between items-center">
                         <div>
