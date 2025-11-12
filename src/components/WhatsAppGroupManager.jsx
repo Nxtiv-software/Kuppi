@@ -7,7 +7,9 @@ import {
   getSessionMembers 
 } from '../services/api';
 
-const WhatsAppGroupManager = ({ sessionId, isTutor = false }) => {
+const WhatsAppGroupManager = ({ session, sessionId, isTutor = false, onClose }) => {
+  // Support both session object and direct sessionId
+  const actualSessionId = session?._id || session?.id || sessionId;
   const [isEditing, setIsEditing] = useState(false);
   const [whatsappLink, setWhatsappLink] = useState('');
   const [showMembers, setShowMembers] = useState(false);
@@ -15,23 +17,23 @@ const WhatsAppGroupManager = ({ sessionId, isTutor = false }) => {
 
   // Fetch WhatsApp link
   const { data: linkData, isLoading: linkLoading } = useQuery({
-    queryKey: ['whatsappLink', sessionId],
-    queryFn: () => getWhatsAppGroupLink(sessionId),
-    enabled: !!sessionId
+    queryKey: ['whatsappLink', actualSessionId],
+    queryFn: () => getWhatsAppGroupLink(actualSessionId),
+    enabled: !!actualSessionId
   });
 
   // Fetch session members
   const { data: membersData, isLoading: membersLoading } = useQuery({
-    queryKey: ['sessionMembers', sessionId],
-    queryFn: () => getSessionMembers(sessionId),
-    enabled: showMembers && !!sessionId
+    queryKey: ['sessionMembers', actualSessionId],
+    queryFn: () => getSessionMembers(actualSessionId),
+    enabled: showMembers && !!actualSessionId
   });
 
   // Add/Update WhatsApp link mutation
   const addLinkMutation = useMutation({
-    mutationFn: (link) => addWhatsAppGroupLink(sessionId, link),
+    mutationFn: (link) => addWhatsAppGroupLink(actualSessionId, link),
     onSuccess: () => {
-      queryClient.invalidateQueries(['whatsappLink', sessionId]);
+      queryClient.invalidateQueries(['whatsappLink', actualSessionId]);
       setIsEditing(false);
       setWhatsappLink('');
       alert('✅ WhatsApp group link added successfully!');
@@ -43,9 +45,9 @@ const WhatsAppGroupManager = ({ sessionId, isTutor = false }) => {
 
   // Remove WhatsApp link mutation
   const removeLinkMutation = useMutation({
-    mutationFn: () => removeWhatsAppGroupLink(sessionId),
+    mutationFn: () => removeWhatsAppGroupLink(actualSessionId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['whatsappLink', sessionId]);
+      queryClient.invalidateQueries(['whatsappLink', actualSessionId]);
       alert('✅ WhatsApp group link removed successfully!');
     },
     onError: (error) => {
@@ -89,12 +91,19 @@ const WhatsAppGroupManager = ({ sessionId, isTutor = false }) => {
   const groupLink = linkData?.data?.whatsappGroupLink;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h3 style={styles.title}>
-          📱 WhatsApp Group
-        </h3>
-      </div>
+    <div style={styles.modalOverlay}>
+      <div style={styles.modalContent}>
+        <div style={styles.header}>
+          <h3 style={styles.title}>
+            📱 WhatsApp Group
+          </h3>
+          {onClose && (
+            <button onClick={onClose} style={styles.closeButton}>
+              ✕
+            </button>
+          )}
+        </div>
+        <div style={styles.container}>
 
       {!hasLink && !isEditing && (
         <div style={styles.noLink}>
@@ -200,30 +209,61 @@ const WhatsAppGroupManager = ({ sessionId, isTutor = false }) => {
           </div>
         </div>
       )}
+      </div>
+      </div>
     </div>
   );
 };
 
 // Inline styles for the component
 const styles = {
-  container: {
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    padding: '1.5rem',
-    marginTop: '1rem',
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  },
+  modalContent: {
     backgroundColor: '#fff',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    borderRadius: '12px',
+    padding: '2rem',
+    maxWidth: '600px',
+    width: '90%',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+  },
+  container: {
+    padding: '0'
   },
   header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderBottom: '2px solid #25D366',
-    paddingBottom: '0.5rem',
-    marginBottom: '1rem'
+    paddingBottom: '1rem',
+    marginBottom: '1.5rem'
   },
   title: {
     margin: 0,
     color: '#25D366',
-    fontSize: '1.2rem',
+    fontSize: '1.5rem',
     fontWeight: '600'
+  },
+  closeButton: {
+    background: 'transparent',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: '#666',
+    padding: '0.25rem 0.5rem',
+    lineHeight: 1
   },
   noLink: {
     textAlign: 'center',
