@@ -559,4 +559,76 @@ export const markSessionCompleted = async (sessionId) => {
   }
 };
 
+// ==================== WhatsApp Group Management ====================
+
+// Add WhatsApp group link to a session
+export const addWhatsAppGroupLink = async (sessionId, whatsappGroupLink) => {
+  try {
+    console.log(`📱 API: Adding WhatsApp link to session ${sessionId}`);
+    const response = await api.post(`/sessions/${sessionId}/whatsapp-link`, {
+      whatsappGroupLink
+    });
+    console.log('✅ API: WhatsApp link added successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to add WhatsApp link:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to add WhatsApp group link');
+  }
+};
+
+// Get WhatsApp group link for a session
+export const getWhatsAppGroupLink = async (sessionId) => {
+  try {
+    console.log(`📱 API: Fetching WhatsApp link for session ${sessionId}`);
+    const response = await api.get(`/sessions/${sessionId}/whatsapp-link`);
+    console.log('✅ API: WhatsApp link fetched:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to fetch WhatsApp link:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to fetch WhatsApp group link');
+  }
+};
+
+// Get session members (students + tutor)
+export const getSessionMembers = async (sessionId) => {
+  try {
+    console.log(`👥 API: Fetching members for session ${sessionId}`);
+    const response = await api.get(`/sessions/${sessionId}/members`);
+    console.log('✅ API: Session members fetched:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to fetch session members:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to fetch session members');
+  }
+};
+
+// Remove WhatsApp group link from a session
+export const removeWhatsAppGroupLink = async (sessionId) => {
+  try {
+    console.log(`📱 API: Removing WhatsApp link from session ${sessionId}`);
+    const response = await api.delete(`/sessions/${sessionId}/whatsapp-link`);
+    console.log('✅ API: WhatsApp link removed successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to remove WhatsApp link:', {
+      sessionId,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message
+    });
+    throw new Error(error.response?.data?.message || 'Failed to remove WhatsApp group link');
+  }
+};
+
 export { api };
