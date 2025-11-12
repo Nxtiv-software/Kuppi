@@ -772,6 +772,7 @@ const MySchedule = () => {
       {whatsappModal.isOpen && whatsappModal.session && (
         <WhatsAppGroupManager
           session={whatsappModal.session}
+          isTutor={true}
           onClose={() => setWhatsappModal({ isOpen: false, session: null })}
         />
       )}
