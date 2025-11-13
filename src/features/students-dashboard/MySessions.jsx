@@ -140,7 +140,7 @@ const SessionFilters = ({ filter, setFilter, sortBy, setSortBy, sessionsData }) 
 };
 
 // Sessions List Component
-const SessionsList = ({ filter, sortBy, sessionsData }) => {
+const SessionsList = ({ filter, sortBy, sessionsData, onJoinWhatsApp }) => {
   if (!sessionsData) return null;
 
   // Handle different response structures from backend
@@ -394,7 +394,7 @@ const SessionsList = ({ filter, sortBy, sessionsData }) => {
 
                 {/* WhatsApp Group Button */}
                 <button 
-                  onClick={() => handleJoinWhatsApp(session._id)}
+                  onClick={() => onJoinWhatsApp(session._id)}
                   className={styles.whatsappButton}
                   title="Join WhatsApp Group"
                 >
@@ -621,6 +621,7 @@ const MySessions = () => {
         filter={filter}
         sortBy={sortBy}
         sessionsData={sessionsData}
+        onJoinWhatsApp={handleJoinWhatsApp}
       />
     </div>
   );
