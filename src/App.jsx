@@ -1,14 +1,14 @@
-import TutorDashboard from "./features/tutor-dashboard/TutorDashboard";
+import TutorDashboardShadcn from "./features/tutor-dashboard/TutorDashboardShadcn";
 import AdminDashboard from "./features/admin-dashboard/AdminDashboard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Routes, Route } from "react-router-dom";
 import HomeLayout from "./ui/HomeLayout";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "./components/ui/sonner";
 import AboutPage from "./ui/AboutPage";
 import ContactUs from "./ui/ContactUs/Contact";
 import ContactUsPage from "./ui/ContactUsPage";
-import StudentDashboard from "./features/students-dashboard/StudentDasboard";
+import StudentDashboardShadcn from "./features/students-dashboard/StudentDashboardShadcn";
 import SignUpClerk from "./ui/SignUpClerk";
 import LoginClerk from "./ui/LoginClerk";
 import TutorRegistrationPage from "./ui/Home/TutorRegistrationPage";
@@ -19,6 +19,8 @@ import { RoleProtectedRoute, PublicRoute } from './components/RoleProtectedRoute
 import { USER_ROLES } from './utils/roleUtils';
 import DashboardRedirect from './components/DashboardRedirect';
 import RoleManager from './components/RoleManager';
+// THEME: Import ThemeProvider
+import { ThemeProvider } from './context/ThemeContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,10 +39,11 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
-      
-      <Routes>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
+        
+        <Routes>
         <Route path="/" element={<HomeLayout />} />
         
         {/* AUTHENTICATION: Protected auth routes */}
@@ -90,7 +93,7 @@ function App() {
           path="student-dashboard" 
           element={
             <RoleProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
-              <StudentDashboard />
+              <StudentDashboardShadcn />
             </RoleProtectedRoute>
           } 
         />
@@ -98,7 +101,7 @@ function App() {
           path="tutor-dashboard" 
           element={
             <RoleProtectedRoute allowedRoles={[USER_ROLES.TUTOR]}>
-              <TutorDashboard />
+              <TutorDashboardShadcn />
             </RoleProtectedRoute>
           } 
         />
@@ -122,27 +125,9 @@ function App() {
         />
       </Routes>
 
-      <Toaster
-        position="top-center"
-        gutter={12}
-        containerStyle={{ margin: "8px" }}
-        toastOptions={{
-          success: {
-            duration: 3000,
-          },
-          error: {
-            duration: 5000,
-          },
-          style: {
-            fontSize: "16px",
-            maxWidth: "500px",
-            padding: "16px 24px",
-            backgroundColor: "var(--color-grey-0)",
-            color: "var(--color-grey-700)",
-          },
-        }}
-      />
-    </QueryClientProvider>
+      <Toaster richColors />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
