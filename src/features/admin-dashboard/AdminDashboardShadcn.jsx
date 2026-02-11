@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import AdminOverviewShadcn from './AdminOverviewShadcn';
 import UserManagementShadcn from './UserManagementShadcn';
-import SessionManagement from './SessionManagement';
+import SessionManagementShadcn from './SessionManagementShadcn';
 import PaymentFinance from './PaymentFinance';
 import NotificationsCommunication from './NotificationsCommunication';
 import SystemSettings from './SystemSettings';
@@ -179,7 +179,7 @@ const AdminDashboardShadcn = () => {
             </TabsContent>
 
             <TabsContent value="sessions" className="space-y-6 mt-0">
-              <SessionManagement />
+              <SessionManagementShadcn />
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-6 mt-0">
