@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './TutorDashboard.module.css';
-import TutorOverview from '../tutor-dashboard/TutorOverview';
+import TutorOverviewShadcn from '../tutor-dashboard/TutorOverviewShadcn';
 import MySchedule from '../tutor-dashboard/MySchedule';
 import SessionRequests from '../tutor-dashboard/SessionRequests';
 import CreateSession from '../tutor-dashboard/CreateSession';
@@ -83,7 +83,7 @@ const TutorDashboard = () => {
 
           {/* Tab Pages */}
           <TabsContent value="overview">
-            <TutorOverview setActiveTab={setActiveTab} />
+            <TutorOverviewShadcn setActiveTab={setActiveTab} />
           </TabsContent>
           <TabsContent value="requests">
             <SessionRequests />
