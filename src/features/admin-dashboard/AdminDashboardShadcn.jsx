@@ -10,7 +10,7 @@ import {
   Shield
 } from "lucide-react";
 import AdminOverviewShadcn from './AdminOverviewShadcn';
-import UserManagement from './UserManagement';
+import UserManagementShadcn from './UserManagementShadcn';
 import SessionManagement from './SessionManagement';
 import PaymentFinance from './PaymentFinance';
 import NotificationsCommunication from './NotificationsCommunication';
@@ -175,7 +175,7 @@ const AdminDashboardShadcn = () => {
             </TabsContent>
 
             <TabsContent value="users" className="space-y-6 mt-0">
-              <UserManagement setActiveTab={setActiveTab} />
+              <UserManagementShadcn setActiveTab={setActiveTab} />
             </TabsContent>
 
             <TabsContent value="sessions" className="space-y-6 mt-0">
