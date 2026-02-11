@@ -13,7 +13,7 @@ import AdminOverviewShadcn from './AdminOverviewShadcn';
 import UserManagementShadcn from './UserManagementShadcn';
 import SessionManagementShadcn from './SessionManagementShadcn';
 import PaymentFinanceShadcn from './PaymentFinanceShadcn';
-import NotificationsCommunication from './NotificationsCommunication';
+import NotificationsCommunicationShadcn from './NotificationsCommunicationShadcn';
 import SystemSettings from './SystemSettings';
 import { cn } from '../../utils/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
@@ -187,7 +187,7 @@ const AdminDashboardShadcn = () => {
             </TabsContent>
 
             <TabsContent value="notifications" className="space-y-6 mt-0">
-              <NotificationsCommunication />
+              <NotificationsCommunicationShadcn />
             </TabsContent>
 
             <TabsContent value="settings" className="space-y-6 mt-0">
