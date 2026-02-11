@@ -12,7 +12,7 @@ import {
 import AdminOverviewShadcn from './AdminOverviewShadcn';
 import UserManagementShadcn from './UserManagementShadcn';
 import SessionManagementShadcn from './SessionManagementShadcn';
-import PaymentFinance from './PaymentFinance';
+import PaymentFinanceShadcn from './PaymentFinanceShadcn';
 import NotificationsCommunication from './NotificationsCommunication';
 import SystemSettings from './SystemSettings';
 import { cn } from '../../utils/utils';
@@ -183,7 +183,7 @@ const AdminDashboardShadcn = () => {
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-6 mt-0">
-              <PaymentFinance />
+              <PaymentFinanceShadcn />
             </TabsContent>
 
             <TabsContent value="notifications" className="space-y-6 mt-0">
