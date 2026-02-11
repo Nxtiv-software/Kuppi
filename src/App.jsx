@@ -1,5 +1,5 @@
 import TutorDashboardShadcn from "./features/tutor-dashboard/TutorDashboardShadcn";
-import AdminDashboard from "./features/admin-dashboard/AdminDashboard";
+import AdminDashboardShadcn from "./features/admin-dashboard/AdminDashboardShadcn";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Routes, Route } from "react-router-dom";
@@ -109,7 +109,7 @@ function App() {
           path="admin-dashboard" 
           element={
             <RoleProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
-              <AdminDashboard />
+              <AdminDashboardShadcn />
             </RoleProtectedRoute>
           } 
         />
