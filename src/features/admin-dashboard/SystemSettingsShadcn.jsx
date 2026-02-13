@@ -10,8 +10,6 @@ import {
   Percent,
   Users,
   Lock,
-  Eye,
-  EyeOff,
   AlertCircle,
   CheckCircle2,
   Info
@@ -30,7 +28,6 @@ import { cn } from '../../utils/utils';
 
 const SystemSettingsShadcn = () => {
   const [activeTab, setActiveTab] = useState('general');
-  const [showApiKey, setShowApiKey] = useState(false);
   
   const [generalSettings, setGeneralSettings] = useState({
     platformName: 'Kuppi.lk',
@@ -644,35 +641,6 @@ const SystemSettingsShadcn = () => {
                     onCheckedChange={(checked) => setSecuritySettings({ ...securitySettings, ipWhitelisting: checked })}
                   />
                 </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold">API Keys</h4>
-                <div className="space-y-2">
-                  <Label>API Access Key</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type={showApiKey ? 'text' : 'password'}
-                      value="api_key_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                      readOnly
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setShowApiKey(!showApiKey)}
-                    >
-                      {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Keep this key secure. Last regenerated: Feb 1, 2026
-                  </p>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Regenerate API Key
-                </Button>
               </div>
 
               <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg">
