@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAvailableSessions, joinSession, showInterestInSession } from '../../services/api';
 import { toast } from 'react-hot-toast';
-import { Search, Calendar, Users, Star, Clock, BookOpen, Filter, TrendingUp } from 'lucide-react';
+import { Search, Calendar, Users, Star, Clock, BookOpen, Filter, TrendingUp, Target } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/badge';
@@ -303,6 +303,36 @@ const BrowseKuppisShadcn = () => {
                       {session.displayCount}
                     </span>
                   </div>
+                  {session.studentLimitType === 'minimum' && (
+                    <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                      <div className="p-1.5 rounded-md bg-blue-500/10">
+                        <Target className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <span>
+                        Min: {session.minStudents || 1} students
+                      </span>
+                    </div>
+                  )}
+                  {session.studentLimitType === 'limited' && (
+                    <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                      <div className="p-1.5 rounded-md bg-purple-500/10">
+                        <Target className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <span>
+                        Max: {session.maxStudents} students
+                      </span>
+                    </div>
+                  )}
+                  {session.studentLimitType === 'unlimited' && (
+                    <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                      <div className="p-1.5 rounded-md bg-purple-500/10">
+                        <Target className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <span>
+                        Unlimited capacity
+                      </span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
 

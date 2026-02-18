@@ -536,7 +536,7 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
         </p>
 
         {/* Info Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           <div className="flex items-center gap-2 text-sm">
             <div className="p-2 rounded-md bg-primary/10">
               <Clock className="h-4 w-4 text-primary" />
@@ -566,6 +566,42 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
               <div className="font-medium">{session.displayCount || 0}</div>
             </div>
           </div>
+
+          {session.studentLimitType === 'minimum' && (
+            <div className="flex items-center gap-2 text-sm">
+              <div className="p-2 rounded-md bg-blue-500/10">
+                <Target className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Min Students</div>
+                <div className="font-medium">{session.minStudents || 1}</div>
+              </div>
+            </div>
+          )}
+
+          {session.studentLimitType === 'limited' && (
+            <div className="flex items-center gap-2 text-sm">
+              <div className="p-2 rounded-md bg-purple-500/10">
+                <Target className="h-4 w-4 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Max Students</div>
+                <div className="font-medium">{session.maxStudents}</div>
+              </div>
+            </div>
+          )}
+
+          {session.studentLimitType === 'unlimited' && (
+            <div className="flex items-center gap-2 text-sm">
+              <div className="p-2 rounded-md bg-purple-500/10">
+                <Target className="h-4 w-4 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Capacity</div>
+                <div className="font-medium">Unlimited</div>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center gap-2 text-sm">
             <div className="p-2 rounded-md bg-green-500/10">
