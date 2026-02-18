@@ -561,14 +561,12 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
           </div>
 
           <div className="flex items-center gap-2 text-sm">
-            <div className="p-2 rounded-md bg-primary/10">
-              <Target className="h-4 w-4 text-primary" />
+            <div className="p-2 rounded-md bg-green-500/10">
+              <DollarSign className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Limit</div>
-              <div className="font-medium">
-                {session.maxStudents === 999 ? 'Unlimited' : `Max: ${session.maxStudents}`}
-              </div>
+              <div className="text-xs text-muted-foreground">Total Revenue</div>
+              <div className="font-medium text-green-600">Rs. {session.totalRevenue || 0}</div>
             </div>
           </div>
         </div>
