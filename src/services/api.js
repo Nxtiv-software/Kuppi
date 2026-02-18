@@ -494,10 +494,12 @@ export const createTutorSession = async (sessionData) => {
 };
 
 // Get tutor's created sessions
-export const getTutorCreatedSessions = async () => {
+export const getTutorCreatedSessions = async (includeCompleted = false) => {
   try {
-    console.log('📡 API: Fetching tutor created sessions...');
-    const response = await api.get('/sessions/tutor/created');
+    console.log('📡 API: Fetching tutor created sessions...', includeCompleted ? '(including completed)' : '(excluding completed)');
+    const response = await api.get('/sessions/tutor/created', {
+      params: { includeCompleted }
+    });
     console.log('📡 API: Tutor created sessions received:', {
       count: response.data.data?.length || 0
     });

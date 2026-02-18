@@ -450,6 +450,7 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
   const isReadyToSchedule = session.status === 'ready_to_schedule' || 
     (session.status === 'open_for_interest' && (session.interestedStudents?.length || 0) >= session.minStudents);
   const isScheduled = session.status === 'scheduled' || session.status === 'upcoming';
+  const isCompleted = session.status === 'completed';
 
   const getStatusBadge = () => {
     switch (session.status) {
@@ -470,7 +471,7 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
           Upcoming
         </Badge>;
       case 'completed':
-        return <Badge variant="secondary">
+        return <Badge variant="secondary" className="gap-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
           <CheckCircle2 className="h-3 w-3" />
           Completed
         </Badge>;
@@ -482,7 +483,8 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
   return (
     <Card className={cn(
       "group hover:shadow-xl transition-all duration-300",
-      isReadyToSchedule && "border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20"
+      isReadyToSchedule && "border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20",
+      isCompleted && "opacity-75 bg-gray-50/50 dark:bg-gray-900/20"
     )}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
@@ -490,9 +492,14 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
             <div className="flex items-start gap-3">
               <div className={cn(
                 "p-2 rounded-lg mt-1",
-                isReadyToSchedule ? "bg-green-500/10" : "bg-primary/10"
+                isReadyToSchedule ? "bg-green-500/10" : isCompleted ? "bg-gray-500/10" : "bg-primary/10"
               )}>
-                <BookOpen className={cn("h-5 w-5", isReadyToSchedule ? "text-green-600 dark:text-green-400" : "text-primary")} />
+                <BookOpen className={cn(
+                  "h-5 w-5", 
+                  isReadyToSchedule ? "text-green-600 dark:text-green-400" : 
+                  isCompleted ? "text-gray-600 dark:text-gray-400" : 
+                  "text-primary"
+                )} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
@@ -571,7 +578,7 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
           </div>
         </div>
 
-        {isReadyToSchedule && (
+        {isReadyToSchedule && !isCompleted && (
           <>
             <Separator />
             <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900">
@@ -591,7 +598,7 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
           </>
         )}
 
-        {isScheduled && (
+        {isScheduled && !isCompleted && (
           <>
             <Separator />
             <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900">
@@ -608,6 +615,23 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
                   <CheckCircle2 className="h-4 w-4" />
                   Mark Done
                 </Button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {isCompleted && (
+          <>
+            <Separator />
+            <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4">
+                <CheckCircle2 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">Session Completed</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {session.date && new Date(session.date).toLocaleDateString()} • {session.enrolledStudentsCount || 0} students attended
+                  </p>
+                </div>
               </div>
             </div>
           </>
@@ -653,10 +677,11 @@ const CreateSessionShadcn = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch sessions
+  // Fetch sessions (including completed when filter is 'completed' or 'all')
+  const includeCompleted = activeFilter === 'completed' || activeFilter === 'all';
   const { data: createdSessions, isLoading, error } = useQuery({
-    queryKey: ['tutorCreatedSessions'],
-    queryFn: getTutorCreatedSessions,
+    queryKey: ['tutorCreatedSessions', includeCompleted],
+    queryFn: () => getTutorCreatedSessions(includeCompleted),
     staleTime: 2 * 60 * 1000,
   });
 
@@ -667,7 +692,7 @@ const CreateSessionShadcn = () => {
       toast.success('Session Created!', {
         description: 'Your session is now available in Browse Kuppi for students.'
       });
-      queryClient.invalidateQueries(['tutorCreatedSessions']);
+      queryClient.invalidateQueries({ queryKey: ['tutorCreatedSessions'] });
       queryClient.invalidateQueries(['availableSessions']);
     } catch (error) {
       toast.error('Failed to Create', { description: error.message });
@@ -681,7 +706,7 @@ const CreateSessionShadcn = () => {
       toast.success('Session Scheduled!', {
         description: 'Students will be notified about the session.'
       });
-      queryClient.invalidateQueries(['tutorCreatedSessions']);
+      queryClient.invalidateQueries({ queryKey: ['tutorCreatedSessions'] });
       queryClient.invalidateQueries(['tutorScheduledSessions']);
       queryClient.invalidateQueries(['myScheduledSessions']);
       setScheduleModal(false);
@@ -698,7 +723,7 @@ const CreateSessionShadcn = () => {
       toast.success('Session Completed!', {
         description: 'Great work on completing this session'
       });
-      queryClient.invalidateQueries(['tutorCreatedSessions']);
+      queryClient.invalidateQueries({ queryKey: ['tutorCreatedSessions'] });
       queryClient.invalidateQueries(['availableSessions']);
       setCompleteDialog({ isOpen: false, session: null });
     } catch (error) {
@@ -743,7 +768,8 @@ const CreateSessionShadcn = () => {
     all: sessions.length,
     open_for_interest: sessions.filter(s => s.status === 'open_for_interest').length,
     ready_to_schedule: sessions.filter(s => s.status === 'ready_to_schedule').length,
-    scheduled: sessions.filter(s => s.status === 'scheduled' || s.status === 'upcoming').length
+    scheduled: sessions.filter(s => s.status === 'scheduled' || s.status === 'upcoming').length,
+    completed: sessions.filter(s => s.status === 'completed').length
   };
 
   return (
@@ -762,10 +788,10 @@ const CreateSessionShadcn = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatsCard
           icon={BookOpen}
-          label="Active Sessions"
+          label="Total Sessions"
           value={sessions.length}
           color="text-blue-600"
           loading={isLoading}
@@ -789,6 +815,13 @@ const CreateSessionShadcn = () => {
           label="Open for Interest"
           value={filterCounts.open_for_interest}
           color="text-orange-600"
+          loading={isLoading}
+        />
+        <StatsCard
+          icon={CheckCircle2}
+          label="Completed"
+          value={filterCounts.completed}
+          color="text-gray-600"
           loading={isLoading}
         />
       </div>
@@ -824,7 +857,8 @@ const CreateSessionShadcn = () => {
                 { key: 'all', label: 'All Sessions' },
                 { key: 'ready_to_schedule', label: 'Ready to Schedule' },
                 { key: 'scheduled', label: 'Scheduled' },
-                { key: 'open_for_interest', label: 'Open for Interest' }
+                { key: 'open_for_interest', label: 'Open for Interest' },
+                { key: 'completed', label: 'Completed' }
               ].map((filter) => (
                 <Button
                   key={filter.key}
