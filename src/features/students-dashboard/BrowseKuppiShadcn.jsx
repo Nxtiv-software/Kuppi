@@ -265,9 +265,14 @@ const BrowseKuppisShadcn = () => {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <Badge variant="outline" className="font-medium">
-                  {session.subject.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Badge>
+                <div className="space-y-2">
+                  <Badge variant="outline" className="font-medium">
+                    {session.subject.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Badge>
+                  {session.topic && (
+                    <p className="text-sm font-medium text-foreground">{session.topic}</p>
+                  )}
+                </div>
 
                 <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{session.description}</p>
 
@@ -295,9 +300,7 @@ const BrowseKuppisShadcn = () => {
                       <Users className="h-4 w-4 text-primary" />
                     </div>
                     <span>
-                      {session.source === 'tutor_created' && session.status !== 'scheduled'
-                        ? `${session.interestedStudents?.length || 0} interested`
-                        : `${session.enrolled}/${session.maxStudents} enrolled`}
+                      {session.displayCount}
                     </span>
                   </div>
                 </div>
@@ -307,9 +310,7 @@ const BrowseKuppisShadcn = () => {
                 <div className="space-y-1">
                   <p className="text-2xl font-bold text-primary">Rs. {session.price}</p>
                   <p className="text-xs text-muted-foreground font-medium">
-                    {session.source === 'tutor_created' && session.status !== 'scheduled'
-                      ? `${session.interestedStudents?.length || 0} needed`
-                      : `${session.availableSpots} spots left`}
+                    {session.displayLabel}
                   </p>
                 </div>
 

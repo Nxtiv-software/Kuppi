@@ -555,8 +555,8 @@ const SessionCard = ({ session, onSchedule, onMarkCompleted }) => {
               <Users className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Interested</div>
-              <div className="font-medium">{session.interestedStudents?.length || 0}</div>
+              <div className="text-xs text-muted-foreground">{session.displayLabel || 'Students'}</div>
+              <div className="font-medium">{session.displayCount || 0}</div>
             </div>
           </div>
 
