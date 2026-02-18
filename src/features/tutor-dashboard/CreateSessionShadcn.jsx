@@ -147,6 +147,8 @@ const CreateSessionDialog = ({ isOpen, onClose, onCreateSession }) => {
     studentLimitType: 'limited',
     maxStudents: '',
     minStudents: '',
+    expectedDate: '',
+    expectedTime: '',
     schedulingNote: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,8 +156,8 @@ const CreateSessionDialog = ({ isOpen, onClose, onCreateSession }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!sessionData.title || !sessionData.topic || !sessionData.description || !sessionData.feePerStudent) {
-      toast.error('Missing Required Fields', { description: 'Please fill in all required fields' });
+    if (!sessionData.title || !sessionData.topic || !sessionData.description || !sessionData.feePerStudent || !sessionData.expectedDate || !sessionData.expectedTime) {
+      toast.error('Missing Required Fields', { description: 'Please fill in all required fields including expected date and time' });
       return;
     }
 
@@ -194,6 +196,8 @@ const CreateSessionDialog = ({ isOpen, onClose, onCreateSession }) => {
         studentLimitType: 'limited',
         maxStudents: '',
         minStudents: '',
+        expectedDate: '',
+        expectedTime: '',
         schedulingNote: ''
       });
       onClose();
@@ -350,6 +354,40 @@ const CreateSessionDialog = ({ isOpen, onClose, onCreateSession }) => {
               </p>
             </div>
           )}
+
+          <Separator className="my-4" />
+          
+          <div className="space-y-2">
+            <Label className="text-base font-semibold">Expected Schedule</Label>
+            <p className="text-xs text-muted-foreground">
+              When do you expect to conduct this session? This helps students plan ahead.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="expectedDate">Expected Date *</Label>
+              <Input
+                id="expectedDate"
+                type="date"
+                value={sessionData.expectedDate}
+                onChange={(e) => setSessionData({ ...sessionData, expectedDate: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expectedTime">Expected Time *</Label>
+              <Input
+                id="expectedTime"
+                type="time"
+                value={sessionData.expectedTime}
+                onChange={(e) => setSessionData({ ...sessionData, expectedTime: e.target.value })}
+                required
+              />
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="schedulingNote">Scheduling Note (Optional)</Label>
