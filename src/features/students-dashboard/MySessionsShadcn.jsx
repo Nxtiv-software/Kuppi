@@ -529,10 +529,6 @@ const MySessionsShadcn = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">My Sessions</h2>
-          <p className="text-muted-foreground">Loading your scheduled sessions...</p>
-        </div>
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2, 3, 4].map(i => <SessionSkeleton key={i} />)}
         </div>
@@ -543,10 +539,6 @@ const MySessionsShadcn = () => {
   if (error) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">My Sessions</h2>
-          <p className="text-muted-foreground">View and manage your scheduled learning sessions</p>
-        </div>
         <Card className="border-destructive">
           <CardContent className="pt-6 text-center">
             <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
@@ -572,12 +564,6 @@ const MySessionsShadcn = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">My Sessions</h2>
-        <p className="text-muted-foreground">View and manage your scheduled learning sessions</p>
-      </div>
-
       {/* Filters and Sort */}
       <Card>
         <CardHeader className="border-b">
