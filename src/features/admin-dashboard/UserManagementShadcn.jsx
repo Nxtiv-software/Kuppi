@@ -45,7 +45,7 @@ import {
 } from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { cn } from '../../utils/utils';
-import { getAllUsers, createUser, updateUser, updateUserRole, deleteUser } from '../../services/adminApi';
+import { getAllUsers, getAdminOverview, createUser, updateUser, updateUserRole, deleteUser } from '../../services/adminApi';
 import { Label } from '../../components/ui/label';
 import {
   Select,
@@ -92,6 +92,12 @@ const UserManagementShadcn = ({ setActiveTab }) => {
       search: searchTerm
     }),
     keepPreviousData: true,
+  });
+
+  // Fetch overview for role counts
+  const { data: overviewData } = useQuery({
+    queryKey: ['adminOverview'],
+    queryFn: getAdminOverview,
   });
 
   // Delete user mutation
@@ -153,10 +159,15 @@ const UserManagementShadcn = ({ setActiveTab }) => {
   const totalUsers = usersData?.data?.total || 0;
   const totalPages = Math.ceil(totalUsers / limit);
 
-  // Separate users by role for display
-  const students = users.filter(u => u.role === 'student');
-  const tutors = users.filter(u => u.role === 'tutor');
-  const admins = users.filter(u => u.role === 'admin');
+  // Get role counts from overview data
+  const roleStats = overviewData?.data?.users?.byRole || { students: 0, tutors: 0, admins: 0 };
+  const studentCount = roleStats.students || 0;
+  const tutorCount = roleStats.tutors || 0;
+  const adminCount = roleStats.admins || 0;
+  const allUsersCount = (roleStats.students || 0) + (roleStats.tutors || 0) + (roleStats.admins || 0);
+
+  // Filter users for display in current tab
+  const displayUsers = users; // Users are already filtered by backend based on activeUserTab
 
   const handleUserAction = (action, userId, currentRole) => {
     setActionDialog({ isOpen: true, action, userId, role: currentRole });
@@ -229,10 +240,6 @@ const UserManagementShadcn = ({ setActiveTab }) => {
     return 'text-red-600 dark:text-red-400';
   };
 
-  // Users are already filtered by backend based on search and role
-  const displayUsers = activeUserTab === 'students' ? students : 
-                       activeUserTab === 'tutors' ? tutors : users;
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -284,10 +291,10 @@ const UserManagementShadcn = ({ setActiveTab }) => {
       {/* Main Tabs */}
       <Tabs value={activeUserTab} onValueChange={(val) => { setActiveUserTab(val); setCurrentPage(1); }}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="students">Students ({students.length})</TabsTrigger>
-          <TabsTrigger value="tutors">Tutors ({tutors.length})</TabsTrigger>
-          <TabsTrigger value="all">All Users ({users.length})</TabsTrigger>
-          <TabsTrigger value="admins">Admins ({admins.length})</TabsTrigger>
+          <TabsTrigger value="students">Students ({studentCount})</TabsTrigger>
+          <TabsTrigger value="tutors">Tutors ({tutorCount})</TabsTrigger>
+          <TabsTrigger value="all">All Users ({allUsersCount})</TabsTrigger>
+          <TabsTrigger value="admins">Admins ({adminCount})</TabsTrigger>
         </TabsList>
 
         {/* Students Tab */}
@@ -295,7 +302,7 @@ const UserManagementShadcn = ({ setActiveTab }) => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Student Management ({displayUsers.length})</CardTitle>
+                <CardTitle>Student Management ({studentCount})</CardTitle>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Search users..."
@@ -444,7 +451,7 @@ const UserManagementShadcn = ({ setActiveTab }) => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Tutor Management ({displayUsers.length})</CardTitle>
+                <CardTitle>Tutor Management ({tutorCount})</CardTitle>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Search users..."
@@ -593,7 +600,7 @@ const UserManagementShadcn = ({ setActiveTab }) => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>All Users ({displayUsers.length})</CardTitle>
+                <CardTitle>All Users ({allUsersCount})</CardTitle>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Search users..."
@@ -742,7 +749,7 @@ const UserManagementShadcn = ({ setActiveTab }) => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Admin Management ({displayUsers.length})</CardTitle>
+                <CardTitle>Admin Management ({adminCount})</CardTitle>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Search users..."
