@@ -342,15 +342,15 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 {user.imageUrl ? (
-                                  <AvatarImage src={user.imageUrl} alt={user.username} />
+                                  <AvatarImage src={user.imageUrl} alt={user.name || user.email} />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                    {user.username?.substring(0, 2).toUpperCase() || 'U'}
+                                    {(user.name || user.email?.split('@')[0])?.substring(0, 2).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
                               <div>
-                                <div className="font-semibold">{user.username || 'No name'}</div>
+                                <div className="font-semibold">{user.name || user.email?.split('@')[0] || 'No name'}</div>
                                 <div className="text-sm text-muted-foreground">
                                   ID: {user._id.slice(-6)}
                                 </div>
@@ -493,15 +493,15 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 {user.imageUrl ? (
-                                  <AvatarImage src={user.imageUrl} alt={user.username} />
+                                  <AvatarImage src={user.imageUrl} alt={user.name || user.email} />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                    {user.username?.substring(0, 2).toUpperCase() || 'U'}
+                                    {(user.name || user.email?.split('@')[0])?.substring(0, 2).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
                               <div>
-                                <div className="font-semibold">{user.username || 'No name'}</div>
+                                <div className="font-semibold">{user.name || user.email?.split('@')[0] || 'No name'}</div>
                                 <div className="text-sm text-muted-foreground">
                                   ID: {user._id.slice(-6)}
                                 </div>
@@ -644,15 +644,15 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 {user.imageUrl ? (
-                                  <AvatarImage src={user.imageUrl} alt={user.username} />
+                                  <AvatarImage src={user.imageUrl} alt={user.name || user.email} />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                    {user.username?.substring(0, 2).toUpperCase() || 'U'}
+                                    {(user.name || user.email?.split('@')[0])?.substring(0, 2).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
                               <div>
-                                <div className="font-semibold">{user.username || 'No name'}</div>
+                                <div className="font-semibold">{user.name || user.email?.split('@')[0] || 'No name'}</div>
                                 <div className="text-sm text-muted-foreground">
                                   ID: {user._id.slice(-6)}
                                 </div>
@@ -795,15 +795,15 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                             <div className="flex items-center gap-3">
                               <Avatar>
                                 {user.imageUrl ? (
-                                  <AvatarImage src={user.imageUrl} alt={user.username} />
+                                  <AvatarImage src={user.imageUrl} alt={user.name || user.email} />
                                 ) : (
                                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                    {user.username?.substring(0, 2).toUpperCase() || 'U'}
+                                    {(user.name || user.email?.split('@')[0])?.substring(0, 2).toUpperCase() || 'U'}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
                               <div>
-                                <div className="font-semibold">{user.username || 'No name'}</div>
+                                <div className="font-semibold">{user.name || user.email?.split('@')[0] || 'No name'}</div>
                                 <div className="text-sm text-muted-foreground">
                                   ID: {user._id.slice(-6)}
                                 </div>
