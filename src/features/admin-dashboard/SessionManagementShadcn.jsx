@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
   XCircle,
@@ -11,7 +12,9 @@ import {
   BookOpen,
   AlertCircle,
   Search,
-  Filter
+  Filter,
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
@@ -38,117 +41,54 @@ import {
 } from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { cn } from '../../utils/utils';
+import { getAllSessions, deleteSession } from '../../services/adminApi';
 
 const SessionManagementShadcn = () => {
-  const [activeView, setActiveView] = useState('pending');
+  const queryClient = useQueryClient();
+  const [activeView, setActiveView] = useState('all');
   const [selectedSession, setSelectedSession] = useState(null);
   const [actionDialog, setActionDialog] = useState({ isOpen: false, action: null, sessionId: null });
   const [searchTerm, setSearchTerm] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 20;
 
-  const pendingSessions = [
-    {
-      id: 1,
-      title: 'Advanced Calculus - Integration Techniques',
-      tutor: 'Dr. Robert Chen',
-      students: 25,
-      price: 300,
-      requestedDate: '2026-02-12',
-      startTime: '3:00 PM',
-      endTime: '4:30 PM',
-      duration: '1.5 hours',
-      subject: 'Mathematics',
-      level: 'Advanced',
-      description: 'Advanced integration techniques including substitution, integration by parts, and partial fractions.'
-    },
-    {
-      id: 2,
-      title: 'Organic Chemistry - Reaction Mechanisms',
-      tutor: 'Mr. David Brown',
-      students: 18,
-      price: 250,
-      requestedDate: '2026-02-14',
-      startTime: '2:00 PM',
-      endTime: '3:30 PM',
-      duration: '1.5 hours',
-      subject: 'Chemistry',
-      level: 'Intermediate',
-      description: 'Comprehensive coverage of organic reaction mechanisms and their applications.'
-    },
-    {
-      id: 3,
-      title: 'Quantum Physics - Wave-Particle Duality',
-      tutor: 'Prof. Lisa Anderson',
-      students: 32,
-      price: 350,
-      requestedDate: '2026-02-13',
-      startTime: '5:00 PM',
-      endTime: '6:30 PM',
-      duration: '1.5 hours',
-      subject: 'Physics',
-      level: 'Advanced',
-      description: 'Exploring the fundamental principles of quantum mechanics and wave-particle duality.'
-    }
-  ];
+  // Map frontend status to backend status
+  const statusMap = {
+    'all': 'all',
+    'scheduled': 'scheduled',
+    'completed': 'completed',
+    'cancelled': 'cancelled'
+  };
 
-  const scheduledSessions = [
-    {
-      id: 4,
-      title: 'Biology - Cell Structure',
-      tutor: 'Ms. Emily Davis',
-      students: 22,
-      price: 280,
-      scheduledDate: '2026-02-13',
-      startTime: '10:00 AM',
-      endTime: '11:30 AM',
-      status: 'scheduled',
-      subject: 'Biology'
-    },
-    {
-      id: 5,
-      title: 'Computer Science - Data Structures',
-      tutor: 'Dr. James Wilson',
-      students: 28,
-      price: 320,
-      scheduledDate: '2026-02-14',
-      startTime: '4:00 PM',
-      endTime: '5:30 PM',
-      status: 'scheduled',
-      subject: 'Computer Science'
-    }
-  ];
+  // Fetch sessions
+  const { data: sessionsData, isLoading, error } = useQuery({
+    queryKey: ['adminSessions', activeView, currentPage, subjectFilter],
+    queryFn: () => getAllSessions({
+      page: currentPage,
+      limit,
+      status: statusMap[activeView] || 'all',
+      subject: subjectFilter
+    }),
+    keepPreviousData: true,
+  });
 
-  const liveSessions = [
-    {
-      id: 6,
-      title: 'Physics - Thermodynamics',
-      tutor: 'Prof. Lisa Anderson',
-      students: 35,
-      participants: 32,
-      startTime: '2:00 PM',
-      duration: '45 minutes elapsed',
-      subject: 'Physics'
+  // Delete session mutation
+  const deleteSessionMutation = useMutation({
+    mutationFn: deleteSession,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminSessions']);
+      queryClient.invalidateQueries(['adminOverview']);
+      toast.success('Session deleted successfully');
     },
-    {
-      id: 7,
-      title: 'Mathematics - Linear Algebra',
-      tutor: 'Dr. Robert Chen',
-      students: 28,
-      participants: 26,
-      startTime: '1:30 PM',
-      duration: '1 hour 15 minutes elapsed',
-      subject: 'Mathematics'
-    },
-    {
-      id: 8,
-      title: 'Chemistry - Electrochemistry',
-      tutor: 'Mr. David Brown',
-      students: 20,
-      participants: 18,
-      startTime: '2:30 PM',
-      duration: '30 minutes elapsed',
-      subject: 'Chemistry'
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to delete session');
     }
-  ];
+  });
+
+  const sessions = sessionsData?.data?.sessions || [];
+  const totalSessions = sessionsData?.data?.total || 0;
+  const totalPages = Math.ceil(totalSessions / limit);
 
   const handleSessionAction = (action, sessionId) => {
     setActionDialog({ isOpen: true, action, sessionId });
@@ -157,19 +97,57 @@ const SessionManagementShadcn = () => {
   const confirmAction = () => {
     const { action, sessionId } = actionDialog;
     
-    switch(action) {
-      case 'approve':
-        toast.success('Session approved successfully');
-        break;
-      case 'reject':
-        toast.error('Session rejected');
-        break;
-      default:
-        break;
+    if (action === 'delete') {
+      deleteSessionMutation.mutate(sessionId);
     }
     
     setActionDialog({ isOpen: false, action: null, sessionId: null });
   };
+
+  const getStatusBadge = (status) => {
+    const variants = {
+      scheduled: { className: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300', label: 'Scheduled' },
+      completed: { className: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300', label: 'Completed' },
+      cancelled: { className: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300', label: 'Cancelled' },
+      active: { className: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300', label: 'Active' }
+    };
+    const config = variants[status] || variants.scheduled;
+    return <Badge className={config.className}>{config.label}</Badge>;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center space-y-3">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading sessions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="border-2 border-red-200 dark:border-red-800">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-lg bg-red-500 flex items-center justify-center shrink-0">
+              <AlertCircle className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold mb-1">Failed to load sessions</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {error?.message || 'An error occurred while fetching sessions'}
+              </p>
+              <Button size="sm" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
