@@ -1,4 +1,5 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Users,
   GraduationCap,
@@ -14,7 +15,8 @@ import {
   ArrowRight,
   Sparkles,
   BarChart3,
-  Shield
+  Shield,
+  AlertTriangle
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
@@ -22,6 +24,7 @@ import { Badge } from '../../components/badge';
 import { Separator } from '../../components/ui/separator';
 import { Progress } from '../../components/ui/progress';
 import { cn } from '../../utils/utils';
+import { getAdminOverview, getSystemAnalytics } from '../../services/adminApi';
 
 // Stats Card Component
 const StatsCard = ({ icon: Icon, label, value, subtitle, color, trend }) => {
@@ -125,80 +128,149 @@ const EngagementMetric = ({ label, value, percentage }) => {
   );
 };
 
+// Tutor Card Component
+const TutorCard = ({ name, sessions, students, revenue }) => {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors">
+      <div className="flex-1">
+        <h4 className="font-semibold text-sm">{name}</h4>
+        <p className="text-xs text-muted-foreground">
+          {sessions} sessions • {students} students
+        </p>
+      </div>
+      <div className="text-right">
+        <p className="text-sm font-bold text-green-600">Rs. {revenue.toLocaleString()}</p>
+      </div>
+    </div>
+  );
+};
+
 // Main Component
 const AdminOverviewShadcn = ({ onTabChange }) => {
+  // Fetch admin overview data
+  const { data: overviewData, isLoading: overviewLoading, error: overviewError } = useQuery({
+    queryKey: ['adminOverview'],
+    queryFn: getAdminOverview,
+    refetchInterval: 60000, // Refresh every minute
+  });
+
+  // Fetch analytics data
+  const { data: analyticsData, isLoading: analyticsLoading, error: analyticsError } = useQuery({
+    queryKey: ['systemAnalytics', 30],
+    queryFn: () => getSystemAnalytics(30),
+    refetchInterval: 300000, // Refresh every 5 minutes
+  });
+
+  // Loading state
+  if (overviewLoading || analyticsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center space-y-3">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (overviewError || analyticsError) {
+    return (
+      <Card className="border-2 border-red-200 dark:border-red-800">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-lg bg-red-500 flex items-center justify-center shrink-0">
+              <AlertTriangle className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold mb-1">Failed to load dashboard data</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {overviewError?.message || analyticsError?.message || 'An error occurred while fetching data'}
+              </p>
+              <Button size="sm" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const overview = overviewData?.data || {};
+  const analytics = analyticsData?.data || {};
+
+  // Calculate growth percentages
+  const calculateGrowth = (current, previous) => {
+    if (!previous || previous === 0) return '+0%';
+    const growth = ((current - previous) / previous * 100).toFixed(1);
+    return growth >= 0 ? `+${growth}%` : `${growth}%`;
+  };
+
   const userStats = [
     {
       label: 'Total Users',
-      value: '2,847',
-      subtitle: '+156 this month',
+      value: overview.totalUsers?.toLocaleString() || '0',
+      subtitle: `${overview.newUsersThisMonth || 0} new this month`,
       icon: Users,
       color: 'bg-blue-500',
-      trend: '+5.8%'
+      trend: overview.userGrowthPercentage ? `${overview.userGrowthPercentage > 0 ? '+' : ''}${overview.userGrowthPercentage}%` : null
     },
     {
       label: 'Student Users',
-      value: '2,234',
-      subtitle: '78.5% of total users',
+      value: overview.totalStudents?.toLocaleString() || '0',
+      subtitle: `${overview.totalUsers > 0 ? ((overview.totalStudents / overview.totalUsers) * 100).toFixed(1) : 0}% of total users`,
       icon: GraduationCap,
       color: 'bg-green-500'
     },
     {
       label: 'Tutor Users',
-      value: '613',
-      subtitle: '21.5% of total users',
+      value: overview.totalTutors?.toLocaleString() || '0',
+      subtitle: `${overview.totalUsers > 0 ? ((overview.totalTutors / overview.totalUsers) * 100).toFixed(1) : 0}% of total users`,
       icon: Award,
       color: 'bg-purple-500'
     },
     {
-      label: 'Active Users',
-      value: '1,892',
-      subtitle: '66.4% activity rate',
-      icon: Zap,
-      color: 'bg-orange-500',
-      trend: '+12.3%'
+      label: 'Admin Users',
+      value: overview.totalAdmins?.toLocaleString() || '0',
+      subtitle: 'Platform administrators',
+      icon: Shield,
+      color: 'bg-red-500'
     }
   ];
 
   const paymentStats = [
     {
-      label: 'This Month Income',
-      value: 'Rs. 234,500',
-      subtitle: '+18.2% from last month',
+      label: 'Total Revenue',
+      value: `Rs. ${overview.totalRevenue?.toLocaleString() || '0'}`,
+      subtitle: `From ${overview.totalSessions || 0} sessions`,
       icon: DollarSign,
       color: 'green-600'
     },
     {
-      label: 'Pending Payouts',
-      value: 'Rs. 45,200',
-      subtitle: '23 pending transactions',
+      label: 'Active Sessions',
+      value: overview.activeSessions?.toLocaleString() || '0',
+      subtitle: 'Currently ongoing',
       icon: Clock,
       color: 'amber-600'
     },
     {
-      label: 'Service Fee Revenue',
-      value: 'Rs. 28,140',
-      subtitle: '12% of total income',
+      label: 'Scheduled Sessions',
+      value: overview.scheduledSessions?.toLocaleString() || '0',
+      subtitle: 'Upcoming sessions',
       icon: TrendingUp,
       color: 'blue-600'
     }
   ];
 
-  const subjects = [
-    { name: 'Mathematics', sessions: 24, students: 342, count: 24 },
-    { name: 'Computer Science', sessions: 18, students: 267, count: 18 },
-    { name: 'Physics', sessions: 15, students: 198, count: 15 },
-    { name: 'Chemistry', sessions: 12, students: 156, count: 12 },
-    { name: 'Biology', sessions: 9, students: 123, count: 9 }
-  ];
+  const subjects = analytics.subjectStats?.slice(0, 5).map(subject => ({
+    name: subject.subject,
+    sessions: subject.count,
+    students: subject.totalStudents || 0,
+    count: subject.count
+  })) || [];
 
-  const engagementMetrics = [
-    { label: 'Session Completion Rate', value: '94.2%', percentage: 94.2 },
-    { label: 'Average Session Rating', value: '4.6/5', percentage: 92 },
-    { label: 'Student Retention', value: '87.3%', percentage: 87.3 },
-    { label: 'Tutor Activity', value: '78.9%', percentage: 78.9 },
-    { label: 'Payment Success Rate', value: '96.8%', percentage: 96.8 }
-  ];
+  const topTutors = analytics.topTutors?.slice(0, 5) || [];
 
   return (
     <div className="space-y-6">
@@ -298,20 +370,26 @@ const AdminOverviewShadcn = ({ onTabChange }) => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  Engagement Metrics
+                  <Award className="h-5 w-5 text-primary" />
+                  Top Tutors
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  Platform performance indicators
+                  Highest performing tutors
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="space-y-4">
-              {engagementMetrics.map((metric, index) => (
-                <EngagementMetric key={index} {...metric} />
-              ))}
+            <div className="space-y-2">
+              {topTutors.length > 0 ? (
+                topTutors.map((tutor, index) => (
+                  <TutorCard key={index} {...tutor} />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No tutor data available
+                </p>
+              )}
             </div>
           </CardContent>
           <Separator />
@@ -321,7 +399,7 @@ const AdminOverviewShadcn = ({ onTabChange }) => {
               className="w-full"
               onClick={() => onTabChange('users')}
             >
-              View Detailed Analytics
+              View All Tutors
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </CardFooter>
@@ -367,23 +445,25 @@ const AdminOverviewShadcn = ({ onTabChange }) => {
               <UserCheck className="h-6 w-6 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold mb-1">Platform Health: Excellent 🎉</h3>
+              <h3 className="font-semibold mb-1">Platform Status: Active 🎉</h3>
               <p className="text-sm text-muted-foreground mb-3">
-                All systems operational. 94.2% session completion rate and 96.8% payment success rate.
+                All systems operational. {overview.totalPolls || 0} active polls and {overview.totalSessions || 0} total sessions.
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                   <Users className="h-3 w-3 mr-1" />
-                  2,847 Users
+                  {overview.totalUsers?.toLocaleString() || 0} Users
                 </Badge>
                 <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                   <BookOpen className="h-3 w-3 mr-1" />
-                  78 Active Sessions
+                  {overview.activeSessions || 0} Active Sessions
                 </Badge>
-                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +18.2% Growth
-                </Badge>
+                {overview.userGrowthPercentage && overview.userGrowthPercentage > 0 && (
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +{overview.userGrowthPercentage}% Growth
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
