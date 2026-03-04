@@ -17,7 +17,8 @@ import {
   AlertCircle,
   Lock,
   Unlock,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
@@ -206,7 +207,7 @@ const UserManagementShadcn = ({ setActiveTab }) => {
 
   const handleEditUser = (user) => {
     setEditUserForm({
-      username: user.username,
+      username: user.name,
       email: user.email,
       role: user.role
     });
@@ -409,31 +410,33 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              {user.role !== 'admin' && (
+                              {user.role !== 'admin' && user._id && (
                                 <Button 
                                   size="sm" 
                                   variant="ghost"
-                                  className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700"
+                                  className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30"
                                   onClick={() => handleUserAction(
                                     user.role === 'student' ? 'makeTutor' : 'makeStudent',
-                                    user.clerkUserId,
+                                    user._id,
                                     user.role
                                   )}
-                                  title={`Make ${user.role === 'student' ? 'Tutor' : 'Student'}`}
+                                  title={`Change Role: Make ${user.role === 'student' ? 'Tutor' : 'Student'}`}
                                 >
-                                  <UserCog className="h-4 w-4" />
+                                  <RefreshCw className="h-4 w-4" />
                                 </Button>
                               )}
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                onClick={() => handleUserAction('delete', user.clerkUserId, user.role)}
-                                title="Delete User"
-                                disabled={deleteUserMutation.isLoading}
-                              >
-                                <Ban className="h-4 w-4" />
-                              </Button>
+                              {user._id && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                  onClick={() => handleUserAction('delete', user._id, user.role)}
+                                  title="Delete User"
+                                  disabled={deleteUserMutation.isLoading}
+                                >
+                                  <Ban className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -558,31 +561,33 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              {user.role !== 'admin' && (
+                              {user.role !== 'admin' && user._id && (
                                 <Button 
                                   size="sm" 
                                   variant="ghost"
-                                  className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700"
+                                  className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30"
                                   onClick={() => handleUserAction(
                                     user.role === 'student' ? 'makeTutor' : 'makeStudent',
-                                    user.clerkUserId,
+                                    user._id,
                                     user.role
                                   )}
-                                  title={`Make ${user.role === 'student' ? 'Tutor' : 'Student'}`}
+                                  title={`Change Role: Make ${user.role === 'student' ? 'Tutor' : 'Student'}`}
                                 >
-                                  <UserCog className="h-4 w-4" />
+                                  <RefreshCw className="h-4 w-4" />
                                 </Button>
                               )}
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                onClick={() => handleUserAction('delete', user.clerkUserId, user.role)}
-                                title="Delete User"
-                                disabled={deleteUserMutation.isLoading}
-                              >
-                                <Ban className="h-4 w-4" />
-                              </Button>
+                              {user._id && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                  onClick={() => handleUserAction('delete', user._id, user.role)}
+                                  title="Delete User"
+                                  disabled={deleteUserMutation.isLoading}
+                                >
+                                  <Ban className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -707,31 +712,33 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              {user.role !== 'admin' && (
+                              {user.role !== 'admin' && user._id && (
                                 <Button 
                                   size="sm" 
                                   variant="ghost"
-                                  className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700"
+                                  className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30"
                                   onClick={() => handleUserAction(
                                     user.role === 'student' ? 'makeTutor' : 'makeStudent',
-                                    user.clerkUserId,
+                                    user._id,
                                     user.role
                                   )}
-                                  title={`Make ${user.role === 'student' ? 'Tutor' : 'Student'}`}
+                                  title={`Change Role: Make ${user.role === 'student' ? 'Tutor' : 'Student'}`}
                                 >
-                                  <UserCog className="h-4 w-4" />
+                                  <RefreshCw className="h-4 w-4" />
                                 </Button>
                               )}
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                onClick={() => handleUserAction('delete', user.clerkUserId, user.role)}
-                                title="Delete User"
-                                disabled={deleteUserMutation.isLoading}
-                              >
-                                <Ban className="h-4 w-4" />
-                              </Button>
+                              {user._id && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                  onClick={() => handleUserAction('delete', user._id, user.role)}
+                                  title="Delete User"
+                                  disabled={deleteUserMutation.isLoading}
+                                >
+                                  <Ban className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -856,15 +863,17 @@ const UserManagementShadcn = ({ setActiveTab }) => {
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="h-8 w-8 p-0 text-orange-600 hover:text-orange-700"
-                                onClick={() => handleUserAction('makeStudent', user.clerkUserId, user.role)}
-                                title="Demote to Student"
-                              >
-                                <UserCog className="h-4 w-4" />
-                              </Button>
+                              {user._id && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30"
+                                  onClick={() => handleUserAction('makeStudent', user._id, user.role)}
+                                  title="Change Role: Demote to Student"
+                                >
+                                  <RefreshCw className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </td>
                         </tr>
