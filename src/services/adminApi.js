@@ -102,10 +102,11 @@ export const getAllSessions = async ({
   status = 'all', 
   subject = 'all',
   source = 'all',
-  tutorId = ''
+  tutorId = '',
+  search = ''
 }) => {
   const response = await api.get('/api/admin/sessions', {
-    params: { page, limit, status, subject, source, tutorId }
+    params: { page, limit, status, subject, source, tutorId, search }
   });
   return response.data;
 };
@@ -115,16 +116,41 @@ export const deleteSession = async (sessionId) => {
   return response.data;
 };
 
+export const cancelSession = async (sessionId, reason = '') => {
+  const response = await api.patch(`/api/admin/sessions/${sessionId}/cancel`, { reason });
+  return response.data;
+};
+
+export const forceEndSession = async (sessionId) => {
+  const response = await api.patch(`/api/admin/sessions/${sessionId}/force-end`);
+  return response.data;
+};
+
 // Poll Management
-export const getAllPolls = async ({ page = 1, limit = 20 }) => {
+export const getAllPolls = async ({ 
+  page = 1, 
+  limit = 20, 
+  status = 'active',
+  search = '' 
+}) => {
   const response = await api.get('/api/admin/polls', {
-    params: { page, limit }
+    params: { page, limit, status, search }
   });
   return response.data;
 };
 
 export const deletePoll = async (pollId) => {
   const response = await api.delete(`/api/admin/polls/${pollId}`);
+  return response.data;
+};
+
+export const updatePollStatus = async (pollId, status, reason = '') => {
+  const response = await api.patch(`/api/admin/polls/${pollId}/status`, { status, reason });
+  return response.data;
+};
+
+export const forceClosePoll = async (pollId) => {
+  const response = await api.patch(`/api/admin/polls/${pollId}/force-close`);
   return response.data;
 };
 
@@ -139,6 +165,10 @@ export default {
   deleteUser,
   getAllSessions,
   deleteSession,
+  cancelSession,
+  forceEndSession,
   getAllPolls,
   deletePoll,
+  updatePollStatus,
+  forceClosePoll,
 };
