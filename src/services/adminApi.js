@@ -154,6 +154,34 @@ export const forceClosePoll = async (pollId) => {
   return response.data;
 };
 
+// Tutor Applications Management
+export const getTutorApplications = async ({ page = 1, limit = 20, status = 'all' }) => {
+  const response = await api.get('/api/tutor-applications', {
+    params: { page, limit, status }
+  });
+  return response.data;
+};
+
+export const approveTutorApplication = async (applicationId) => {
+  const response = await api.patch(`/api/tutor-applications/${applicationId}/approve`);
+  return response.data;
+};
+
+export const rejectTutorApplication = async (applicationId, adminNote = '') => {
+  const response = await api.patch(`/api/tutor-applications/${applicationId}/reject`, { adminNote });
+  return response.data;
+};
+
+export const deleteTutorApplication = async (applicationId) => {
+  const response = await api.delete(`/api/tutor-applications/${applicationId}`);
+  return response.data;
+};
+
+export const updateTutorApplicationEmail = async (applicationId, email) => {
+  const response = await api.patch(`/api/tutor-applications/${applicationId}/email`, { email });
+  return response.data;
+};
+
 export default {
   getAdminOverview,
   getSystemAnalytics,
@@ -171,4 +199,9 @@ export default {
   deletePoll,
   updatePollStatus,
   forceClosePoll,
+  getTutorApplications,
+  approveTutorApplication,
+  rejectTutorApplication,
+  deleteTutorApplication,
+  updateTutorApplicationEmail,
 };
