@@ -633,4 +633,29 @@ export const removeWhatsAppGroupLink = async (sessionId) => {
   }
 };
 
+// ─── Tutor Applications ───────────────────────────────────────────────────────
+
+// Submit a new tutor application
+export const submitTutorApplication = async (applicationData) => {
+  try {
+    const response = await api.post('/api/tutor-applications', applicationData);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API: Failed to submit tutor application:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to submit tutor application');
+  }
+};
+
+// Get current user's own application status
+export const getMyTutorApplication = async () => {
+  try {
+    const response = await api.get('/api/tutor-applications/my');
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404 || error.response?.status === 401) return null;
+    console.error('❌ API: Failed to fetch tutor application:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || 'Failed to fetch tutor application');
+  }
+};
+
 export { api };
