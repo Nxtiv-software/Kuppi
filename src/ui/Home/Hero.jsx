@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { Button } from '../../components/Button';
 import { ArrowRight, Users, BookOpen, Star, Trophy, Target } from 'lucide-react';
+import { getMyTutorApplication } from '../../services/api';
 import heroImg from "../../assets/images/student_holding_books.png"
 import styles from './Hero.module.css';
 import TutorRegistrationForm from './TutorRegistrationForm';
@@ -10,9 +12,12 @@ import TutorRegistrationForm from './TutorRegistrationForm';
 const Hero = () => {
   const { t } = useTranslation('global');
   const navigate = useNavigate();
+  const { isLoaded, isSignedIn, user } = useUser();
   const isSinhala = (text) => /[\u0D80-\u0DFF]/.test(text);
   const [currentStatIndex, setCurrentStatIndex] = useState(0);
   const [showTutorForm, setShowTutorForm] = useState(false);
+  const [isTutorApproved, setIsTutorApproved] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState('none');
 
   const stats = [
     { icon: Users, value: "500+", label: "Active Students" },
@@ -26,6 +31,68 @@ const Hero = () => {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const syncTutorApplicationStatus = async () => {
+      if (!isLoaded) return;
+
+      if (!isSignedIn) {
+        localStorage.removeItem('tutorApplicationStatus');
+        setIsTutorApproved(false);
+        setApplicationStatus('none');
+        return;
+      }
+
+      try {
+        // Always fetch from API - do not pre-populate from localStorage
+        const result = await getMyTutorApplication();
+        const remoteStatus = result?.data?.status;
+
+        if (remoteStatus === 'pending') {
+          localStorage.setItem('tutorApplicationStatus', 'pending');
+          setIsTutorApproved(false);
+          setApplicationStatus('pending');
+          console.log('✅ Application status: PENDING');
+        } else if (remoteStatus === 'approved') {
+          localStorage.removeItem('tutorApplicationStatus');
+          setIsTutorApproved(true);
+          setApplicationStatus('approved');
+          console.log('✅ Application status: APPROVED');
+        } else if (remoteStatus === 'rejected') {
+          localStorage.removeItem('tutorApplicationStatus');
+          setIsTutorApproved(false);
+          setApplicationStatus('rejected');
+          console.log('✅ Application status: REJECTED - button should show again');
+        } else {
+          // No application found (404 or result is null)
+          localStorage.removeItem('tutorApplicationStatus');
+          setIsTutorApproved(false);
+          setApplicationStatus('none');
+          console.log('✅ Application status: NONE (no application found)');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching application status:', error);
+        localStorage.removeItem('tutorApplicationStatus');
+        setIsTutorApproved(false);
+        setApplicationStatus('none');
+      }
+    };
+
+    syncTutorApplicationStatus();
+  }, [isLoaded, isSignedIn]);
+
+  const currentUserRole = user?.publicMetadata?.role || user?.privateMetadata?.role;
+  const normalizedUserRole = typeof currentUserRole === 'string' ? currentUserRole.toLowerCase() : '';
+  
+  // Role is the source of truth for whether user is a tutor
+  const isAlreadyTutor = normalizedUserRole === 'tutor';
+  
+  // Show button if: signed in AND NOT already a tutor
+  // This works regardless of application status (because role changes when approved)
+  const shouldShowTutorButton = isSignedIn && !isAlreadyTutor;
+  
+  // Show "Applying" state only if pending and not yet a tutor
+  const showApplyingState = isSignedIn && applicationStatus === 'pending' && !isAlreadyTutor;
 
   return (
     <section className={styles.heroSection}>
@@ -73,15 +140,18 @@ const Hero = () => {
                 {t("hero.explore")}
               </Button>
 
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                className={styles.tutorButton}
-                onClick={() => navigate('/become-tutor')}
-              >
-                Become a Tutor
-              </Button>
+              {shouldShowTutorButton && (
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  className={`${styles.tutorButton} ${showApplyingState ? styles.tutorButtonApplying : styles.tutorButtonDefault}`}
+                  onClick={() => !showApplyingState && navigate('/become-tutor')}
+                  disabled={showApplyingState}
+                >
+                  {showApplyingState ? 'Applying' : 'Become a Tutor'}
+                </Button>
+              )}
             </div>
 
             {/* Animated Stats */}
