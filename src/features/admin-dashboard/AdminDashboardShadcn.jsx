@@ -8,12 +8,14 @@ import {
   Bell, 
   Settings,
   Shield,
-  BarChart3
+  BarChart3,
+  FileCheck2
 } from "lucide-react";
 import AdminOverviewShadcn from './AdminOverviewShadcn';
 import UserManagementShadcn from './UserManagementShadcn';
 import SessionManagementShadcn from './SessionManagementShadcn';
 import PollManagementShadcn from './PollManagementShadcn';
+import TutorApplicationsShadcn from './TutorApplicationsShadcn';
 import PaymentFinanceShadcn from './PaymentFinanceShadcn';
 import NotificationsCommunicationShadcn from './NotificationsCommunicationShadcn';
 import SystemSettingsShadcn from './SystemSettingsShadcn';
@@ -56,6 +58,10 @@ const AdminDashboardShadcn = () => {
               <TabsTrigger value="polls" className="gap-2 data-[state=active]:bg-muted">
                 <BarChart3 className="h-4 w-4" />
                 <span className="hidden sm:inline">Polls</span>
+              </TabsTrigger>
+              <TabsTrigger value="tutor-applications" className="gap-2 data-[state=active]:bg-muted">
+                <FileCheck2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Tutor Apps</span>
               </TabsTrigger>
               <TabsTrigger value="payments" className="gap-2 data-[state=active]:bg-muted">
                 <DollarSign className="h-4 w-4" />
@@ -144,6 +150,20 @@ const AdminDashboardShadcn = () => {
         </div>
       )}
 
+      {/* Tutor Applications Header */}
+      {activeTab === 'tutor-applications' && (
+        <div className="flex-none z-40 w-full border-b border-white/20 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl backdrop-saturate-150 shadow-lg shadow-black/5">
+          <div className="container max-w-screen-2xl px-12 py-6 mx-auto">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Tutor Applications</h2>
+              <p className="text-muted-foreground">
+                Review and manage student requests to become tutors
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Payments Header */}
       {activeTab === 'payments' && (
         <div className="flex-none z-40 w-full border-b border-white/20 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl backdrop-saturate-150 shadow-lg shadow-black/5">
@@ -204,6 +224,10 @@ const AdminDashboardShadcn = () => {
 
             <TabsContent value="polls" className="space-y-6 mt-0">
               <PollManagementShadcn />
+            </TabsContent>
+
+            <TabsContent value="tutor-applications" className="space-y-6 mt-0">
+              <TutorApplicationsShadcn />
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-6 mt-0">
