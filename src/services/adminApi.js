@@ -182,6 +182,95 @@ export const updateTutorApplicationEmail = async (applicationId, email) => {
   return response.data;
 };
 
+// Notification Management
+export const getAdminNotifications = async ({
+  page = 1,
+  limit = 20,
+  status = 'all',
+  category = 'all',
+  severity = 'all'
+} = {}) => {
+  const response = await api.get('/api/admin/notifications', {
+    params: { page, limit, status, category, severity }
+  });
+  return response.data;
+};
+
+export const getAdminUnreadNotificationCount = async () => {
+  const response = await api.get('/api/admin/notifications/unread-count');
+  return response.data;
+};
+
+export const markAdminNotificationAsRead = async (notificationId) => {
+  const response = await api.patch(`/api/admin/notifications/${notificationId}/read`);
+  return response.data;
+};
+
+export const markAllAdminNotificationsAsRead = async () => {
+  const response = await api.patch('/api/admin/notifications/mark-all-read');
+  return response.data;
+};
+
+// Communication Campaigns
+export const getCommunicationCampaigns = async ({ page = 1, limit = 20 } = {}) => {
+  const response = await api.get('/api/admin/communications/campaigns', {
+    params: { page, limit }
+  });
+  return response.data;
+};
+
+export const sendCommunicationCampaign = async ({
+  title,
+  message,
+  audience = 'all',
+  actionUrl = '',
+  customRecipientEmails = []
+}) => {
+  const response = await api.post('/api/admin/communications/campaigns', {
+    title,
+    message,
+    audience,
+    actionUrl,
+    customRecipientEmails
+  });
+  return response.data;
+};
+
+// Reminder Rules
+export const getReminderRules = async ({ page = 1, limit = 20 } = {}) => {
+  const response = await api.get('/api/admin/communications/reminders', {
+    params: { page, limit }
+  });
+  return response.data;
+};
+
+export const createReminderRule = async (payload) => {
+  const response = await api.post('/api/admin/communications/reminders', payload);
+  return response.data;
+};
+
+export const updateReminderRule = async (reminderId, payload) => {
+  const response = await api.patch(`/api/admin/communications/reminders/${reminderId}`, payload);
+  return response.data;
+};
+
+export const toggleReminderRuleStatus = async (reminderId) => {
+  const response = await api.patch(`/api/admin/communications/reminders/${reminderId}/toggle`);
+  return response.data;
+};
+
+export const runReminderRule = async (reminderId) => {
+  const response = await api.post(`/api/admin/communications/reminders/${reminderId}/run`);
+  return response.data;
+};
+
+export const getReminderRuleLogs = async (reminderId, { page = 1, limit = 10 } = {}) => {
+  const response = await api.get(`/api/admin/communications/reminders/${reminderId}/logs`, {
+    params: { page, limit }
+  });
+  return response.data;
+};
+
 export default {
   getAdminOverview,
   getSystemAnalytics,
@@ -204,4 +293,16 @@ export default {
   rejectTutorApplication,
   deleteTutorApplication,
   updateTutorApplicationEmail,
+  getAdminNotifications,
+  getAdminUnreadNotificationCount,
+  markAdminNotificationAsRead,
+  markAllAdminNotificationsAsRead,
+  getCommunicationCampaigns,
+  sendCommunicationCampaign,
+  getReminderRules,
+  createReminderRule,
+  updateReminderRule,
+  toggleReminderRuleStatus,
+  runReminderRule,
+  getReminderRuleLogs,
 };
