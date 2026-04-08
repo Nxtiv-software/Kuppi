@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CheckCircle2,
@@ -46,14 +47,30 @@ import { toast } from 'sonner';
 import { getAllPolls, deletePoll, updatePollStatus, forceClosePoll } from '../../services/adminApi';
 
 const PollManagementShadcn = () => {
+  const location = useLocation();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('active');
+  const resolveTabFromSearch = (search) => {
+    const params = new URLSearchParams(search);
+    const tab = params.get('pollStatus') || params.get('status');
+    const validTabs = new Set(['active', 'pending', 'accepted', 'expired', 'rejected']);
+    return tab && validTabs.has(tab) ? tab : 'active';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => resolveTabFromSearch(location.search));
   const [selectedPoll, setSelectedPoll] = useState(null);
   const [viewDetailsDialog, setViewDetailsDialog] = useState(false);
   const [actionDialog, setActionDialog] = useState({ isOpen: false, action: null, pollId: null, pollTitle: null });
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 20;
+
+  useEffect(() => {
+    const tabFromUrl = resolveTabFromSearch(location.search);
+    if (tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+      setCurrentPage(1);
+    }
+  }, [location.search, activeTab]);
 
   // Fetch polls based on status
   const { data: pollsData, isLoading, error } = useQuery({

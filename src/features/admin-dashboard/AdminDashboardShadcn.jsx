@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { UserButton } from "@clerk/clerk-react";
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -21,10 +22,75 @@ import NotificationsCommunicationShadcn from './NotificationsCommunicationShadcn
 import SystemSettingsShadcn from './SystemSettingsShadcn';
 import { cn } from '../../utils/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
+import { Badge } from '../../components/badge';
 import { ThemeToggle } from '../../components/ThemeToggle';
+import { getAdminUnreadNotificationCount } from '../../services/adminApi';
 
 const AdminDashboardShadcn = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const validTabs = useMemo(() => new Set([
+    'overview',
+    'users',
+    'sessions',
+    'polls',
+    'tutor-applications',
+    'payments',
+    'notifications',
+    'settings'
+  ]), []);
+
+  const resolveTabFromSearch = (search) => {
+    const tab = new URLSearchParams(search).get('tab');
+    return tab && validTabs.has(tab) ? tab : 'overview';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => resolveTabFromSearch(location.search));
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [loadingUnreadCount, setLoadingUnreadCount] = useState(false);
+
+  const fetchUnreadNotificationCount = async () => {
+    try {
+      setLoadingUnreadCount(true);
+      const count = await getAdminUnreadNotificationCount();
+      setUnreadNotificationCount(count || 0);
+    } catch (error) {
+      console.error('Failed to fetch unread notification count:', error);
+    } finally {
+      setLoadingUnreadCount(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadNotificationCount();
+    
+    const interval = setInterval(() => {
+      fetchUnreadNotificationCount();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') !== activeTab) {
+      params.set('tab', activeTab);
+      navigate(
+        {
+          pathname: location.pathname,
+          search: `?${params.toString()}`
+        },
+        { replace: true }
+      );
+    }
+  }, [activeTab, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    if (activeTab === 'notifications') {
+      fetchUnreadNotificationCount();
+    }
+  }, [activeTab]);
 
   return (
     <div className="h-screen bg-background flex flex-col">
@@ -67,8 +133,17 @@ const AdminDashboardShadcn = () => {
                 <DollarSign className="h-4 w-4" />
                 <span className="hidden sm:inline">Payments</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="gap-2 data-[state=active]:bg-muted">
-                <Bell className="h-4 w-4" />
+              <TabsTrigger value="notifications" className="gap-2 data-[state=active]:bg-muted relative">
+                <div className="relative">
+                  <Bell className="h-4 w-4" />
+                  {unreadNotificationCount > 0 && (
+                    <Badge 
+                      className="absolute -top-2 -right-3 h-5 w-5 p-0 flex items-center justify-center text-xs bg-red-600 hover:bg-red-700 rounded-full"
+                    >
+                      {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                    </Badge>
+                  )}
+                </div>
                 <span className="hidden sm:inline">Notifications</span>
               </TabsTrigger>
               <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-muted">
