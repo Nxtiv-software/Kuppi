@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getTutorScheduledSessions, getSessionRequests } from '../../services/api';
+import {
+  getTutorScheduledSessions,
+  getSessionRequests,
+  getMyDashboardNotifications,
+  markMyDashboardNotificationAsRead,
+  markAllMyDashboardNotificationsAsRead,
+  deleteMyReadDashboardNotification,
+  deleteAllMyReadDashboardNotifications
+} from '../../services/api';
 import { useUser } from '@clerk/clerk-react';
 import { 
   DollarSign, 
@@ -20,7 +28,10 @@ import {
   Target,
   Award,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Bell,
+  Mail,
+  Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/card';
 import { Button } from '../../components/Button';
@@ -29,6 +40,7 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { Separator } from '../../components/ui/separator';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 import { cn } from '../../utils/utils';
+import { toast } from 'sonner';
 
 // Stats Card Component
 const StatsCard = ({ title, value, subtitle, icon: Icon, color, loading, trend }) => {
@@ -192,8 +204,9 @@ const SessionCard = ({ session, type = 'upcoming' }) => {
 };
 
 // Main TutorOverview Component
-const TutorOverviewShadcn = ({ onTabChange }) => {
+const TutorOverviewShadcn = ({ onTabChange, focusNotificationsKey = 0 }) => {
   const { user } = useUser();
+  const notificationsPanelRef = useRef(null);
   
   // Extract first name from email or Clerk user data
   const getFirstName = () => {
@@ -233,6 +246,16 @@ const TutorOverviewShadcn = ({ onTabChange }) => {
   const { data: sessionRequestsData, isLoading: loadingRequests } = useQuery({
     queryKey: ['sessionRequests'],
     queryFn: getSessionRequests,
+  });
+
+  const {
+    data: dashboardNotificationsData,
+    isLoading: loadingDashboardNotifications,
+    refetch: refetchDashboardNotifications
+  } = useQuery({
+    queryKey: ['myDashboardNotifications', { status: 'all' }],
+    queryFn: () => getMyDashboardNotifications({ page: 1, limit: 5, status: 'all' }),
+    staleTime: 60 * 1000,
   });
 
   const upcomingSessions = (upcomingSessionsData?.data || []).filter(
@@ -295,6 +318,72 @@ const TutorOverviewShadcn = ({ onTabChange }) => {
       color: 'bg-orange-500',
     }
   ];
+
+  const dashboardNotifications = dashboardNotificationsData?.data?.notifications || [];
+  const dashboardUnreadCount = dashboardNotificationsData?.data?.unreadCount || 0;
+  const dashboardReadCount = dashboardNotifications.filter((item) => item.status === 'read').length;
+
+  const handleMarkNotificationRead = async (notificationId) => {
+    try {
+      await markMyDashboardNotificationAsRead(notificationId);
+      refetchDashboardNotifications();
+    } catch (error) {
+      toast.error(error.message || 'Failed to mark notification as read');
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await markAllMyDashboardNotificationsAsRead();
+      refetchDashboardNotifications();
+      toast.success('All notifications marked as read');
+    } catch (error) {
+      toast.error(error.message || 'Failed to mark all notifications as read');
+    }
+  };
+
+  const handleDeleteReadNotification = async (notificationId) => {
+    try {
+      await deleteMyReadDashboardNotification(notificationId);
+      refetchDashboardNotifications();
+      toast.success('Read notification deleted');
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete read notification');
+    }
+  };
+
+  const handleDeleteAllReadNotifications = async () => {
+    try {
+      await deleteAllMyReadDashboardNotifications();
+      refetchDashboardNotifications();
+      toast.success('Read notifications deleted');
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete read notifications');
+    }
+  };
+
+  const handleOpenNotificationAction = (notification) => {
+    if (!notification?.actionUrl) return;
+
+    const normalizedActionUrl = notification.actionUrl.startsWith('/admin')
+      ? notification.actionUrl.replace(/^\/admin(?=\?|$)/, '/admin-dashboard')
+      : notification.actionUrl;
+
+    window.location.assign(normalizedActionUrl);
+  };
+
+  useEffect(() => {
+    if (!focusNotificationsKey) return;
+
+    const timer = setTimeout(() => {
+      notificationsPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 80);
+
+    return () => clearTimeout(timer);
+  }, [focusNotificationsKey]);
 
   return (
     <div className="space-y-6">
@@ -497,6 +586,74 @@ const TutorOverviewShadcn = ({ onTabChange }) => {
           )}
         </Card>
       </div>
+
+      <Card ref={notificationsPanelRef}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <Bell className="h-5 w-5 text-primary" />
+                Dashboard Notifications
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Messages sent to your role from admin dashboard
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Unread: {dashboardUnreadCount}</Badge>
+              <Button size="sm" variant="outline" onClick={handleMarkAllNotificationsRead} disabled={dashboardUnreadCount === 0}>
+                Mark All Read
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleDeleteAllReadNotifications} disabled={dashboardReadCount === 0}>
+                Delete Read
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loadingDashboardNotifications ? (
+            <div className="space-y-2">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : dashboardNotifications.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-8 text-center">No dashboard notifications yet.</div>
+          ) : (
+            <div className="space-y-2">
+              {dashboardNotifications.map((item) => (
+                <div key={item._id} className="p-3 rounded-lg border flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="font-medium text-sm">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">{item.message}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Mail className="h-3 w-3" />
+                      <span>{new Date(item.createdAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {item.actionUrl && (
+                      <Button size="sm" variant="outline" onClick={() => handleOpenNotificationAction(item)}>
+                        View
+                      </Button>
+                    )}
+                    {item.status !== 'read' && (
+                      <Button size="sm" variant="outline" onClick={() => handleMarkNotificationRead(item._id)}>
+                        Mark Read
+                      </Button>
+                    )}
+                    {item.status === 'read' && (
+                      <Button size="sm" variant="outline" onClick={() => handleDeleteReadNotification(item._id)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Performance Insights */}
       <Card className="border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/50">

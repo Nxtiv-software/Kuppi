@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { UserButton } from "@clerk/clerk-react";
-import { LayoutDashboard, MessageSquare, Calendar, BookOpen, MessageCircle, GraduationCap } from "lucide-react";
+import { useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, MessageSquare, Calendar, BookOpen, MessageCircle, GraduationCap, Bell } from "lucide-react";
 import TutorOverviewShadcn from './TutorOverviewShadcn';
 import SessionRequestsShadcn from './SessionRequestsShadcn';
 import MyScheduleShadcn from './MyScheduleShadcn';
@@ -9,9 +10,67 @@ import StudentFeedbackShadcn from './StudentFeedbackShadcn';
 import { cn } from '../../utils/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 import { ThemeToggle } from '../../components/ThemeToggle';
+import { getMyDashboardNotifications } from '../../services/api';
 
 const TutorDashboardShadcn = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const validTabs = useMemo(() => new Set([
+    'overview',
+    'requests',
+    'schedule',
+    'create-session',
+    'feedback'
+  ]), []);
+
+  const resolveTabFromSearch = (search) => {
+    const tab = new URLSearchParams(search).get('tab');
+    return tab && validTabs.has(tab) ? tab : 'overview';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => resolveTabFromSearch(location.search));
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [focusNotificationsKey, setFocusNotificationsKey] = useState(0);
+
+  const handleBellClick = () => {
+    setActiveTab('overview');
+    setFocusNotificationsKey((prev) => prev + 1);
+  };
+
+  const fetchUnreadNotificationCount = async () => {
+    try {
+      const response = await getMyDashboardNotifications({ page: 1, limit: 1, status: 'all' });
+      setUnreadNotificationCount(response?.data?.unreadCount || 0);
+    } catch (error) {
+      console.error('Failed to fetch tutor unread notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUnreadNotificationCount();
+    const interval = setInterval(fetchUnreadNotificationCount, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const tabFromUrl = resolveTabFromSearch(location.search);
+    setActiveTab((currentTab) => (currentTab === tabFromUrl ? currentTab : tabFromUrl));
+  }, [location.search]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') !== activeTab) {
+      params.set('tab', activeTab);
+      navigate(
+        {
+          pathname: location.pathname,
+          search: `?${params.toString()}`
+        },
+        { replace: true }
+      );
+    }
+  }, [activeTab, location.pathname, location.search, navigate]);
 
   return (
     <div className="h-screen bg-background flex flex-col">
@@ -54,6 +113,20 @@ const TutorDashboardShadcn = () => {
           </Tabs>
           
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleBellClick}
+              className="relative inline-flex h-9 w-9 items-center justify-center rounded-md border border-input bg-background hover:bg-accent transition-colors"
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <Bell className="h-4 w-4" />
+              {unreadNotificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-600 text-white text-[10px] leading-5 text-center font-semibold">
+                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                </span>
+              )}
+            </button>
             <ThemeToggle />
             <UserButton
               appearance={{
@@ -144,7 +217,7 @@ const TutorDashboardShadcn = () => {
         <div className="container max-w-screen-2xl px-12 py-6 mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsContent value="overview" className="space-y-6 mt-0">
-              <TutorOverviewShadcn onTabChange={setActiveTab} />
+              <TutorOverviewShadcn onTabChange={setActiveTab} focusNotificationsKey={focusNotificationsKey} />
             </TabsContent>
 
             <TabsContent value="requests" className="space-y-6 mt-0">
