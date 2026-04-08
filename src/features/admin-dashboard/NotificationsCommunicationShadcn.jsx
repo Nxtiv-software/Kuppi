@@ -47,8 +47,11 @@ import {
   getAdminNotifications,
   markAdminNotificationAsRead,
   markAllAdminNotificationsAsRead,
+  deleteAdminNotification,
+  deleteReadAdminNotifications,
   getCommunicationCampaigns,
   sendCommunicationCampaign,
+  deleteCommunicationCampaign,
   getReminderRules,
   createReminderRule,
   updateReminderRule,
@@ -61,7 +64,7 @@ const NotificationsCommunicationShadcn = () => {
   const [showNewAnnouncement, setShowNewAnnouncement] = useState(false);
   const [showNewNotification, setShowNewNotification] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, id: null });
+  const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, id: null, type: null });
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationLoading, setNotificationLoading] = useState(false);
@@ -254,9 +257,25 @@ const NotificationsCommunicationShadcn = () => {
     }
   };
 
-  const handleDelete = () => {
-    toast.success('Item deleted successfully');
-    setDeleteDialog({ isOpen: false, id: null });
+  const handleDelete = async () => {
+    try {
+      if (deleteDialog.type === 'campaign' && deleteDialog.id) {
+        await deleteCommunicationCampaign(deleteDialog.id);
+        toast.success('Sent notification deleted successfully');
+        fetchCampaignData();
+      } else if (deleteDialog.type === 'inbox-notification' && deleteDialog.id) {
+        await deleteAdminNotification(deleteDialog.id);
+        toast.success('Inbox notification deleted successfully');
+        fetchInboxNotifications(page);
+      } else {
+        toast.success('Item deleted successfully');
+      }
+    } catch (error) {
+      console.error('Failed to delete item:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete item');
+    } finally {
+      setDeleteDialog({ isOpen: false, id: null, type: null });
+    }
   };
 
   const handleEditReminder = (reminder) => {
@@ -342,6 +361,18 @@ const NotificationsCommunicationShadcn = () => {
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
       toast.error('Failed to mark all notifications as read');
+    }
+  };
+
+  const handleDeleteAllRead = async () => {
+    try {
+      await deleteReadAdminNotifications();
+      toast.success('Read notifications deleted');
+      fetchInboxNotifications(1);
+      setPage(1);
+    } catch (error) {
+      console.error('Failed to delete read notifications:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete read notifications');
     }
   };
 
@@ -578,6 +609,10 @@ const NotificationsCommunicationShadcn = () => {
                       <Filter className="h-4 w-4" />
                       Refresh
                     </Button>
+                    <Button variant="outline" className="gap-2" onClick={handleDeleteAllRead}>
+                      <Trash2 className="h-4 w-4" />
+                      Delete Read
+                    </Button>
                     <Button className="gap-2" onClick={handleMarkAllAsRead}>
                       <CheckCircle2 className="h-4 w-4" />
                       Mark All Read
@@ -694,6 +729,16 @@ const NotificationsCommunicationShadcn = () => {
                               Mark Read
                             </Button>
                           )}
+
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="gap-2 text-destructive hover:text-destructive"
+                            onClick={() => setDeleteDialog({ isOpen: true, id: item._id, type: 'inbox-notification' })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -785,7 +830,7 @@ const NotificationsCommunicationShadcn = () => {
                           size="sm"
                           variant="ghost"
                           className="gap-2 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteDialog({ isOpen: true, id: announcement.id })}
+                          onClick={() => setDeleteDialog({ isOpen: true, id: announcement.id, type: 'announcement' })}
                         >
                           <Trash2 className="h-4 w-4" />
                           Delete
@@ -824,18 +869,19 @@ const NotificationsCommunicationShadcn = () => {
                         <th className="text-left p-4 font-medium text-sm">DELIVERED</th>
                         <th className="text-left p-4 font-medium text-sm">FAILED</th>
                         <th className="text-left p-4 font-medium text-sm">STATUS</th>
+                        <th className="text-left p-4 font-medium text-sm">ACTIONS</th>
                       </tr>
                     </thead>
                     <tbody>
                       {campaignLoading ? (
                         <tr>
-                          <td colSpan={7} className="p-8 text-center text-sm text-muted-foreground">
+                          <td colSpan={8} className="p-8 text-center text-sm text-muted-foreground">
                             Loading campaigns...
                           </td>
                         </tr>
                       ) : campaigns.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="p-8 text-center text-sm text-muted-foreground">
+                          <td colSpan={8} className="p-8 text-center text-sm text-muted-foreground">
                             No campaigns sent yet.
                           </td>
                         </tr>
@@ -864,6 +910,17 @@ const NotificationsCommunicationShadcn = () => {
                           </td>
                           <td className="p-4">
                             {getStatusBadge(campaign.status)}
+                          </td>
+                          <td className="p-4">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="gap-2 text-destructive hover:text-destructive"
+                              onClick={() => setDeleteDialog({ isOpen: true, id: campaign._id, type: 'campaign' })}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -1255,7 +1312,7 @@ const NotificationsCommunicationShadcn = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({ isOpen: false, id: null })}>
+      <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog({ isOpen: false, id: null, type: null })}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>

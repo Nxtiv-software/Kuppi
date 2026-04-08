@@ -211,6 +211,16 @@ export const markAllAdminNotificationsAsRead = async () => {
   return response.data;
 };
 
+export const deleteAdminNotification = async (notificationId) => {
+  const response = await api.delete(`/api/admin/notifications/${notificationId}`);
+  return response.data;
+};
+
+export const deleteReadAdminNotifications = async () => {
+  const response = await api.delete('/api/admin/notifications/read');
+  return response.data;
+};
+
 // Communication Campaigns
 export const getCommunicationCampaigns = async ({ page = 1, limit = 20 } = {}) => {
   const response = await api.get('/api/admin/communications/campaigns', {
@@ -233,6 +243,11 @@ export const sendCommunicationCampaign = async ({
     actionUrl,
     customRecipientEmails
   });
+  return response.data;
+};
+
+export const deleteCommunicationCampaign = async (campaignId) => {
+  const response = await api.delete(`/api/admin/communications/campaigns/${campaignId}`);
   return response.data;
 };
 
@@ -297,8 +312,11 @@ export default {
   getAdminUnreadNotificationCount,
   markAdminNotificationAsRead,
   markAllAdminNotificationsAsRead,
+  deleteAdminNotification,
+  deleteReadAdminNotifications,
   getCommunicationCampaigns,
   sendCommunicationCampaign,
+  deleteCommunicationCampaign,
   getReminderRules,
   createReminderRule,
   updateReminderRule,
