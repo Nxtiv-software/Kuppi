@@ -493,6 +493,58 @@ export const createTutorSession = async (sessionData) => {
   }
 };
 
+// Get current user's dashboard notifications
+export const getMyDashboardNotifications = async ({ page = 1, limit = 10, status = 'all' } = {}) => {
+  try {
+    const response = await api.get('/api/notifications/my', {
+      params: { page, limit, status }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch dashboard notifications');
+  }
+};
+
+// Mark one dashboard notification as read
+export const markMyDashboardNotificationAsRead = async (notificationId) => {
+  try {
+    const response = await api.patch(`/api/notifications/${notificationId}/read`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to mark notification as read');
+  }
+};
+
+// Mark all dashboard notifications as read
+export const markAllMyDashboardNotificationsAsRead = async () => {
+  try {
+    const response = await api.patch('/api/notifications/mark-all-read');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to mark all notifications as read');
+  }
+};
+
+// Delete one read dashboard notification
+export const deleteMyReadDashboardNotification = async (notificationId) => {
+  try {
+    const response = await api.delete(`/api/notifications/${notificationId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete read notification');
+  }
+};
+
+// Delete all read dashboard notifications
+export const deleteAllMyReadDashboardNotifications = async () => {
+  try {
+    const response = await api.delete('/api/notifications/read');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete read notifications');
+  }
+};
+
 // Get tutor's created sessions
 export const getTutorCreatedSessions = async (includeCompleted = false) => {
   try {
