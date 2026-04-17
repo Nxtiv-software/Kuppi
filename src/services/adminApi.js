@@ -269,6 +269,11 @@ export const updateReminderRule = async (reminderId, payload) => {
   return response.data;
 };
 
+export const deleteReminderRule = async (reminderId) => {
+  const response = await api.delete(`/api/admin/communications/reminders/${reminderId}`);
+  return response.data;
+};
+
 export const toggleReminderRuleStatus = async (reminderId) => {
   const response = await api.patch(`/api/admin/communications/reminders/${reminderId}/toggle`);
   return response.data;
@@ -282,6 +287,13 @@ export const runReminderRule = async (reminderId) => {
 export const getReminderRuleLogs = async (reminderId, { page = 1, limit = 10 } = {}) => {
   const response = await api.get(`/api/admin/communications/reminders/${reminderId}/logs`, {
     params: { page, limit }
+  });
+  return response.data;
+};
+
+export const getReminderAnalyticsSummary = async ({ days = 7 } = {}) => {
+  const response = await api.get('/api/admin/communications/reminders/analytics/summary', {
+    params: { days }
   });
   return response.data;
 };
@@ -320,7 +332,9 @@ export default {
   getReminderRules,
   createReminderRule,
   updateReminderRule,
+  deleteReminderRule,
   toggleReminderRuleStatus,
   runReminderRule,
   getReminderRuleLogs,
+  getReminderAnalyticsSummary,
 };
