@@ -66,11 +66,14 @@ const PollManagementShadcn = () => {
 
   useEffect(() => {
     const tabFromUrl = resolveTabFromSearch(location.search);
-    if (tabFromUrl !== activeTab) {
-      setActiveTab(tabFromUrl);
-      setCurrentPage(1);
-    }
-  }, [location.search, activeTab]);
+    setActiveTab((previousTab) => {
+      if (tabFromUrl !== previousTab) {
+        setCurrentPage(1);
+        return tabFromUrl;
+      }
+      return previousTab;
+    });
+  }, [location.search]);
 
   // Fetch polls based on status
   const { data: pollsData, isLoading, error } = useQuery({
