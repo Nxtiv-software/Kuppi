@@ -55,9 +55,34 @@ import {
   getReminderRules,
   createReminderRule,
   updateReminderRule,
+  deleteReminderRule,
   toggleReminderRuleStatus,
-  runReminderRule
+  runReminderRule,
+  getReminderRuleLogs,
+  getReminderAnalyticsSummary
 } from '../../services/adminApi';
+
+const INITIAL_REMINDER_FORM = {
+  name: '',
+  description: '',
+  triggerLabel: '',
+  triggerType: 'session_start',
+  timingMode: 'before',
+  offsetMinutes: '15',
+  audience: 'students',
+  channel: 'email',
+  scheduleType: 'one_time',
+  scheduledFor: '',
+  repeatEveryMinutes: '',
+  templateSubject: '',
+  templateMessage: '',
+  actionUrl: '',
+  timezone: 'Asia/Colombo',
+  quietHoursStart: '22:00',
+  quietHoursEnd: '07:00',
+  cooldownMinutes: '60',
+  maxSendsPerUser: '1'
+};
 
 const NotificationsCommunicationShadcn = () => {
   const [activeTab, setActiveTab] = useState('inbox');
@@ -72,6 +97,7 @@ const NotificationsCommunicationShadcn = () => {
   const [campaignLoading, setCampaignLoading] = useState(false);
   const [reminderRules, setReminderRules] = useState([]);
   const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderAnalytics, setReminderAnalytics] = useState(null);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [statusFilter, setStatusFilter] = useState('all');
@@ -79,6 +105,10 @@ const NotificationsCommunicationShadcn = () => {
   const [severityFilter, setSeverityFilter] = useState('all');
   const [showNewReminder, setShowNewReminder] = useState(false);
   const [editingReminderId, setEditingReminderId] = useState(null);
+  const [showReminderLogs, setShowReminderLogs] = useState(false);
+  const [selectedReminderForLogs, setSelectedReminderForLogs] = useState(null);
+  const [reminderLogs, setReminderLogs] = useState([]);
+  const [reminderLogsLoading, setReminderLogsLoading] = useState(false);
   const [campaignForm, setCampaignForm] = useState({
     title: '',
     message: '',
@@ -86,19 +116,7 @@ const NotificationsCommunicationShadcn = () => {
     actionUrl: '',
     customRecipientEmails: ''
   });
-  const [reminderForm, setReminderForm] = useState({
-    name: '',
-    description: '',
-    triggerLabel: '',
-    audience: 'students',
-    channel: 'email',
-    scheduleType: 'one_time',
-    scheduledFor: '',
-    repeatEveryMinutes: '',
-    templateSubject: '',
-    templateMessage: '',
-    actionUrl: ''
-  });
+  const [reminderForm, setReminderForm] = useState(INITIAL_REMINDER_FORM);
 
   const [announcementForm, setAnnouncementForm] = useState({
     title: '',
@@ -177,8 +195,12 @@ const NotificationsCommunicationShadcn = () => {
   const fetchReminderData = async () => {
     try {
       setReminderLoading(true);
-      const response = await getReminderRules({ page: 1, limit: 20 });
-      setReminderRules(response?.data?.reminders || []);
+      const [rulesResponse, analyticsResponse] = await Promise.all([
+        getReminderRules({ page: 1, limit: 20 }),
+        getReminderAnalyticsSummary({ days: 7 })
+      ]);
+      setReminderRules(rulesResponse?.data?.reminders || []);
+      setReminderAnalytics(analyticsResponse?.data || null);
     } catch (error) {
       console.error('Failed to fetch reminder rules:', error);
       toast.error('Failed to load reminders');
@@ -217,6 +239,9 @@ const NotificationsCommunicationShadcn = () => {
         name: reminderForm.name,
         description: reminderForm.description,
         triggerLabel: reminderForm.triggerLabel,
+        triggerType: reminderForm.triggerType,
+        timingMode: reminderForm.timingMode,
+        offsetMinutes: reminderForm.offsetMinutes === '' ? undefined : Number(reminderForm.offsetMinutes),
         audience: reminderForm.audience,
         channel: reminderForm.channel,
         scheduleType: reminderForm.scheduleType,
@@ -224,7 +249,14 @@ const NotificationsCommunicationShadcn = () => {
         repeatEveryMinutes: reminderForm.repeatEveryMinutes ? Number(reminderForm.repeatEveryMinutes) : undefined,
         templateSubject: reminderForm.templateSubject,
         templateMessage: reminderForm.templateMessage,
-        actionUrl: reminderForm.actionUrl || ''
+        actionUrl: reminderForm.actionUrl || '',
+        timezone: String(reminderForm.timezone || '').trim() || undefined,
+        quietHours: {
+          start: reminderForm.quietHoursStart,
+          end: reminderForm.quietHoursEnd
+        },
+        cooldownMinutes: reminderForm.cooldownMinutes === '' ? undefined : Number(reminderForm.cooldownMinutes),
+        maxSendsPerUser: reminderForm.maxSendsPerUser === '' ? undefined : Number(reminderForm.maxSendsPerUser)
       };
 
       if (editingReminderId) {
@@ -237,23 +269,16 @@ const NotificationsCommunicationShadcn = () => {
 
       setShowNewReminder(false);
       setEditingReminderId(null);
-      setReminderForm({
-        name: '',
-        description: '',
-        triggerLabel: '',
-        audience: 'students',
-        channel: 'email',
-        scheduleType: 'one_time',
-        scheduledFor: '',
-        repeatEveryMinutes: '',
-        templateSubject: '',
-        templateMessage: '',
-        actionUrl: ''
-      });
+      setReminderForm(INITIAL_REMINDER_FORM);
       fetchReminderData();
     } catch (error) {
       console.error('Failed to save reminder:', error);
-      toast.error(error.response?.data?.message || 'Failed to save reminder');
+      const errorList = error.response?.data?.errors;
+      if (Array.isArray(errorList) && errorList.length > 0) {
+        toast.error(errorList[0]);
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to save reminder');
+      }
     }
   };
 
@@ -263,6 +288,10 @@ const NotificationsCommunicationShadcn = () => {
         await deleteCommunicationCampaign(deleteDialog.id);
         toast.success('Sent notification deleted successfully');
         fetchCampaignData();
+      } else if (deleteDialog.type === 'reminder' && deleteDialog.id) {
+        await deleteReminderRule(deleteDialog.id);
+        toast.success('Reminder deleted successfully');
+        fetchReminderData();
       } else if (deleteDialog.type === 'inbox-notification' && deleteDialog.id) {
         await deleteAdminNotification(deleteDialog.id);
         toast.success('Inbox notification deleted successfully');
@@ -284,6 +313,9 @@ const NotificationsCommunicationShadcn = () => {
       name: reminder.name || '',
       description: reminder.description || '',
       triggerLabel: reminder.triggerLabel || reminder.trigger || '',
+      triggerType: reminder.triggerType || 'session_start',
+      timingMode: reminder.timingMode || 'before',
+      offsetMinutes: reminder.offsetMinutes !== undefined && reminder.offsetMinutes !== null ? String(reminder.offsetMinutes) : '15',
       audience: reminder.audience || 'students',
       channel: reminder.channel || 'email',
       scheduleType: reminder.scheduleType || 'one_time',
@@ -291,9 +323,30 @@ const NotificationsCommunicationShadcn = () => {
       repeatEveryMinutes: reminder.repeatEveryMinutes ? String(reminder.repeatEveryMinutes) : '',
       templateSubject: reminder.templateSubject || reminder.name || '',
       templateMessage: reminder.templateMessage || reminder.description || '',
-      actionUrl: reminder.actionUrl || ''
+      actionUrl: reminder.actionUrl || '',
+      timezone: reminder.timezone || 'Asia/Colombo',
+      quietHoursStart: reminder.quietHours?.start || '22:00',
+      quietHoursEnd: reminder.quietHours?.end || '07:00',
+      cooldownMinutes: reminder.cooldownMinutes !== undefined && reminder.cooldownMinutes !== null ? String(reminder.cooldownMinutes) : '60',
+      maxSendsPerUser: reminder.maxSendsPerUser !== undefined && reminder.maxSendsPerUser !== null ? String(reminder.maxSendsPerUser) : '1'
     });
     setShowNewReminder(true);
+  };
+
+  const handleOpenReminderLogs = async (reminder) => {
+    try {
+      setShowReminderLogs(true);
+      setSelectedReminderForLogs(reminder);
+      setReminderLogsLoading(true);
+
+      const response = await getReminderRuleLogs(reminder._id, { page: 1, limit: 20 });
+      setReminderLogs(response?.data?.logs || []);
+    } catch (error) {
+      console.error('Failed to fetch reminder logs:', error);
+      toast.error(error.response?.data?.message || 'Failed to load reminder logs');
+    } finally {
+      setReminderLogsLoading(false);
+    }
   };
 
   const handleToggleReminder = async (reminderId) => {
@@ -311,6 +364,10 @@ const NotificationsCommunicationShadcn = () => {
     try {
       await runReminderRule(reminderId);
       toast.success('Reminder run completed');
+      if (showReminderLogs && selectedReminderForLogs?._id === reminderId) {
+        const response = await getReminderRuleLogs(reminderId, { page: 1, limit: 20 });
+        setReminderLogs(response?.data?.logs || []);
+      }
       fetchReminderData();
     } catch (error) {
       console.error('Failed to run reminder:', error);
@@ -417,8 +474,10 @@ const NotificationsCommunicationShadcn = () => {
       published: { className: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300', label: 'Published' },
       draft: { className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300', label: 'Draft' },
       sending: { className: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300', label: 'Sending' },
+      success: { className: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300', label: 'Success' },
       sent: { className: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300', label: 'Sent' },
       failed: { className: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300', label: 'Failed' },
+      skipped: { className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300', label: 'Skipped' },
       active: { className: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300', label: 'Active' },
       paused: { className: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300', label: 'Paused' },
       completed: { className: 'bg-muted text-muted-foreground', label: 'Completed' },
@@ -480,6 +539,10 @@ const NotificationsCommunicationShadcn = () => {
       minute: '2-digit'
     });
   };
+
+  const formatTriggerType = (value) => String(value || '').replace(/_/g, ' ');
+
+  const getSkipReasonLabel = (value) => String(value || '').replace(/_/g, ' ');
 
   useEffect(() => {
     if (activeTab === 'inbox') {
@@ -940,19 +1003,7 @@ const NotificationsCommunicationShadcn = () => {
                 <CardTitle>Automated Reminders</CardTitle>
                 <Button className="gap-2" onClick={() => {
                   setEditingReminderId(null);
-                  setReminderForm({
-                    name: '',
-                    description: '',
-                    triggerLabel: '',
-                    audience: 'students',
-                    channel: 'email',
-                    scheduleType: 'one_time',
-                    scheduledFor: '',
-                    repeatEveryMinutes: '',
-                    templateSubject: '',
-                    templateMessage: '',
-                    actionUrl: ''
-                  });
+                  setReminderForm(INITIAL_REMINDER_FORM);
                   setShowNewReminder(true);
                 }}>
                   <Plus className="h-4 w-4" />
@@ -961,6 +1012,29 @@ const NotificationsCommunicationShadcn = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {reminderAnalytics && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="rounded-lg border border-border/50 p-3">
+                    <p className="text-xs text-muted-foreground">Runs (7d)</p>
+                    <p className="text-xl font-semibold">{reminderAnalytics?.totals?.runs || 0}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/50 p-3">
+                    <p className="text-xs text-muted-foreground">Delivered (7d)</p>
+                    <p className="text-xl font-semibold">{reminderAnalytics?.totals?.delivered || 0}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/50 p-3">
+                    <p className="text-xs text-muted-foreground">Skipped (7d)</p>
+                    <p className="text-xl font-semibold">{reminderAnalytics?.totals?.skipped || 0}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/50 p-3">
+                    <p className="text-xs text-muted-foreground">Top Skip Reason</p>
+                    <p className="text-sm font-semibold capitalize">
+                      {formatTriggerType(reminderAnalytics?.topSkippedReasons?.[0]?.reason) || '-'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {reminderLoading ? (
                 <div className="py-8 text-center text-sm text-muted-foreground">Loading reminders...</div>
               ) : reminders.length === 0 ? (
@@ -985,7 +1059,7 @@ const NotificationsCommunicationShadcn = () => {
                         
                         <p className="text-sm text-muted-foreground">{reminder.description}</p>
                         
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <p className="text-muted-foreground">Trigger</p>
                             <p className="font-medium">{reminder.triggerLabel || reminder.trigger}</p>
@@ -1003,12 +1077,46 @@ const NotificationsCommunicationShadcn = () => {
                             <p className="font-medium">{reminder.runCount || reminder.sentCount || 0} times</p>
                           </div>
                         </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-muted-foreground">
+                          <div className="rounded-md border border-border/50 px-3 py-2">
+                            <span className="font-medium text-foreground">Trigger Type:</span> {formatTriggerType(reminder.triggerType || 'session_start')}
+                          </div>
+                          <div className="rounded-md border border-border/50 px-3 py-2">
+                            <span className="font-medium text-foreground">Timing:</span> {reminder.timingMode || 'before'} {reminder.offsetMinutes ?? 15} min
+                          </div>
+                          <div className="rounded-md border border-border/50 px-3 py-2">
+                            <span className="font-medium text-foreground">Timezone:</span> {reminder.timezone || 'Asia/Colombo'}
+                          </div>
+                          <div className="rounded-md border border-border/50 px-3 py-2">
+                            <span className="font-medium text-foreground">Quiet Hours:</span> {reminder.quietHours?.start || '22:00'} to {reminder.quietHours?.end || '07:00'}
+                          </div>
+                          <div className="rounded-md border border-border/50 px-3 py-2">
+                            <span className="font-medium text-foreground">Cooldown:</span> {reminder.cooldownMinutes ?? 60} min
+                          </div>
+                          <div className="rounded-md border border-border/50 px-3 py-2">
+                            <span className="font-medium text-foreground">Max Sends/User:</span> {reminder.maxSendsPerUser ?? 1}
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex flex-col gap-2">
                         <Button size="sm" variant="outline" className="gap-2" onClick={() => handleEditReminder(reminder)}>
                           <Edit className="h-4 w-4" />
                           Edit
+                        </Button>
+                        <Button size="sm" variant="outline" className="gap-2" onClick={() => handleOpenReminderLogs(reminder)}>
+                          <Eye className="h-4 w-4" />
+                          Logs
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-2 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteDialog({ isOpen: true, id: reminder._id, type: 'reminder' })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
                         </Button>
                         {reminder.status === 'active' ? (
                           <Button size="sm" variant="outline" className="gap-2" onClick={() => handleToggleReminder(reminder._id)}>
@@ -1183,12 +1291,13 @@ const NotificationsCommunicationShadcn = () => {
 
       {/* Reminder Dialog */}
       <Dialog open={showNewReminder} onOpenChange={setShowNewReminder}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="w-[95vw] sm:w-full max-w-3xl max-h-[88vh] overflow-hidden p-0 flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-3 border-b border-border/50">
             <DialogTitle>{editingReminderId ? 'Edit Reminder' : 'Create New Reminder'}</DialogTitle>
             <DialogDescription>Configure an automated email reminder rule</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            <div className="space-y-5">
             <div>
               <label className="text-sm font-medium mb-2 block">Name</label>
               <Input
@@ -1214,7 +1323,49 @@ const NotificationsCommunicationShadcn = () => {
                 onChange={(e) => setReminderForm({ ...reminderForm, triggerLabel: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Trigger Type</label>
+                <select
+                  value={reminderForm.triggerType}
+                  onChange={(e) => setReminderForm({ ...reminderForm, triggerType: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="session_start">Session Start</option>
+                  <option value="session_created">Session Created</option>
+                  <option value="session_rescheduled">Session Rescheduled</option>
+                  <option value="poll_ending">Poll Ending</option>
+                  <option value="tutor_application_followup">Tutor Application Follow-up</option>
+                  <option value="payment_due">Payment Due</option>
+                  <option value="inactive_users">Inactive Users</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Timing Mode</label>
+                <select
+                  value={reminderForm.timingMode}
+                  onChange={(e) => setReminderForm({ ...reminderForm, timingMode: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="before">Before trigger</option>
+                  <option value="after">After trigger</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Offset Minutes</label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="43200"
+                  placeholder="15"
+                  value={reminderForm.offsetMinutes}
+                  onChange={(e) => setReminderForm({ ...reminderForm, offsetMinutes: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Audience</label>
                 <select
@@ -1240,7 +1391,8 @@ const NotificationsCommunicationShadcn = () => {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">Schedule Type</label>
                 <select
@@ -1261,18 +1413,73 @@ const NotificationsCommunicationShadcn = () => {
                 />
               </div>
             </div>
+
             {reminderForm.scheduleType === 'recurring' && (
               <div>
                 <label className="text-sm font-medium mb-2 block">Repeat Every Minutes</label>
                 <Input
                   type="number"
                   min="1"
+                  max="10080"
                   placeholder="60"
                   value={reminderForm.repeatEveryMinutes}
                   onChange={(e) => setReminderForm({ ...reminderForm, repeatEveryMinutes: e.target.value })}
                 />
               </div>
             )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Timezone</label>
+                <Input
+                  placeholder="Asia/Colombo"
+                  value={reminderForm.timezone}
+                  onChange={(e) => setReminderForm({ ...reminderForm, timezone: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Cooldown Minutes</label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="10080"
+                  placeholder="60"
+                  value={reminderForm.cooldownMinutes}
+                  onChange={(e) => setReminderForm({ ...reminderForm, cooldownMinutes: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Quiet Hours Start</label>
+                <Input
+                  type="time"
+                  value={reminderForm.quietHoursStart}
+                  onChange={(e) => setReminderForm({ ...reminderForm, quietHoursStart: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Quiet Hours End</label>
+                <Input
+                  type="time"
+                  value={reminderForm.quietHoursEnd}
+                  onChange={(e) => setReminderForm({ ...reminderForm, quietHoursEnd: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Max Sends Per User</label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  placeholder="1"
+                  value={reminderForm.maxSendsPerUser}
+                  onChange={(e) => setReminderForm({ ...reminderForm, maxSendsPerUser: e.target.value })}
+                />
+              </div>
+            </div>
+
             <div>
               <label className="text-sm font-medium mb-2 block">Template Subject</label>
               <Input
@@ -1298,14 +1505,70 @@ const NotificationsCommunicationShadcn = () => {
                 onChange={(e) => setReminderForm({ ...reminderForm, actionUrl: e.target.value })}
               />
             </div>
+            </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t border-border/50 bg-background">
             <Button variant="outline" onClick={() => setShowNewReminder(false)}>
               Cancel
             </Button>
             <Button onClick={handleSaveReminder} className="gap-2">
               <Send className="h-4 w-4" />
               {editingReminderId ? 'Update Reminder' : 'Create Reminder'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reminder Logs Dialog */}
+      <Dialog open={showReminderLogs} onOpenChange={setShowReminderLogs}>
+        <DialogContent className="w-[95vw] sm:w-full max-w-5xl max-h-[88vh] overflow-hidden p-0 flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-3 border-b border-border/50">
+            <DialogTitle>Reminder Run Logs</DialogTitle>
+            <DialogDescription>
+              {selectedReminderForLogs?.name ? `Latest executions for ${selectedReminderForLogs.name}` : 'Latest reminder execution logs'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {reminderLogsLoading ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">Loading logs...</div>
+            ) : reminderLogs.length === 0 ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">No run logs found for this reminder.</div>
+            ) : (
+              <div className="border rounded-lg overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="text-left p-3 font-medium">Run At</th>
+                      <th className="text-left p-3 font-medium">Status</th>
+                      <th className="text-left p-3 font-medium">Recipients</th>
+                      <th className="text-left p-3 font-medium">Delivered</th>
+                      <th className="text-left p-3 font-medium">Failed</th>
+                      <th className="text-left p-3 font-medium">Skipped</th>
+                      <th className="text-left p-3 font-medium">Reason</th>
+                      <th className="text-left p-3 font-medium">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reminderLogs.map((log) => (
+                      <tr key={log._id} className="border-b last:border-b-0">
+                        <td className="p-3 whitespace-nowrap">{formatDateTime(log.runAt || log.createdAt)}</td>
+                        <td className="p-3">{getStatusBadge(log.status)}</td>
+                        <td className="p-3">{log.recipientsCount || 0}</td>
+                        <td className="p-3">{log.deliveredCount || 0}</td>
+                        <td className="p-3">{log.failedCount || 0}</td>
+                        <td className="p-3">{log.skippedCount || 0}</td>
+                        <td className="p-3 capitalize">{getSkipReasonLabel(log.metadata?.skippedReason) || '-'}</td>
+                        <td className="p-3 text-muted-foreground max-w-sm">{log.notes || log.error || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="px-6 py-4 border-t border-border/50 bg-background">
+            <Button variant="outline" onClick={() => setShowReminderLogs(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
