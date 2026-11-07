@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { UserButton } from "@clerk/clerk-react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, BarChart3, FileText, TrendingUp, Home, Bell } from "lucide-react";
+import { BookOpen, BarChart3, FileText, TrendingUp, Home, Bell, Settings } from "lucide-react";
 import OverviewShadcn from './OverviewShadcn';
 import VoteCreateShadcn from './VoteCreateShadcn';
 import MySessionsShadcn from './MySessionsShadcn';
 import ProgressShadcn from './ProgressShadcn';
 import BrowseKuppisShadcn from './BrowseKuppiShadcn';
+import StudentSettingsShadcn from './StudentSettingsShadcn';
 import { cn } from '../../utils/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 import { ThemeToggle } from '../../components/ThemeToggle';
@@ -21,7 +22,8 @@ const StudentDashboard = () => {
     'browse',
     'vote-create',
     'my-sessions',
-    'progress'
+    'progress',
+    'settings'
   ]), []);
 
   const resolveTabFromSearch = (search) => {
@@ -108,6 +110,10 @@ const StudentDashboard = () => {
               <TabsTrigger value="progress" className="gap-2 data-[state=active]:bg-muted">
                 <TrendingUp className="h-4 w-4" />
                 <span className="hidden sm:inline">Progress</span>
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-muted">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Settings</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -212,6 +218,19 @@ const StudentDashboard = () => {
         </div>
       )}
 
+      {activeTab === 'settings' && (
+        <div className="flex-none z-40 w-full border-b border-white/20 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl backdrop-saturate-150 shadow-lg shadow-black/5">
+          <div className="container max-w-screen-2xl px-12 py-6 mx-auto">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+              <p className="text-muted-foreground">
+                Configure your student preferences and notifications
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="container max-w-screen-2xl px-12 py-6 mx-auto">
@@ -234,6 +253,10 @@ const StudentDashboard = () => {
 
           <TabsContent value="progress" className="space-y-6 mt-0">
             <ProgressShadcn />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6 mt-0">
+            <StudentSettingsShadcn />
           </TabsContent>
         </Tabs>
         </div>
