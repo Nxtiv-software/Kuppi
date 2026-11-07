@@ -19,7 +19,7 @@ import PollManagementShadcn from './PollManagementShadcn';
 import TutorApplicationsShadcn from './TutorApplicationsShadcn';
 import PaymentFinanceShadcn from './PaymentFinanceShadcn';
 import NotificationsCommunicationShadcn from './NotificationsCommunicationShadcn';
-import SystemSettingsShadcn from './SystemSettingsShadcn';
+import AdminSettingsBasicShadcn from './AdminSettingsBasicShadcn';
 import { cn } from '../../utils/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 import { Badge } from '../../components/badge';
@@ -314,7 +314,7 @@ const AdminDashboardShadcn = () => {
             </TabsContent>
 
             <TabsContent value="settings" className="space-y-6 mt-0">
-              <SystemSettingsShadcn />
+              <AdminSettingsBasicShadcn />
             </TabsContent>
           </Tabs>
         </div>
