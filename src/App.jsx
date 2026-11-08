@@ -21,6 +21,8 @@ import DashboardRedirect from './components/DashboardRedirect';
 import RoleManager from './components/RoleManager';
 // THEME: Import ThemeProvider
 import { ThemeProvider } from './context/ThemeContext';
+import MaintenanceGate from './components/MaintenanceGate';
+import { AppSettingsProvider } from './context/AppSettingsContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,8 +43,9 @@ function App() {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
+        <AppSettingsProvider>
         <ReactQueryDevtools initialIsOpen={false} />
-        
+        <MaintenanceGate>
         <Routes>
         <Route path="/" element={<HomeLayout />} />
         
@@ -123,7 +126,9 @@ function App() {
             </SignedOut>
           } 
         />
-      </Routes>
+        </Routes>
+        </MaintenanceGate>
+        </AppSettingsProvider>
 
       <Toaster richColors />
       </QueryClientProvider>

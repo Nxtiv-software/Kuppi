@@ -9,7 +9,7 @@ export const USER_ROLES = {
 
 // Hook to get user role from Clerk metadata
 export const useUserRole = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   
   // Get role from user metadata (you'll need to set this in Clerk)
   // For now, we'll use a mock function - replace with actual role logic
@@ -37,6 +37,7 @@ export const useUserRole = () => {
   
   return {
     user,
+    isLoaded,
     role: getUserRole(),
     isStudent: () => getUserRole() === USER_ROLES.STUDENT,
     isTutor: () => getUserRole() === USER_ROLES.TUTOR,

@@ -11,6 +11,7 @@ import {
   SignInButton,
   useUser,
 } from "@clerk/clerk-react";
+import { useAppSettings } from '../../context/AppSettingsContext';
 import LoginClerk from "../LoginClerk";
 import StudentDashboard from "../../features/students-dashboard/StudentDasboard";
 import StudentDashBoardButton from "../../features/students-dashboard/StudentDashBoardButton";
@@ -40,6 +41,7 @@ const Header = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { isLoaded, user } = useUser();
+  const { settings } = useAppSettings();
 
   const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
 
@@ -75,8 +77,13 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <img className="h-12 w-auto object-contain" src={logo} alt="logo" />
+          {/* Logo + Site Name */}
+          <div className="flex items-center gap-3">
+            <img className="h-12 w-auto object-contain" src={logo} alt="logo" />
+            <div className="hidden sm:block">
+              <h1 className="text-lg font-semibold">{settings?.siteName || 'Kuppi'}</h1>
+            </div>
+          </div>
 
           {/* Navigation Links */}
           <ul className="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-700">
