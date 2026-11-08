@@ -298,6 +298,17 @@ export const getReminderAnalyticsSummary = async ({ days = 7 } = {}) => {
   return response.data;
 };
 
+// App Settings (Admin)
+export const getAppSettings = async () => {
+  const response = await api.get('/api/settings/app');
+  return response.data;
+};
+
+export const updateAppSettings = async (payload) => {
+  const response = await api.patch('/api/settings/app', payload);
+  return response.data;
+};
+
 export default {
   getAdminOverview,
   getSystemAnalytics,
@@ -337,4 +348,6 @@ export default {
   runReminderRule,
   getReminderRuleLogs,
   getReminderAnalyticsSummary,
+  getAppSettings,
+  updateAppSettings,
 };

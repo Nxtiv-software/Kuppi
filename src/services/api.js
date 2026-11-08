@@ -710,4 +710,34 @@ export const getMyTutorApplication = async () => {
   }
 };
 
+// Get current authenticated user's settings
+export const getMySettings = async () => {
+  try {
+    const response = await api.get('/api/settings/me');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch settings');
+  }
+};
+
+// Update current authenticated user's settings
+export const updateMySettings = async (payload) => {
+  try {
+    const response = await api.patch('/api/settings/me', payload);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to update settings');
+  }
+};
+
+// Get public app settings (maintenance status, site name, defaults)
+export const getPublicAppSettings = async () => {
+  try {
+    const response = await api.get('/api/settings/public');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch public app settings');
+  }
+};
+
 export { api };
