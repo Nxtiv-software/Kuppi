@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { UserButton } from "@clerk/clerk-react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, Calendar, BookOpen, MessageCircle, GraduationCap, Bell } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Calendar, BookOpen, MessageCircle, GraduationCap, Bell, Settings } from "lucide-react";
 import TutorOverviewShadcn from './TutorOverviewShadcn';
 import SessionRequestsShadcn from './SessionRequestsShadcn';
 import MyScheduleShadcn from './MyScheduleShadcn';
 import CreateSessionShadcn from './CreateSessionShadcn';
 import StudentFeedbackShadcn from './StudentFeedbackShadcn';
+import TutorSettingsShadcn from './TutorSettingsShadcn';
 import { cn } from '../../utils/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/tabs';
 import { ThemeToggle } from '../../components/ThemeToggle';
@@ -21,7 +22,8 @@ const TutorDashboardShadcn = () => {
     'requests',
     'schedule',
     'create-session',
-    'feedback'
+    'feedback',
+    'settings'
   ]), []);
 
   const resolveTabFromSearch = (search) => {
@@ -108,6 +110,10 @@ const TutorDashboardShadcn = () => {
               <TabsTrigger value="feedback" className="gap-2 data-[state=active]:bg-muted">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden sm:inline">Feedback</span>
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-muted">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Settings</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -212,6 +218,19 @@ const TutorDashboardShadcn = () => {
         </div>
       )}
 
+      {activeTab === 'settings' && (
+        <div className="flex-none z-40 w-full border-b border-white/20 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl backdrop-saturate-150 shadow-lg shadow-black/5">
+          <div className="container max-w-screen-2xl px-12 py-6 mx-auto">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+              <p className="text-muted-foreground">
+                Configure your tutor profile preferences and notifications
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="container max-w-screen-2xl px-12 py-6 mx-auto">
@@ -234,6 +253,10 @@ const TutorDashboardShadcn = () => {
 
             <TabsContent value="feedback" className="space-y-6 mt-0">
               <StudentFeedbackShadcn />
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6 mt-0">
+              <TutorSettingsShadcn />
             </TabsContent>
           </Tabs>
         </div>

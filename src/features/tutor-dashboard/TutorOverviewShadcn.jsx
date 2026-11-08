@@ -243,6 +243,12 @@ const TutorOverviewShadcn = ({ onTabChange, focusNotificationsKey = 0 }) => {
     queryFn: getTutorScheduledSessions,
   });
 
+  const { data: mySettingsData } = useQuery({
+    queryKey: ['mySettings'],
+    queryFn: getMySettings,
+    staleTime: 30 * 1000,
+  });
+
   const { data: sessionRequestsData, isLoading: loadingRequests } = useQuery({
     queryKey: ['sessionRequests'],
     queryFn: getSessionRequests,
@@ -399,6 +405,14 @@ const TutorOverviewShadcn = ({ onTabChange, focusNotificationsKey = 0 }) => {
               <p className="text-muted-foreground">
                 Here's what's happening with your teaching today
               </p>
+              {/* Availability display from my settings */}
+              {mySettingsData?.data?.data?.settings?.tutor?.availability?.length > 0 ? (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Availability: {mySettingsData.data.data.settings.tutor.availability.map(s => `${s.day.charAt(0).toUpperCase()+s.day.slice(1)} ${s.start}-${s.end}`).join(', ')}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-2">No availability set. Use "Set Availability" to add days.</p>
+              )}
             </div>
             <Badge variant="secondary" className="text-sm">
               <Award className="h-4 w-4 mr-1" />
